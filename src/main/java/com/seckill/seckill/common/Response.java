@@ -51,4 +51,12 @@ public class Response {
         String nowTimeStr = timeFormat.format(nowTime);
         return new Response(Code.AUTH_ERR, true, msg, null, nowTimeStr, nowTime.getTime());
     }
+
+    public static Response systemErr(String msg){//系统异常
+        SimpleDateFormat timeFormat = new SimpleDateFormat();
+        timeFormat.applyLocalizedPattern("yyyy-MM-dd HH:mm:ss");
+        Date nowTime = new Date();
+        String nowTimeStr = timeFormat.format(nowTime);
+        return new Response(Code.SYSTEM_ERR, true, msg, null, nowTimeStr, nowTime.getTime());
+    }
 }
