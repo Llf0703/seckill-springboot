@@ -52,7 +52,50 @@ public class UserController {
         HashMap<String, Object> data = new HashMap<String, Object>();
         String token = JWTUtil.createToken(user.getPhone());
         data.put("token", token);
+        data.put("phone", user.getPhone());
         result.add_data(data);
+        return result.getMap();
+    }
+
+    @PostMapping("/login")
+    public HashMap<String, Object> login_controller(@RequestBody User user) {
+        MessageUitl result = user.login_check();
+        if (result.getMap().get("message")!="ok") return result.getMap();
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        wrapper.eq("phone", user.getPhone());
+        long cnt = user_mapper.selectCount(wrapper);
+        if (cnt == 0) {
+            result.init(300, "user not found", false);
+            return result.getMap();
+        }
+        user.password_to_md5();
+        HashMap<String,Object> params = new HashMap<>();
+        params.put("phone", user.getPhone());
+        params.put("password", user.getPassword());
+        wrapper.allEq(params);
+        cnt = user_mapper.selectCount(wrapper);
+        if (cnt == 0) {
+            result.init(300, "wrong password", false);
+            return result.getMap();
+        }
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        String token = JWTUtil.createToken(user.getPhone());
+        data.put("token", token);
+        data.put("phone", user.getPhone());
+        result.add_data(data);
+        return result.getMap();
+    }
+
+    @GetMapping("/check_version")
+    public HashMap<String, Object> check_version_controller(@RequestHeader("token") String token) {
+        MessageUitl result = new MessageUitl();
+        String phone = JWTUtil.verifyToken(token);
+        if (phone != null) {
+            HashMap<String, Object> data = new HashMap<>();
+            data.put("phone", phone);
+            result.init(200, "登录成功", true, data);
+        }
+        else result.init(300, "登录失败", false);
         return result.getMap();
     }
 }

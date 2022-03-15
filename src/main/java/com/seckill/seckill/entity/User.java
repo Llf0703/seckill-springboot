@@ -69,8 +69,12 @@ public class User {
 
     }
 
-    public boolean login_check() {
-        return true;
+    public MessageUitl login_check() {
+        MessageUitl result = new MessageUitl();
+        if (!is_valid_phone()) result.init(300, "invalid phone", false);
+        else if (!is_valid_password()) result.init(300, "invalid password", false);
+        else result.init(200, "ok", true);
+        return result;
     }
 
     public void password_to_md5() {
