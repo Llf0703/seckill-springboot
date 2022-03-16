@@ -36,13 +36,13 @@ public class UserServiceImpl implements UserService {
         wrapper.eq("phone", user.getPhone());
         long cnt = user_mapper.selectCount(wrapper);
         if (cnt != 0) {
-            result.init(300, "user exist", false);
+            result.auth_error("user exist");
             return result.getMap();
         }
         try {
             user.get_age();
         } catch (ParseException e) {
-            result.init(300, "invalid id card", false);
+            result.auth_error("invalid id card");
             return result.getMap();
         }
         user.generate_user_name();
@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
         wrapper.eq("phone", user.getPhone());
         long cnt = user_mapper.selectCount(wrapper);
         if (cnt == 0) {
-            result.init(300, "user not found", false);
+            result.auth_error("user not found");
             return result.getMap();
         }
         user.password_to_md5();
@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
         wrapper.allEq(params);
         cnt = user_mapper.selectCount(wrapper);
         if (cnt == 0) {
-            result.init(300, "wrong password", false);
+            result.auth_error("wrong password");
             return result.getMap();
         }
         HashMap<String, Object> data = new HashMap<String, Object>();
@@ -92,9 +92,9 @@ public class UserServiceImpl implements UserService {
         if (phone != null) {
             HashMap<String, Object> data = new HashMap<>();
             data.put("phone", phone);
-            result.init(200, "登录成功", true, data);
+            result.success("登录成功");
         }
-        else result.init(300, "登录失败", false);
+        else result.auth_error("登录失败");
         return result.getMap();
     }
 }

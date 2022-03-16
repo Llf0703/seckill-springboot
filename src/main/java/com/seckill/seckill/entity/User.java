@@ -23,7 +23,7 @@ import com.seckill.seckill.utils.MessageUitl;
 public class User {
 
     @TableId(type = IdType.AUTO)
-    private int id;
+    private Integer id;
 
     @TableField(insertStrategy = FieldStrategy.NOT_NULL, updateStrategy = FieldStrategy.NOT_NULL)
     private Date created_at, updated_at, deleted_at, age;
@@ -60,20 +60,20 @@ public class User {
 
     public MessageUitl register_check() {
         MessageUitl result = new MessageUitl();
-        if (!is_valid_phone()) result.init(300, "invalid phone", false);
-        else if (!is_valid_password()) result.init(300, "invalid password", false);
-        else if (!is_valid_id_card()) result.init(300, "invalid id card", false);
-        else if (!is_valid_name()) result.init(300, "invalid name", false);
-        else result.init(200, "ok", true);
+        if (!is_valid_phone()) result.auth_error("invalid phone");
+        else if (!is_valid_password()) result.auth_error("invalid password");
+        else if (!is_valid_id_card()) result.auth_error("invalid id card");
+        else if (!is_valid_name()) result.auth_error("invalid name");
+        else result.success("ok");
         return result;
 
     }
 
     public MessageUitl login_check() {
         MessageUitl result = new MessageUitl();
-        if (!is_valid_phone()) result.init(300, "invalid phone", false);
-        else if (!is_valid_password()) result.init(300, "invalid password", false);
-        else result.init(200, "ok", true);
+        if (!is_valid_phone()) result.auth_error("invalid phone");
+        else if (!is_valid_password()) result.auth_error("invalid password");
+        else result.auth_error("ok");
         return result;
     }
 
