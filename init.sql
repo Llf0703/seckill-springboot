@@ -30,3 +30,17 @@ CREATE TABLE recharge_record
     recharge_amount decimal NOT NULL,
     recharge_method int NOT NULL
 );
+
+CREATE TABLE manager_user
+(
+    id int primary key NOT NULL AUTO_INCREMENT,
+    created_at datetime NOT NULL,
+    updated_at datetime NOT NULL,
+    deleted_at datetime,
+    account varchar(50) NOT NULL,
+    password varchar(255) NOT NULL,
+    product_permissions int NOT NULL,
+    seckill_record_permissions int NOT NULL,
+    recharge_record_permissions int NOT NULL,
+    add_admin_rights int NOT NULL
+);

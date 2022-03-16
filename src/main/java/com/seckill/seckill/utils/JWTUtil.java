@@ -33,7 +33,7 @@ public class JWTUtil {//过期时间
             // 返回token字符串
             return JWT.create()
                     .withHeader(header)
-                    .withClaim("phone", phone)
+                    .withClaim("user", phone)
                     .withExpiresAt(date)
                     .sign(algorithm);
         } catch (Exception e) {
@@ -61,7 +61,7 @@ public class JWTUtil {//过期时间
             // 返回token字符串
             return JWT.create()
                     .withHeader(header)
-                    .withClaim("phone", phone)
+                    .withClaim("user", phone)
                     .withExpiresAt(date)
                     .sign(algorithm);
         } catch (Exception e) {
@@ -79,7 +79,7 @@ public class JWTUtil {//过期时间
             Algorithm algorithm = Algorithm.HMAC256(TOKEN_SECRET);
             JWTVerifier verifier = JWT.require(algorithm).build();
             DecodedJWT jwt = verifier.verify(token);
-            String phone = jwt.getClaim("phone").asString();
+            String phone = jwt.getClaim("user").asString();
             return phone;
         } catch (Exception e){
             return null;

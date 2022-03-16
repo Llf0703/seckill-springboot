@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
+import com.seckill.seckill.entity.Manager;
 import com.seckill.seckill.entity.User;
 
 import org.springframework.util.DigestUtils;
@@ -29,6 +30,11 @@ public class UserUtil {
         return Pattern.matches("^(?:(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])).{6,20}$", password);
     }
 
+    private static boolean is_valid_account(String account) {
+        if (account == null) return false;
+        return Pattern.matches("^[A-Za-z0-9]{1,10}$", account);
+    }
+
     private static boolean is_valid_name(String name) {
         if (name == null) return false;
         return Pattern.matches("^[\u9FA6-\u9FCB\u3400-\u4DB5\u4E00-\u9FA5]{2,5}([\u25CF\u00B7][\u9FA6-\u9FCB\u3400-\u4DB5\u4E00-\u9FA5]{2,5})*$", name);
@@ -48,7 +54,15 @@ public class UserUtil {
         MessageUitl result = new MessageUitl();
         if (!is_valid_phone(user.getPhone())) result.auth_error("invalid phone");
         else if (!is_valid_password(user.getPassword())) result.auth_error("invalid password");
-        else result.auth_error("ok");
+        else result.success("ok");
+        return result;
+    }
+
+    public static MessageUitl login_check(Manager user) {
+        MessageUitl result = new MessageUitl();
+        if (!is_valid_account(user.getAccount())) result.auth_error("invalid account");
+        else if (!is_valid_password(user.getPassword())) result.auth_error("invalid password");
+        else result.success("ok");
         return result;
     }
 
