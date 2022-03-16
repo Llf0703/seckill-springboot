@@ -11,6 +11,7 @@ import com.seckill.seckill.entity.User;
 import com.seckill.seckill.mapper.UserMapper;
 import com.seckill.seckill.utils.JWTUtil;
 import com.seckill.seckill.utils.MessageUitl;
+import com.seckill.seckill.utils.UserUtil;
 
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,7 @@ public class UserServiceImpl implements UserService {
     
     @Override
     public HashMap<String, Object> register_service(User user) {
-        MessageUitl result = user.register_check();
+        MessageUitl result = UserUtil.register_check(user);
         if (result.getMap().get("message")!="ok") return result.getMap();
         Date date = new Date();
         user = user.toBuilder()
@@ -40,13 +41,14 @@ public class UserServiceImpl implements UserService {
             return result.getMap();
         }
         try {
-            user.get_age();
+            Date brithday = UserUtil.get_age(user.getId_card());
+            user.setAge(brithday);
         } catch (ParseException e) {
             result.auth_error("invalid id card");
             return result.getMap();
         }
-        user.generate_user_name();
-        user.password_to_md5();
+        user.setUser_name(UserUtil.generate_user_name());
+        user.setPassword(UserUtil.password_to_md5(user.getPhone(), user.getPassword()));
         user_mapper.insert(user);
         HashMap<String, Object> data = new HashMap<String, Object>();
         String token = JWTUtil.createToken(user.getPhone());
@@ -58,7 +60,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public HashMap<String, Object> login_service(User user) {
-        MessageUitl result = user.login_check();
+        MessageUitl result = UserUtil.login_check(user);
         if (result.getMap().get("message")!="ok") return result.getMap();
         QueryWrapper<User> wrapper = new QueryWrapper<>();
         wrapper.eq("phone", user.getPhone());
@@ -67,7 +69,7 @@ public class UserServiceImpl implements UserService {
             result.auth_error("user not found");
             return result.getMap();
         }
-        user.password_to_md5();
+        user.setPassword(UserUtil.password_to_md5(user.getPhone(), user.getPassword()));
         HashMap<String,Object> params = new HashMap<>();
         params.put("phone", user.getPhone());
         params.put("password", user.getPassword());

@@ -3,19 +3,9 @@ package com.seckill.seckill.entity;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Random;
-import java.util.TimeZone;
-import java.util.regex.Pattern;
 
 import com.baomidou.mybatisplus.annotation.*;
-import org.springframework.util.DigestUtils;
-
-import com.seckill.seckill.utils.IdCardUtil;
-import com.seckill.seckill.utils.MessageUitl;
 
 @Data
 @Builder(toBuilder = true)
@@ -37,68 +27,4 @@ public class User {
     private String email;
 
     private BigDecimal balance;
-
-    private boolean is_valid_phone() {
-        if (this.phone == null) return false;
-        return Pattern.matches("^(13[0-9]|14[01456879]|15[0-3,5-9]|16[2567]|17[0-8]|18[0-9]|19[0-3,5-9])\\d{8}$", this.phone);
-    }
-
-    private boolean is_valid_id_card() {
-        if (this.phone == null) return false;
-        return IdCardUtil.idCardValidate(this.id_card);
-    }
-
-    private boolean is_valid_password() {
-        if (this.password == null) return false;
-        return Pattern.matches("^(?:(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])).{6,20}$", this.password);
-    }
-
-    private boolean is_valid_name() {
-        if (this.name == null) return false;
-        return Pattern.matches("^[\u9FA6-\u9FCB\u3400-\u4DB5\u4E00-\u9FA5]{2,5}([\u25CF\u00B7][\u9FA6-\u9FCB\u3400-\u4DB5\u4E00-\u9FA5]{2,5})*$", this.name);
-    }
-
-    public MessageUitl register_check() {
-        MessageUitl result = new MessageUitl();
-        if (!is_valid_phone()) result.auth_error("invalid phone");
-        else if (!is_valid_password()) result.auth_error("invalid password");
-        else if (!is_valid_id_card()) result.auth_error("invalid id card");
-        else if (!is_valid_name()) result.auth_error("invalid name");
-        else result.success("ok");
-        return result;
-
-    }
-
-    public MessageUitl login_check() {
-        MessageUitl result = new MessageUitl();
-        if (!is_valid_phone()) result.auth_error("invalid phone");
-        else if (!is_valid_password()) result.auth_error("invalid password");
-        else result.auth_error("ok");
-        return result;
-    }
-
-    public void password_to_md5() {
-        String salt = "23fdt34w=-*.de";
-        String md5 = DigestUtils.md5DigestAsHex(this.phone.concat(this.password).concat(salt).getBytes());
-        this.password = md5;
-    }
-
-    public void get_age() throws ParseException {
-        String date_string = this.id_card.substring(6, 14);
-        DateFormat fmt = new SimpleDateFormat("yyyyMMdd");
-        fmt.setLenient(false); 
-        fmt.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
-        this.age = fmt.parse(date_string);
-    }
-
-    public void generate_user_name() {
-        String S = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        Random random = new Random();
-        StringBuffer tmp = new StringBuffer();
-        for (int i = 0; i < 8; i++) {
-            int number = random.nextInt(62);
-            tmp.append(S.charAt(number));
-        }
-        this.user_name = tmp.toString();
-    }
 }
