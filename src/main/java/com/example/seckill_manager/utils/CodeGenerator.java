@@ -19,7 +19,7 @@ public class CodeGenerator {
     }
 
     private static void generator() {
-        FastAutoGenerator.create("jdbc:mysql://localhost:3306/java_test?serverTimezone=GMT%2b8", "root", "Wky15878295798")
+        FastAutoGenerator.create("jdbc:mysql://124.223.199.137:3306/seckill?serverTimezone=GMT%2b8", "root", "seckill")
                 .globalConfig(builder -> {
                     builder.author("wky1742095859") // 设置作者
                             .enableSwagger() // 开启 swagger 模式
@@ -32,7 +32,7 @@ public class CodeGenerator {
                             .pathInfo(Collections.singletonMap(OutputFile.mapperXml, "E:\\java_spring_boot\\seckill_manager\\src\\main\\resources\\mapper"));//OutputFile.mapperXml, "D://")); // 设置mapperXml生成路径
                 })
                 .strategyConfig(builder -> {
-                    builder.addInclude("manager_users") // 设置需要生成的表名
+                    builder.addInclude("financial_items") // 设置需要生成的表名
                             .addTablePrefix("t_", "c_"); // 设置过滤表前缀
                 })
                 .templateEngine(new FreemarkerTemplateEngine()) // 使用Freemarker引擎模板，默认的是Velocity引擎模板
