@@ -26,21 +26,21 @@ public class ManagerUsersController {
 
     @PostMapping("/login")
     public Response login(HttpServletRequest request, @RequestBody ManagerUsersVO managerUsersVO) {
-        String ip = request.getHeader("X-Forwarded-For");
+        String ip = request.getHeader("X-real-ip");
         return managerUsersService.login(managerUsersVO, ip);
     }
 
     @GetMapping("/check_version")
     public Response checkVersion(HttpServletRequest request) {
         String token = request.getHeader("token");
-        String ip = request.getHeader("X-Forwarded-For");
+        String ip = request.getHeader("X-real-ip");
         return managerUsersService.checkVersion(token, ip);
     }
 
     @PostMapping("/log_out")
     public Response logOut(HttpServletRequest request) {
         String token = request.getHeader("token");
-        String ip = request.getHeader("X-Forwarded-For");
+        String ip = request.getHeader("X-real-ip");
         return managerUsersService.loginOut(token, ip);
     }
 }

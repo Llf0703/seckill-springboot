@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2022-03-20
  */
 @RestController
-@RequestMapping("/financial-items")
+@RequestMapping("/api/financial_item")
 public class FinancialItemsController {
 
 }
