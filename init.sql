@@ -44,3 +44,17 @@ CREATE TABLE manager_user
     recharge_record_permissions int NOT NULL,
     add_admin_rights int NOT NULL
 );
+
+CREATE TABLE `seckill_items` (
+  `id` int primary key NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  `title` varchar(50) DEFAULT NULL,
+  `stock` bigint NOT NULL,
+  `amount` bigint NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  `remaining_stock` bigint NOT NULL
+);
