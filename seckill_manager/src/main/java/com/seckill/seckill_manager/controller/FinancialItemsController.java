@@ -4,12 +4,14 @@ package com.seckill.seckill_manager.controller;
 import com.seckill.seckill_manager.Interceptor.Type.EditFinancialItemPermission;
 import com.seckill.seckill_manager.Interceptor.Type.LoginRequired;
 import com.seckill.seckill_manager.common.Response;
-import com.seckill.seckill_manager.entity.ManagerUsers;
+import com.seckill.seckill_manager.controller.vo.FinancialItemVO;
+import com.seckill.seckill_manager.service.impl.FinancialItemsServiceImpl;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.annotation.Resource;
 
 /**
  * <p>
@@ -22,12 +24,13 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/api/financial_item")
 public class FinancialItemsController {
+    @Resource
+    private FinancialItemsServiceImpl financialItemsService;
+
     @LoginRequired
     @EditFinancialItemPermission
     @PostMapping("/add_item")
-    public Response test(HttpServletRequest request) {
-        ManagerUsers managerUsers = (ManagerUsers) request.getAttribute("user");
-        System.out.println(managerUsers);
-        return Response.success("ok");
+    public Response addItem(@RequestBody FinancialItemVO financialItemVO) {
+        return financialItemsService.editFinancialItem(financialItemVO);
     }
 }

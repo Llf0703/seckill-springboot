@@ -84,22 +84,27 @@ public class InterceptorUtils {
             res.put("status", false);
             return res;
         }
-        System.out.println("登录玩玩");
         res.put("status", true);
         res.put("user", userInfo);
         return res;
         //return Objects.equals(userInfoStr[0], token) && Objects.equals(userInfoStr[1], userInfoStr);
     }
 
+    /*
+     * @MethodName editFinancialItemPermission
+     * @author Wky1742095859
+     * @Description 鉴别是否有修改理财产品权限
+     * @Date 2022/3/23 3:39
+     * @Param [managerUsers]
+     * @Return java.util.HashMap<java.lang.String,java.lang.Object>
+    **/
     public static HashMap<String, Object> editFinancialItemPermission(ManagerUsers managerUsers) {
         HashMap<String, Object> res = new HashMap<>();
         if (managerUsers == null) {
-            System.out.println("user为空");
             res.put("status", false);
             return res;
         }
         if (managerUsers.getFinancialItemsPermissions() != 2) {
-            System.out.println(managerUsers.getFinancialItemsPermissions());
             res.put("status", false);
             return res;
         }

@@ -27,6 +27,7 @@ public class Validator {
     public static boolean isValidAccount(String account) {
         return Pattern.matches(RegexStr.REGEX_ACCOUNT, account);
     }
+
     /*
      * @MethodName isValidPassword
      * @author Wky1742095859
@@ -34,7 +35,7 @@ public class Validator {
      * @Date 2022/3/19 19:14
      * @Param [password]
      * @Return boolean
-    **/
+     **/
     public static boolean isValidPassword(String password) {
         return Pattern.matches(RegexStr.REGEX_PASSWORD, password);
     }
