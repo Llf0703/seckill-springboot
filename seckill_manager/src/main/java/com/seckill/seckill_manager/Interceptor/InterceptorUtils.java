@@ -25,6 +25,14 @@ public class InterceptorUtils {
         managerUsersMapper = this.managerUsersMapper0;
     }
 
+    /*
+     * @MethodName loginRequired
+     * @author Wky1742095859
+     * @Description 鉴别是否登录
+     * @Date 2022/3/23 2:49
+     * @Param [token, ip]
+     * @Return java.util.HashMap<java.lang.String,java.lang.Object>
+     **/
     public static HashMap<String, Object> loginRequired(String token, String ip) {
         HashMap<String, Object> res = new HashMap<>();
         HashMap<String, Object> result = JWTAuth.parseToken(token);
@@ -63,6 +71,9 @@ public class InterceptorUtils {
                 res.put("status", false);
                 return res;
             }
+            res.put("status", true);
+            res.put("user", managerUsers);
+            return res;
             //return Objects.equals(managerUsers.getPassword(), userInfoStr[1]) && Objects.equals(token, userInfoStr[0]);
         }
         ManagerUsers userInfo = JSONUtils.toEntity(userInfoStr, ManagerUsers.class);
@@ -73,9 +84,26 @@ public class InterceptorUtils {
             res.put("status", false);
             return res;
         }
+        System.out.println("登录玩玩");
         res.put("status", true);
         res.put("user", userInfo);
         return res;
         //return Objects.equals(userInfoStr[0], token) && Objects.equals(userInfoStr[1], userInfoStr);
+    }
+
+    public static HashMap<String, Object> editFinancialItemPermission(ManagerUsers managerUsers) {
+        HashMap<String, Object> res = new HashMap<>();
+        if (managerUsers == null) {
+            System.out.println("user为空");
+            res.put("status", false);
+            return res;
+        }
+        if (managerUsers.getFinancialItemsPermissions() != 2) {
+            System.out.println(managerUsers.getFinancialItemsPermissions());
+            res.put("status", false);
+            return res;
+        }
+        res.put("status", true);
+        return res;
     }
 }

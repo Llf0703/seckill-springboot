@@ -12,7 +12,7 @@ spring:
   redis:
     host: 127.0.0.1
     port: 6379
-    password: Wky15878295798
+    password: seckill
     timeout: 30000
     jedis:
       pool:
@@ -22,7 +22,7 @@ spring:
         max-wait: -1
 
 
-#mybatis-plus:
-  #configuration:
-    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 

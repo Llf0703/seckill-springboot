@@ -1,15 +1,5 @@
 package com.seckill.seckill_manager.service.impl;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.TimeZone;
-
-import javax.annotation.Resource;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seckill.seckill_manager.common.Response;
@@ -21,8 +11,16 @@ import com.seckill.seckill_manager.mapper.SeckillItemsMapper;
 import com.seckill.seckill_manager.service.ItemService;
 import com.seckill.seckill_manager.utils.JWTAuth;
 import com.seckill.seckill_manager.utils.RedisUtils;
-
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.TimeZone;
 
 @Service
 public class ItemserviceImpl extends ServiceImpl<SeckillItemsMapper, SeckillItems> implements ItemService {
@@ -51,7 +49,7 @@ public class ItemserviceImpl extends ServiceImpl<SeckillItemsMapper, SeckillItem
             queryWrapper.isNull("deleted_at").eq("account", account);
             ManagerUsers managerUser = managerUsersMapper.selectOne(queryWrapper);
             if (managerUser == null) return Response.authErr("登录失效");
-            if (managerUser.getProductPermissions() != 2) return Response.authErr("无权限");
+            if (managerUser.getSeckillItemsPermissions() != 2) return Response.authErr("无权限");
             //检查密码是否更改及ip所登录的token与传回的token是否一致
             if (!Objects.equals(managerUser.getPassword(), userInfo[1]) || !Objects.equals(token, userInfo[0]))
                 return Response.authErr("登录失效");

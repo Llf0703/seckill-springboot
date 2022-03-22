@@ -1,5 +1,0 @@
-com\example\seckill_manager\controller\FinancialItemsController.class
-com\example\seckill_manager\service\IFinancialItemsService.class
-com\example\seckill_manager\entity\FinancialItems.class
-com\example\seckill_manager\mapper\FinancialItemsMapper.class
-com\example\seckill_manager\service\impl\FinancialItemsServiceImpl.class

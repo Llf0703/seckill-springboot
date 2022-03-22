@@ -8,7 +8,6 @@ import com.seckill.seckill_manager.entity.ManagerUsers;
 import com.seckill.seckill_manager.mapper.ManagerUsersMapper;
 import com.seckill.seckill_manager.service.IManagerUsersService;
 import com.seckill.seckill_manager.utils.*;
-
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
