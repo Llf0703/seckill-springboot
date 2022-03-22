@@ -7,10 +7,7 @@ import com.seckill.seckill_manager.controller.vo.ManagerUsersVO;
 import com.seckill.seckill_manager.entity.ManagerUsers;
 import com.seckill.seckill_manager.mapper.ManagerUsersMapper;
 import com.seckill.seckill_manager.service.IManagerUsersService;
-import com.seckill.seckill_manager.utils.JWTAuth;
-import com.seckill.seckill_manager.utils.MD5;
-import com.seckill.seckill_manager.utils.RedisUtils;
-import com.seckill.seckill_manager.utils.Validator;
+import com.seckill.seckill_manager.utils.*;
 
 import org.springframework.stereotype.Service;
 
@@ -49,7 +46,18 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (!Validator.isValidAccount(VOAccount) || !Validator.isValidPassword(VOPassword))
             return Response.authErr("账号或密码错误");//正则判断
         String MD5Password = MD5.MD5Password(VOAccount + VOPassword);
-        if (Objects.equals(RedisUtils.get(VOAccount), MD5Password)) {
+        String userInfoStr = RedisUtils.get(VOAccount);
+        String userPassword = null;
+        if (userInfoStr != null) {
+            ManagerUsers userInfo = JSONUtils.toEntity(userInfoStr, ManagerUsers.class);
+            if (userInfo != null) {
+                userPassword = userInfo.getPassword();
+            }
+        }
+        if (userInfoStr != null && !Objects.equals(userPassword, MD5Password)) {
+            return Response.authErr("账号或密码错误");
+        }
+        if (userInfoStr != null && Objects.equals(userPassword, MD5Password)) {
             String token = JWTAuth.releaseToken(managerUsersVO.getAccount());
             HashMap<String, Object> data = new HashMap<>();
             data.put("token", token);
@@ -68,7 +76,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         String token = JWTAuth.releaseToken(managerUsersVO.getAccount());
         data.put("token", token);
         String res = RedisUtils.set(VOAccount + "," + ip, token + "," + MD5Password, 3600);
-        String res2 = RedisUtils.set(managerUsers.getAccount(), managerUsers.getPassword());//缓存账号密码
+        String res2 = RedisUtils.set(managerUsers.getAccount(), JSONUtils.toJSONStr(managerUsers));//缓存账号密码
         String res3 = RedisUtils.set(ip + "_user", VOAccount, 3600);
         if (!Objects.equals(res, "OK") || !Objects.equals(res2, "OK") || !Objects.equals(res3, "OK"))
             return Response.systemErr("登录失败,系统异常");
@@ -81,25 +89,26 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (!result.get("status").equals(true)) return Response.authErr("登录失效");
         if (ip == null) return Response.authErr("登录失效");
         String account = result.get("account").toString();
-        String userInfoStr = RedisUtils.get(account + "," + ip);
-        String MD5Password = RedisUtils.get(account);
         String loginUser = RedisUtils.get(ip + "_user");
         //检查ip对应的登录账号及token账号是否一致
         if (loginUser == null || !loginUser.equals(account)) return Response.authErr("登录失效");
-        if (userInfoStr == null) return Response.authErr("登录失效");
-        String[] userInfo = userInfoStr.split(",");
-        if (MD5Password == null) {
+        String loginInfoStr = RedisUtils.get(account + "," + ip);
+        if (loginInfoStr == null) return Response.authErr("登录失效");
+        String userInfoStr = RedisUtils.get(account);
+        String[] loginInfo = loginInfoStr.split(",");
+        ManagerUsers userInfo = JSONUtils.toEntity(userInfoStr, ManagerUsers.class);
+        if (userInfo == null) {
             QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
             queryWrapper.isNull("deleted_at").eq("account", account);
             ManagerUsers managerUsers = managerUsersMapper.selectOne(queryWrapper);
             if (managerUsers == null) return Response.authErr("登录失效");
             RedisUtils.set(managerUsers.getAccount(), managerUsers.getPassword());
             //检查密码是否更改及ip所登录的token与传回的token是否一致
-            if (!Objects.equals(managerUsers.getPassword(), userInfo[1]) || !Objects.equals(token, userInfo[0]))
+            if (!Objects.equals(managerUsers.getPassword(), loginInfo[1]) || !Objects.equals(token, loginInfo[0]))
                 return Response.authErr("登录失效");
             return Response.success("查询成功");
         }
-        if (!Objects.equals(userInfo[0], token) || !Objects.equals(userInfo[1], MD5Password))
+        if (!Objects.equals(loginInfo[0], token) || !Objects.equals(userInfo.getPassword(), loginInfo[1]))
             return Response.authErr("登录失效");
         return Response.success("查询成功");
     }
@@ -109,8 +118,8 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         HashMap<String, Object> result = JWTAuth.parseToken(token);
         if (!result.get("status").equals(true)) return Response.success("退出成功");//token过期,直接返回退出成功
         String account = result.get("account").toString();
-        if (RedisUtils.exist(account + "," + ip)) RedisUtils.del(account + "," + ip);
-        if (RedisUtils.exist(ip + "_user")) RedisUtils.del(ip + "_user");
+        if (ip != null && RedisUtils.exist(account + "," + ip)) RedisUtils.del(account + "," + ip);
+        if (ip != null && RedisUtils.exist(ip + "_user")) RedisUtils.del(ip + "_user");
         return Response.success("退出成功");
     }
 }

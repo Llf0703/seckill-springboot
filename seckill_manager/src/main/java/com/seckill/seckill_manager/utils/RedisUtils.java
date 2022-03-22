@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.Pipeline;
 
 import java.util.Arrays;
 /**
@@ -40,7 +41,6 @@ public class RedisUtils {
 
     public static String mset(String... kv) {
         try (Jedis jedis = jedisPool.getResource()) {
-            System.out.println(Arrays.toString(kv));
             return jedis.mset(kv);
         } catch (Exception e) {
             return "0";

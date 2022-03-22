@@ -1,4 +1,4 @@
-package com.seckill.seckill_manager.config.InterceptorAdapter;
+package com.seckill.seckill_manager.Interceptor.Type;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,6 +1,6 @@
 package com.seckill.seckill_manager.Exception;
 
-import com.example.seckill_manager.common.Response;
+import com.seckill.seckill_manager.common.Response;
 import org.springframework.boot.json.JsonParseException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MissingRequestHeaderException;
@@ -61,9 +61,15 @@ public class GlobalExceptionHandler {
         return Response.paramsErr("参数异常");
     }
 
-    @ExceptionHandler(value = com.example.seckill_manager.Exception.InterceptorException.class)
+    @ExceptionHandler(value = InterceptorJWTException.class)
     public @ResponseBody
-    Response JWTExceptionHandler(HttpServletRequest req, com.example.seckill_manager.Exception.InterceptorException e) {
-        return Response.authErr("请先登录");
+    Response JWTExceptionHandler(HttpServletRequest req, InterceptorJWTException e) {
+        return Response.authErr(e.getMsg());
+    }
+
+    @ExceptionHandler(value = InterceptorSystemException.class)
+    public @ResponseBody
+    Response SystemException(HttpServletRequest req, InterceptorSystemException e) {
+        return Response.systemErr(e.getMsg());
     }
 }
