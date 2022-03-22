@@ -55,10 +55,9 @@ public class InterceptorUtils {
                 return res;
             }
             String info = JSONUtils.toJSONStr(managerUsers);
-            if (info == null) {
-                throw new InterceptorSystemException("系统异常");
+            if (info != null) {
+                RedisUtils.set(managerUsers.getAccount(), info);
             }
-            RedisUtils.set(managerUsers.getAccount(), info);
             //检查密码是否更改及ip所登录的token与传回的token是否一致
             if (!Objects.equals(managerUsers.getPassword(), loginInfo[1]) || !Objects.equals(token, loginInfo[0])) {
                 res.put("status", false);
