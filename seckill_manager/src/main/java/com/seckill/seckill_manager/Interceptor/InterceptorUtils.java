@@ -20,6 +20,20 @@ public class InterceptorUtils {
     @Resource
     private ManagerUsersMapper managerUsersMapper0;
 
+    public static HashMap<String, Object> seckillItemPermission(ManagerUsers managerUsers, int permission) {
+        HashMap<String, Object> res = new HashMap<>();
+        if (managerUsers == null) {
+            res.put("status", false);
+            return res;
+        }
+        if (managerUsers.getSeckillItemsPermissions() < permission) {
+            res.put("status", false);
+            return res;
+        }
+        res.put("status", true);
+        return res;
+    }
+
     @PostConstruct
     private void init() {
         managerUsersMapper = this.managerUsersMapper0;
@@ -98,13 +112,13 @@ public class InterceptorUtils {
      * @Param [managerUsers]
      * @Return java.util.HashMap<java.lang.String,java.lang.Object>
     **/
-    public static HashMap<String, Object> editFinancialItemPermission(ManagerUsers managerUsers) {
+    public static HashMap<String, Object> financialItemPermission(ManagerUsers managerUsers,int permission) {
         HashMap<String, Object> res = new HashMap<>();
         if (managerUsers == null) {
             res.put("status", false);
             return res;
         }
-        if (managerUsers.getFinancialItemsPermissions() != 2) {
+        if (managerUsers.getFinancialItemsPermissions() < permission) {
             res.put("status", false);
             return res;
         }

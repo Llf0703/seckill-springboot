@@ -1,7 +1,8 @@
 package com.seckill.seckill_manager.controller;
 
 
-import com.seckill.seckill_manager.Interceptor.Type.EditFinancialItemPermission;
+import com.seckill.seckill_manager.Interceptor.PermissionCode;
+import com.seckill.seckill_manager.Interceptor.Type.FinancialItemPermission;
 import com.seckill.seckill_manager.Interceptor.Type.LoginRequired;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.FinancialItemVO;
@@ -28,7 +29,7 @@ public class FinancialItemsController {
     private FinancialItemsServiceImpl financialItemsService;
 
     @LoginRequired
-    @EditFinancialItemPermission
+    @FinancialItemPermission(permission = PermissionCode.EDIT)
     @PostMapping("/add_item")
     public Response addItem(@RequestBody FinancialItemVO financialItemVO) {
         return financialItemsService.editFinancialItem(financialItemVO);

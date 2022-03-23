@@ -47,8 +47,8 @@ public class ManagerUsers implements Serializable {
     @ApiModelProperty("充值记录权限 0无权限 1可读")
     private Integer rechargeRecordPermissions;
 
-    @ApiModelProperty("添加管理员权限 0无权限 1可编辑")
-    private Integer addAdminRights;
+    @ApiModelProperty("添加管理员权限 0无权限 1可读 2可编辑")
+    private Integer adminInfoPermissions;
 
     @ApiModelProperty("理财产品权限 0无权限 1可读 2可编辑")
     private Integer financialItemsPermissions;
@@ -72,7 +72,7 @@ public class ManagerUsers implements Serializable {
                 ", seckillItemsPermissions=" + seckillItemsPermissions +
                 ", seckillRecordPermissions=" + seckillRecordPermissions +
                 ", rechargeRecordPermissions=" + rechargeRecordPermissions +
-                ", addAdminRights=" + addAdminRights +
+                ", adminInfoPermissions=" + adminInfoPermissions +
                 ", financialItemsPermissions=" + financialItemsPermissions +
                 ", riskControlPermissions=" + riskControlPermissions +
                 ", guestInfoPermissions=" + guestInfoPermissions +
