@@ -1,8 +1,7 @@
 package com.seckill.seckill_manager.config;
 
-import com.seckill.seckill_manager.Interceptor.FinancialItemPermissionInterceptor;
 import com.seckill.seckill_manager.Interceptor.JWTInterceptor;
-import com.seckill.seckill_manager.Interceptor.SeckillItemPermissionInterceptor;
+import com.seckill.seckill_manager.Interceptor.PermissionInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -14,13 +13,10 @@ public class InterceptorConfig implements WebMvcConfigurer {
     @Resource
     private JWTInterceptor jwtInterceptor;
     @Resource
-    private FinancialItemPermissionInterceptor editFinancialItemPermission;
-    @Resource
-    private SeckillItemPermissionInterceptor seckillItemPermissionInterceptor;
+    private PermissionInterceptor permissionInterceptor;
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor).addPathPatterns("/**");
-        registry.addInterceptor(editFinancialItemPermission).addPathPatterns("/**");
-        registry.addInterceptor(seckillItemPermissionInterceptor).addPathPatterns("/**");
+        registry.addInterceptor(permissionInterceptor).addPathPatterns("/**");
     }
 }

@@ -20,38 +20,46 @@ public class InterceptorUtils {
     @Resource
     private ManagerUsersMapper managerUsersMapper0;
 
-    public static HashMap<String, Object> seckillItemPermission(ManagerUsers managerUsers, int permission) {
-        HashMap<String, Object> res = new HashMap<>();
-        if (managerUsers == null) {
-            res.put("status", false);
-            return res;
-        }
-        if (managerUsers.getSeckillItemsPermissions() < permission) {
-            res.put("status", false);
-            return res;
-        }
-        res.put("status", true);
-        return res;
-    }
-
-    public static HashMap<String, Object> seckilRecordPermission(ManagerUsers user, int permission) {
-        HashMap<String, Object> res = new HashMap<>();
-        if (user == null) {
-            res.put("status", false);
-            return res;
-        }
-        if (user.getSeckillRecordPermissions() < permission) {
-            res.put("status", false);
-            return res;
-        }
-        res.put("status", true);
-        return res;
-    }
-
     @PostConstruct
     private void init() {
         managerUsersMapper = this.managerUsersMapper0;
     }
+
+    public static boolean riskControlPermission(ManagerUsers user, int level) {
+        if (user == null) return false;
+        return user.getRiskControlPermissions() >= level;
+    }
+
+    public static boolean seckillItemPermission(ManagerUsers user, int level) {
+        if (user == null) return false;
+        return user.getSeckillItemsPermissions() >= level;
+    }
+
+    public static boolean seckilRecordPermission(ManagerUsers user, int level) {
+        if (user == null) return false;
+        return user.getSeckillRecordPermissions() >= level;
+    }
+
+    public static boolean adminInfoPermission(ManagerUsers user, int level) {
+        if (user == null) return false;
+        return user.getAdminInfoPermissions() >= level;
+    }
+
+    public static boolean guestInfoPermission(ManagerUsers user, int level) {
+        if (user == null) return false;
+        return user.getGuestInfoPermissions() >= level;
+    }
+
+    public static boolean financialItemPermission(ManagerUsers user, int level) {
+        if (user == null) return false;
+        return user.getFinancialItemsPermissions() >= level;
+    }
+
+    public static boolean rechargeRecordPermission(ManagerUsers user, int level) {
+        if (user == null) return false;
+        return user.getRechargeRecordPermissions() >= level;
+    }
+
 
     /*
      * @MethodName loginRequired
@@ -118,25 +126,5 @@ public class InterceptorUtils {
         //return Objects.equals(userInfoStr[0], token) && Objects.equals(userInfoStr[1], userInfoStr);
     }
 
-    /*
-     * @MethodName editFinancialItemPermission
-     * @author Wky1742095859
-     * @Description 鉴别是否有修改理财产品权限
-     * @Date 2022/3/23 3:39
-     * @Param [managerUsers]
-     * @Return java.util.HashMap<java.lang.String,java.lang.Object>
-    **/
-    public static HashMap<String, Object> financialItemPermission(ManagerUsers managerUsers,int permission) {
-        HashMap<String, Object> res = new HashMap<>();
-        if (managerUsers == null) {
-            res.put("status", false);
-            return res;
-        }
-        if (managerUsers.getFinancialItemsPermissions() < permission) {
-            res.put("status", false);
-            return res;
-        }
-        res.put("status", true);
-        return res;
-    }
+
 }

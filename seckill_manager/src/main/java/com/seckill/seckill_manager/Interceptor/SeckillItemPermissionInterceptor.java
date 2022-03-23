@@ -9,7 +9,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
+
 @Component
 public class SeckillItemPermissionInterceptor implements HandlerInterceptor {
     @Override
@@ -18,9 +18,9 @@ public class SeckillItemPermissionInterceptor implements HandlerInterceptor {
             HandlerMethod handlerMethod = (HandlerMethod) handler;// 把handler强转为HandlerMethod
             SeckillItemPermission seckillItemPermission = handlerMethod.getMethod().getAnnotation(SeckillItemPermission.class);
             if (seckillItemPermission != null) {//进行鉴权
-                ManagerUsers user=(ManagerUsers) request.getAttribute("user");
-                HashMap<String, Object> res = InterceptorUtils.seckillItemPermission(user, seckillItemPermission.permission());
-                if (res.get("status").equals(false))
+                ManagerUsers user = (ManagerUsers) request.getAttribute("user");
+                boolean res = InterceptorUtils.seckillItemPermission(user, seckillItemPermission.permission());
+                if (!res)
                     throw new InterceptorJWTException("权限不足");
             }
         }
