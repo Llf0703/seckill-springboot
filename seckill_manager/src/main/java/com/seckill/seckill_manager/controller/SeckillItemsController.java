@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author wky1742095859
@@ -27,14 +27,16 @@ import javax.servlet.http.HttpServletRequest;
 public class SeckillItemsController {
     @Resource
     private SeckillItemsServiceImpl seckillItemsService;
+
     @LoginRequired
-    @Permission(level = LevelCode.EDIT,permission = PermissionType.SeckillItemPermission)
+    @Permission(level = LevelCode.EDIT, permission = PermissionType.SeckillItemPermission)
     @PostMapping("/add_item")
     public Response add_item_controller(HttpServletRequest request, @RequestBody SeckillItemVO item) {
         return seckillItemsService.editSeckillItem(item);
     }
+
     @LoginRequired
-    @Permission(level = LevelCode.EDIT,permission = PermissionType.SeckillItemPermission)
+    @Permission(level = LevelCode.EDIT, permission = PermissionType.SeckillItemPermission)
     @PostMapping("/edit_item")
     public Response editItemController(HttpServletRequest request, @RequestBody SeckillItemVO item) {
         return seckillItemsService.editSeckillItem(item);

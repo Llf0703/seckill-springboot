@@ -1,6 +1,7 @@
 package com.seckill.seckill_manager.utils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.regex.Pattern;
 
 
@@ -64,7 +65,8 @@ public class Validator {
     }
 
     public static boolean isValidRate(BigDecimal rate) {
-        return rate.compareTo(BigDecimal.ZERO) >= 0 && rate.compareTo(BigDecimal.ONE) <= 0;
+        BigDecimal temp=rate.divide(new BigDecimal("100"),8, RoundingMode.HALF_UP);
+        return temp.compareTo(BigDecimal.ZERO) >= 0 && temp.compareTo(BigDecimal.ONE) <= 0;
 
     }
 

@@ -13,6 +13,8 @@ import com.seckill.seckill_manager.utils.Validator;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 /**
@@ -66,6 +68,8 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
             LocalDateTime localDateTime = LocalDateTime.now();
             financialItem.setCreatedAt(localDateTime);//初始化创建时间
             financialItem.setUpdatedAt(localDateTime);//初始化更新时间
+            //百分数化小数
+            financialItem.setInterestRate(financialItemVO.getInterestRate().divide(new BigDecimal("100"), 8, RoundingMode.HALF_UP));
             save(financialItem);
             return Response.success("新增成功");
         }
@@ -75,12 +79,15 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
         LocalDateTime localDateTime = LocalDateTime.now();
         BeanUtil.copyProperties(financialItemVO, financialItem, true);//更改字段
         financialItem.setUpdatedAt(localDateTime);//修改更新时间
+        //百分数化小数
+        financialItem.setInterestRate(financialItemVO.getInterestRate().divide(new BigDecimal("100"), 8, RoundingMode.HALF_UP));
         if (!updateById(financialItem)) return Response.dataErr("保存失败,数据库异常");
         return Response.success("保存成功");
     }
 
     @Override
     public Response getFinancialItem(QueryByIdVO queryByIdVO) {
+        if (queryByIdVO.getId() == null) return Response.paramsErr("参数异常");
         FinancialItems financialItem = getFinancialItemById(queryByIdVO.getId());
         if (financialItem == null) return Response.dataNotFoundErr("产品不存在");
         FinancialItemVO financialItemVO = new FinancialItemVO();

@@ -1,9 +1,11 @@
 package com.seckill.seckill_manager.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.ManagerUsersVO;
+import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
 import com.seckill.seckill_manager.entity.ManagerUsers;
 import com.seckill.seckill_manager.mapper.ManagerUsersMapper;
 import com.seckill.seckill_manager.service.IManagerUsersService;
@@ -118,6 +120,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (ip != null && RedisUtils.exist(ip + "_user")) RedisUtils.del(ip + "_user");
         return Response.success("退出成功");
     }
+
     /*
      * @MethodName editAdmin
      * @author 滕
@@ -125,11 +128,21 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
      * @Date 2022/3/23 21:59
      * @Param [managerUsersVO]
      * @Return com.seckill.seckill_manager.common.Response
-    **/
+     **/
     @Override
     public Response editAdmin(ManagerUsersVO managerUsersVO) {
-        String MD5Password=MD5.MD5Password(managerUsersVO.getAccount()+managerUsersVO.getPassword());
+        String MD5Password = MD5.MD5Password(managerUsersVO.getAccount() + managerUsersVO.getPassword());
         return Response.success("成功");
+    }
+
+    @Override
+    public Response getAdmin(QueryByIdVO queryByIdVO) {
+        if (queryByIdVO.getId() == null) return Response.paramsErr("参数异常");
+        ManagerUsers managerUsers = getManagerUserById(queryByIdVO.getId());
+        if (managerUsers == null) return Response.dataNotFoundErr("未查询到相关数据");
+        ManagerUsersVO managerUsersVO = new ManagerUsersVO();
+        BeanUtil.copyProperties(managerUsers, managerUsersVO, true);
+        return Response.success(managerUsersVO, "获取成功");
     }
 
     private ManagerUsers getManagerUserByAccount(String account) {
@@ -138,10 +151,9 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         return managerUsersMapper.selectOne(queryWrapper);
     }
 
-    private ManagerUsers getManagerUserById(ManagerUsersVO managerUsersVO) {
-        if (managerUsersVO.getId() == null) return null;
+    private ManagerUsers getManagerUserById(Integer id) {
         QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at").eq("id", managerUsersVO.getId());
+        queryWrapper.isNull("deleted_at").eq("id", id);
         return managerUsersMapper.selectOne(queryWrapper);
     }
 }

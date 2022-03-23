@@ -51,7 +51,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         save(seckillItem);
         return Response.success("test");
         //VO id不为空,查询数据是否存在,不存在返回dataErr,存在进行新增,同时修改更新时间
-        //getSeckillItemById(item_VO);
+        //getSeckillItemById(item_VO.getId());
         /*
         Date date = new Date();
         DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -80,10 +80,9 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         return Response.success("success");*/
     }
 
-    private SeckillItems getSeckillItemById(SeckillItemVO seckillItemVO){
-        if (seckillItemVO.getId() == null) return null;
+    private SeckillItems getSeckillItemById(Integer id){
         QueryWrapper<SeckillItems> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at").eq("id", seckillItemVO.getId());
+        queryWrapper.isNull("deleted_at").eq("id", id);
         return seckillItemsMapper.selectOne(queryWrapper);
     }
 }
