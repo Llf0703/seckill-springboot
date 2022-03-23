@@ -1,5 +1,7 @@
 package com.seckill.seckill_manager.service.impl;
 
+import com.seckill.seckill_manager.common.Response;
+import com.seckill.seckill_manager.controller.vo.RiskControlVO;
 import com.seckill.seckill_manager.entity.RiskControl;
 import com.seckill.seckill_manager.mapper.RiskControlMapper;
 import com.seckill.seckill_manager.service.IRiskControlService;
@@ -16,5 +18,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class RiskControlServiceImpl extends ServiceImpl<RiskControlMapper, RiskControl> implements IRiskControlService {
-
+    @Override
+    public Response editRiskControl(RiskControlVO riskControlVO){
+        return Response.success("test");
+    }
 }

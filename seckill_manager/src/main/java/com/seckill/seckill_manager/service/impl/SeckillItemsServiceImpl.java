@@ -30,7 +30,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
     private SeckillItemsMapper seckillItemsMapper;
 
     /*
-     * @MethodName editItem
+     * @MethodName editSeckillItem
      * @author llf
      * @Description 新增,修改秒杀产品接口
      * @Date 2022/3/23 23:10
@@ -38,7 +38,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
      * @Return com.seckill.seckill_manager.common.Response
     **/
     @Override
-    public Response editItem(SeckillItemVO item_VO) {
+    public Response editSeckillItem(SeckillItemVO item_VO) {
         BigDecimal amount = item_VO.getAmount();
         Long stock = item_VO.getStock();
         if (!Validator.isValidAmountCanNotBeZERO(amount) || stock <= 0) return Response.systemErr("数值无效");

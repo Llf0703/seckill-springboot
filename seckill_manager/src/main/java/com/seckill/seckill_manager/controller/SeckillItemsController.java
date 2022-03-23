@@ -31,12 +31,12 @@ public class SeckillItemsController {
     @Permission(level = LevelCode.EDIT,permission = PermissionType.SeckillItemPermission)
     @PostMapping("/add_item")
     public Response add_item_controller(HttpServletRequest request, @RequestBody SeckillItemVO item) {
-        return seckillItemsService.editItem(item);
+        return seckillItemsService.editSeckillItem(item);
     }
     @LoginRequired
     @Permission(level = LevelCode.EDIT,permission = PermissionType.SeckillItemPermission)
     @PostMapping("/edit_item")
     public Response editItemController(HttpServletRequest request, @RequestBody SeckillItemVO item) {
-        return seckillItemsService.editItem(item);
+        return seckillItemsService.editSeckillItem(item);
     }
 }

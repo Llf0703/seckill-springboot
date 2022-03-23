@@ -1,7 +1,9 @@
 package com.seckill.seckill_manager.service;
 
-import com.seckill.seckill_manager.entity.RiskControl;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.seckill.seckill_manager.common.Response;
+import com.seckill.seckill_manager.controller.vo.RiskControlVO;
+import com.seckill.seckill_manager.entity.RiskControl;
 
 /**
  * <p>
@@ -12,5 +14,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2022-03-24
  */
 public interface IRiskControlService extends IService<RiskControl> {
-
+    Response editRiskControl(RiskControlVO riskControlVO);
 }
