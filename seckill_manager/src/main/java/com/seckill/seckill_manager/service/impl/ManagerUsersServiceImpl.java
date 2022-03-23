@@ -118,7 +118,14 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (ip != null && RedisUtils.exist(ip + "_user")) RedisUtils.del(ip + "_user");
         return Response.success("退出成功");
     }
-
+    /*
+     * @MethodName editAdmin
+     * @author 滕
+     * @Description 修改管理员信息
+     * @Date 2022/3/23 21:59
+     * @Param [managerUsersVO]
+     * @Return com.seckill.seckill_manager.common.Response
+    **/
     @Override
     public Response editAdmin(ManagerUsersVO managerUsersVO) {
         return Response.success("成功");
