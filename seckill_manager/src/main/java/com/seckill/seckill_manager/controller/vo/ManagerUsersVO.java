@@ -12,6 +12,23 @@ import lombok.Data;
  **/
 @Data
 public class ManagerUsersVO {
+    private Integer id;
+
     private String account;
+
     private String password;
+
+    private Integer seckillItemsPermissions;
+
+    private Integer seckillRecordPermissions;
+
+    private Integer rechargeRecordPermissions;
+
+    private Integer adminInfoPermissions;
+
+    private Integer financialItemsPermissions;
+
+    private Integer riskControlPermissions;
+
+    private Integer guestInfoPermissions;
 }

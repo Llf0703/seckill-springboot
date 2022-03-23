@@ -119,6 +119,11 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         return Response.success("退出成功");
     }
 
+    @Override
+    public Response editAdmin(ManagerUsersVO managerUsersVO){
+        return Response.success("成功");
+    }
+
     private ManagerUsers getManagerUserByAccount(String account) {
         QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("deleted_at").eq("account", account);

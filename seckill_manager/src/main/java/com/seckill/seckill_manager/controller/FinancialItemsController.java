@@ -35,4 +35,11 @@ public class FinancialItemsController {
     public Response addItem(@RequestBody FinancialItemVO financialItemVO) {
         return financialItemsService.editFinancialItem(financialItemVO);
     }
+
+    @LoginRequired
+    @Permission(level = LevelCode.EDIT,permission = PermissionType.FinancialItemPermission)
+    @PostMapping("/edit_item")
+    public Response editItem(@RequestBody FinancialItemVO financialItemVO) {
+        return financialItemsService.editFinancialItem(financialItemVO);
+    }
 }

@@ -17,4 +17,5 @@ public interface IManagerUsersService extends IService<ManagerUsers> {
     Response login(ManagerUsersVO managerUsersVO,String ip);
     Response checkVersion(String token,String ip);
     Response loginOut(String token,String ip);
+    Response editAdmin(ManagerUsersVO managerUsersVO);
 }
