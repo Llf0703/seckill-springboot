@@ -14,5 +14,5 @@ import com.seckill.seckill_manager.entity.FinancialItems;
  * @since 2022-03-20
  */
 public interface IFinancialItemsService extends IService<FinancialItems> {
-    public Response editFinancialItem(FinancialItemVO financialItemVO);
+    Response editFinancialItem(FinancialItemVO financialItemVO);
 }

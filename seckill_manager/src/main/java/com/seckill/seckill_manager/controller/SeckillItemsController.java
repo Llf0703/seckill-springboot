@@ -1,14 +1,17 @@
 package com.seckill.seckill_manager.controller;
 
 
+import com.seckill.seckill_manager.Interceptor.LevelCode;
+import com.seckill.seckill_manager.Interceptor.PermissionType;
+import com.seckill.seckill_manager.Interceptor.Type.LoginRequired;
+import com.seckill.seckill_manager.Interceptor.Type.Permission;
+import com.seckill.seckill_manager.common.Response;
+import com.seckill.seckill_manager.controller.vo.SeckillItemVO;
+import com.seckill.seckill_manager.service.impl.SeckillItemsServiceImpl;
+import org.springframework.web.bind.annotation.*;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-
-import com.seckill.seckill_manager.common.Response;
-import com.seckill.seckill_manager.controller.vo.ItemVO;
-import com.seckill.seckill_manager.service.ItemService;
-
-import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -23,12 +26,17 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/seckill_item")
 public class SeckillItemsController {
     @Resource
-    private ItemService item_service;
-
+    private SeckillItemsServiceImpl seckillItemsService;
+    @LoginRequired
+    @Permission(level = LevelCode.EDIT,permission = PermissionType.SeckillItemPermission)
     @PostMapping("/add_item")
-    public Response add_item_controller(HttpServletRequest request, @RequestBody ItemVO item) {
-        String token = request.getHeader("token");
-        String ip = request.getHeader("X-real-ip");
-        return item_service.add_item_service(item, token, ip);
+    public Response add_item_controller(HttpServletRequest request, @RequestBody SeckillItemVO item) {
+        return seckillItemsService.editItem(item);
+    }
+    @LoginRequired
+    @Permission(level = LevelCode.EDIT,permission = PermissionType.SeckillItemPermission)
+    @PostMapping("/edit_item")
+    public Response editItemController(HttpServletRequest request, @RequestBody SeckillItemVO item) {
+        return seckillItemsService.editItem(item);
     }
 }
