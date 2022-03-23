@@ -34,6 +34,20 @@ public class InterceptorUtils {
         return res;
     }
 
+    public static HashMap<String, Object> seckilRecordPermission(ManagerUsers user, int permission) {
+        HashMap<String, Object> res = new HashMap<>();
+        if (user == null) {
+            res.put("status", false);
+            return res;
+        }
+        if (user.getSeckillRecordPermissions() < permission) {
+            res.put("status", false);
+            return res;
+        }
+        res.put("status", true);
+        return res;
+    }
+
     @PostConstruct
     private void init() {
         managerUsersMapper = this.managerUsersMapper0;
