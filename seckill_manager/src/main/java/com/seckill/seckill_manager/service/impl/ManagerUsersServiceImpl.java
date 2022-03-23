@@ -67,9 +67,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
             return Response.success(data, "登录成功");
         }
         //缓存未空,查询mysql
-        QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at").eq("account", VOAccount);
-        ManagerUsers managerUsers = managerUsersMapper.selectOne(queryWrapper);
+        ManagerUsers managerUsers = getManagerUserByAccount(VOAccount);
         if (managerUsers == null || !Objects.equals(managerUsers.getPassword(), MD5Password))//未查到或密码不相等
             return Response.authErr("账号或密码错误");
         HashMap<String, Object> data = new HashMap<>();
@@ -98,9 +96,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         String[] loginInfo = loginInfoStr.split(",");//提取token,登录时的密码
         ManagerUsers userInfo = JSONUtils.toEntity(userInfoStr, ManagerUsers.class);
         if (userInfo == null) {//未查到用户信息,查询数据库
-            QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
-            queryWrapper.isNull("deleted_at").eq("account", account);
-            ManagerUsers managerUsers = managerUsersMapper.selectOne(queryWrapper);
+            ManagerUsers managerUsers = getManagerUserByAccount(account);
             if (managerUsers == null) return Response.authErr("登录失效");//账号不存在
             RedisUtils.set(managerUsers.getAccount(), JSONUtils.toJSONStr(managerUsers));//缓存用户信息
             //检查密码是否更改及ip所登录的token与传回的token是否一致
@@ -121,5 +117,11 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (ip != null && RedisUtils.exist(account + "," + ip)) RedisUtils.del(account + "," + ip);
         if (ip != null && RedisUtils.exist(ip + "_user")) RedisUtils.del(ip + "_user");
         return Response.success("退出成功");
+    }
+
+    private ManagerUsers getManagerUserByAccount(String account) {
+        QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNull("deleted_at").eq("account", account);
+        return managerUsersMapper.selectOne(queryWrapper);
     }
 }

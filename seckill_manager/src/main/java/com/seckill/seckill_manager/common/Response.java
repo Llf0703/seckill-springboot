@@ -13,6 +13,7 @@ interface Code {
     int SYSTEM_ERR = 500;
     int DATA_NO_FOUND = 404;
     int PARAMS_ERR = 400;
+    int DATA_ERR=402;
 }
 
 /**
@@ -100,6 +101,11 @@ public class Response {
     public static Response paramsErr(String msg){
         Date nowTime = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return new Response(Code.SYSTEM_ERR, false, null, msg, sdf.format(nowTime), nowTime.getTime());
+        return new Response(Code.PARAMS_ERR, false, null, msg, sdf.format(nowTime), nowTime.getTime());
+    }
+    public static Response dataErr(String msg){
+        Date nowTime = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return new Response(Code.DATA_ERR, false, null, msg, sdf.format(nowTime), nowTime.getTime());
     }
 }

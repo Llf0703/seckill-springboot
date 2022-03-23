@@ -1,8 +1,10 @@
 package com.seckill.seckill_manager.controller.vo;
 
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
+@Data
 public class FinancialItemVO {
     private Integer id;
 
@@ -26,5 +28,5 @@ public class FinancialItemVO {
 
     private Integer shelfLife;
 
-    private Float interestRate;
+    private BigDecimal interestRate;
 }

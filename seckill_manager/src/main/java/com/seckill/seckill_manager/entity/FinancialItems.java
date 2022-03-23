@@ -54,7 +54,7 @@ public class FinancialItems implements Serializable {
 
     private Integer shelfLife;
 
-    private Float interestRate;
+    private BigDecimal interestRate;
 
 
     @Override
