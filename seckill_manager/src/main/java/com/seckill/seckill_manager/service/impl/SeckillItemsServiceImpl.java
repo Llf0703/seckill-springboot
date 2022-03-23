@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.SeckillItemVO;
 import com.seckill.seckill_manager.entity.SeckillItems;
-import com.seckill.seckill_manager.mapper.ManagerUsersMapper;
 import com.seckill.seckill_manager.mapper.SeckillItemsMapper;
 import com.seckill.seckill_manager.service.ISeckillItemsService;
 import com.seckill.seckill_manager.utils.Validator;
@@ -30,9 +29,14 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
     @Resource
     private SeckillItemsMapper seckillItemsMapper;
 
-    @Resource
-    private ManagerUsersMapper managerUsersMapper;
-
+    /*
+     * @MethodName editItem
+     * @author llf
+     * @Description 新增,修改秒杀产品接口
+     * @Date 2022/3/23 23:10
+     * @Param [item_VO]
+     * @Return com.seckill.seckill_manager.common.Response
+    **/
     @Override
     public Response editItem(SeckillItemVO item_VO) {
         BigDecimal amount = item_VO.getAmount();
