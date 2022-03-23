@@ -7,6 +7,7 @@ import com.seckill.seckill_manager.Interceptor.Type.LoginRequired;
 import com.seckill.seckill_manager.Interceptor.Type.Permission;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.FinancialItemVO;
+import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
 import com.seckill.seckill_manager.service.impl.FinancialItemsServiceImpl;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,9 +38,16 @@ public class FinancialItemsController {
     }
 
     @LoginRequired
-    @Permission(level = LevelCode.EDIT,permission = PermissionType.FinancialItemPermission)
+    @Permission(level = LevelCode.EDIT, permission = PermissionType.FinancialItemPermission)
     @PostMapping("/edit_item")
     public Response editItem(@RequestBody FinancialItemVO financialItemVO) {
         return financialItemsService.editFinancialItem(financialItemVO);
+    }
+
+    @LoginRequired
+    @Permission(level = LevelCode.READ, permission = PermissionType.FinancialItemPermission)
+    @PostMapping("/get_item")
+    public Response getItem(@RequestBody QueryByIdVO queryByIdVO) {
+        return financialItemsService.getFinancialItem(queryByIdVO);
     }
 }

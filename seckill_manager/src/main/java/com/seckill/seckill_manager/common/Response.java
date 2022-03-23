@@ -11,7 +11,7 @@ interface Code {
     int SUCCESS = 200;
     int AUTH_ERR = 401;
     int SYSTEM_ERR = 500;
-    int DATA_NO_FOUND = 404;
+    int DATA_NOT_FOUND = 404;
     int PARAMS_ERR = 400;
     int DATA_ERR=402;
 }
@@ -107,5 +107,10 @@ public class Response {
         Date nowTime = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return new Response(Code.DATA_ERR, false, null, msg, sdf.format(nowTime), nowTime.getTime());
+    }
+    public static Response dataNotFoundErr(String msg){
+        Date nowTime = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return new Response(Code.DATA_NOT_FOUND, false, null, msg, sdf.format(nowTime), nowTime.getTime());
     }
 }

@@ -3,6 +3,7 @@ package com.seckill.seckill_manager.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.FinancialItemVO;
+import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
 import com.seckill.seckill_manager.entity.FinancialItems;
 
 /**
@@ -15,4 +16,5 @@ import com.seckill.seckill_manager.entity.FinancialItems;
  */
 public interface IFinancialItemsService extends IService<FinancialItems> {
     Response editFinancialItem(FinancialItemVO financialItemVO);
+    Response getFinancialItem(QueryByIdVO queryByIdVO);
 }

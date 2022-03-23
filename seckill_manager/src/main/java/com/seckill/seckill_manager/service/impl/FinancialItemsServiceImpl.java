@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.FinancialItemVO;
+import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
 import com.seckill.seckill_manager.entity.FinancialItems;
 import com.seckill.seckill_manager.mapper.FinancialItemsMapper;
 import com.seckill.seckill_manager.service.IFinancialItemsService;
@@ -69,19 +70,27 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
             return Response.success("新增成功");
         }
         //id存在,修改数据
-        financialItem = getFinancialItemById(financialItemVO);
-        if (financialItem == null) return Response.dataErr("未找到该商品");
+        financialItem = getFinancialItemById(financialItemVO.getId());
+        if (financialItem == null) return Response.dataErr("保存失败,产品不存在");
         LocalDateTime localDateTime = LocalDateTime.now();
-        BeanUtil.copyProperties(financialItemVO,financialItem,true);//更改字段
+        BeanUtil.copyProperties(financialItemVO, financialItem, true);//更改字段
         financialItem.setUpdatedAt(localDateTime);//修改更新时间
-        if (!updateById(financialItem)) return Response.dataErr("保存失败");
+        if (!updateById(financialItem)) return Response.dataErr("保存失败,数据库异常");
         return Response.success("保存成功");
     }
 
-    private FinancialItems getFinancialItemById(FinancialItemVO financialItemVO) {
-        if (financialItemVO.getId() == null) return null;
+    @Override
+    public Response getFinancialItem(QueryByIdVO queryByIdVO) {
+        FinancialItems financialItem = getFinancialItemById(queryByIdVO.getId());
+        if (financialItem == null) return Response.dataNotFoundErr("产品不存在");
+        FinancialItemVO financialItemVO = new FinancialItemVO();
+        BeanUtil.copyProperties(financialItem, financialItemVO, true);
+        return Response.success(financialItem, "获取成功");
+    }
+
+    private FinancialItems getFinancialItemById(Integer id) {
         QueryWrapper<FinancialItems> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at").eq("id", financialItemVO.getId());
+        queryWrapper.isNull("deleted_at").eq("id", id);
         return financialItemsMapper.selectOne(queryWrapper);
     }
 }
