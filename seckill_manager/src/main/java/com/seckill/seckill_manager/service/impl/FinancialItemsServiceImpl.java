@@ -63,16 +63,17 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
         if (financialItemVO.getId() == null) {//id不存在,新增数据
             BeanUtil.copyProperties(financialItemVO, financialItem, true);
             LocalDateTime localDateTime = LocalDateTime.now();
-            financialItem.setCreatedAt(localDateTime);
-            financialItem.setUpdatedAt(localDateTime);
+            financialItem.setCreatedAt(localDateTime);//初始化创建时间
+            financialItem.setUpdatedAt(localDateTime);//初始化更新时间
             save(financialItem);
             return Response.success("新增成功");
         }
+        //id存在,修改数据
         financialItem = getFinancialItemById(financialItemVO);
         if (financialItem == null) return Response.dataErr("未找到该商品");
         LocalDateTime localDateTime = LocalDateTime.now();
-        BeanUtil.copyProperties(financialItemVO,financialItem,true);
-        financialItem.setUpdatedAt(localDateTime);
+        BeanUtil.copyProperties(financialItemVO,financialItem,true);//更改字段
+        financialItem.setUpdatedAt(localDateTime);//修改更新时间
         if (!updateById(financialItem)) return Response.dataErr("保存失败");
         return Response.success("保存成功");
     }

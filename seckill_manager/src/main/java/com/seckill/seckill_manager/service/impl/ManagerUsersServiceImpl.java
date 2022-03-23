@@ -120,13 +120,20 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
     }
 
     @Override
-    public Response editAdmin(ManagerUsersVO managerUsersVO){
+    public Response editAdmin(ManagerUsersVO managerUsersVO) {
         return Response.success("成功");
     }
 
     private ManagerUsers getManagerUserByAccount(String account) {
         QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("deleted_at").eq("account", account);
+        return managerUsersMapper.selectOne(queryWrapper);
+    }
+
+    private ManagerUsers getManagerUserById(ManagerUsersVO managerUsersVO) {
+        if (managerUsersVO.getId() == null) return null;
+        QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNull("deleted_at").eq("id", managerUsersVO.getId());
         return managerUsersMapper.selectOne(queryWrapper);
     }
 }
