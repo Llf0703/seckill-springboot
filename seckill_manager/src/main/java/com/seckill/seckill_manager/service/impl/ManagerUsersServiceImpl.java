@@ -128,6 +128,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
     **/
     @Override
     public Response editAdmin(ManagerUsersVO managerUsersVO) {
+        String MD5Password=MD5.MD5Password(managerUsersVO.getAccount()+managerUsersVO.getPassword());
         return Response.success("成功");
     }
 
