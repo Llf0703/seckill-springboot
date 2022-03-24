@@ -75,13 +75,22 @@ public class Validator {
         return age >= 0 && age <= 100;
     }
 
-    public static boolean isValidTimes(Integer times){
-        if (times==null)return false;
-        return times>=0 && times<=65535;
+    public static boolean isValidTimes(Integer times) {
+        if (times == null) return false;
+        return times >= 0 && times <= 65535;
     }
 
     public static boolean isValidDays(Integer n) {
         if (n == null) return false;
         return n >= 1 && n <= 36000;
+    }
+
+    public static boolean isValidPageCurrent(Integer current) {
+        return current != null;
+    }
+
+    public static boolean isValidPageSize(Integer size) {
+        if (size == null) return false;
+        return size > 0 && size <= 50;
     }
 }

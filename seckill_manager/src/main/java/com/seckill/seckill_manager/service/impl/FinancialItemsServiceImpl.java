@@ -2,9 +2,12 @@ package com.seckill.seckill_manager.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seckill.seckill_manager.common.Response;
+import com.seckill.seckill_manager.controller.dto.FinancialItemDTO;
 import com.seckill.seckill_manager.controller.vo.FinancialItemVO;
+import com.seckill.seckill_manager.controller.vo.PageVO;
 import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
 import com.seckill.seckill_manager.entity.FinancialItems;
 import com.seckill.seckill_manager.mapper.FinancialItemsMapper;
@@ -16,6 +19,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -91,9 +95,19 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
         if (queryByIdVO.getId() == null) return Response.paramsErr("参数异常");
         FinancialItems financialItem = getFinancialItemById(queryByIdVO.getId());
         if (financialItem == null) return Response.dataNotFoundErr("产品不存在");
-        FinancialItemVO financialItemVO = new FinancialItemVO();
-        BeanUtil.copyProperties(financialItem, financialItemVO, true);
-        return Response.success(financialItem, "获取成功");
+        return Response.success(FinancialItemDTO.toFinancialItemPostFormDTO(financialItem), "获取成功");
+    }
+
+    @Override
+    public Response getFinancialItemPage(PageVO pageVO) {
+        if (!Validator.isValidPageCurrent(pageVO.getCurrent())) return Response.paramsErr("页数异常");
+        if (!Validator.isValidPageSize(pageVO.getSize())) return Response.paramsErr("请求数量超出范围");
+        Page<FinancialItems> page = new Page<>(pageVO.getCurrent(), pageVO.getSize());
+        QueryWrapper<FinancialItems> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNull("deleted_at");
+        financialItemsMapper.selectPage(page, queryWrapper);
+        List<FinancialItems> itemsList = page.getRecords();
+        return Response.success(FinancialItemDTO.toFinancialItemTableDTO(itemsList), "获取成功");
     }
 
     private FinancialItems getFinancialItemById(Integer id) {
