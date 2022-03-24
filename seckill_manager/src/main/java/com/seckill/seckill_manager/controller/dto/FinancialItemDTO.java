@@ -63,8 +63,22 @@ class FinancialItemPostFormDTO extends FinancialItemVO {
 
 }
 
+/**
+ * @author Wky1742095859
+ * @version 1.0
+ * @ClassName FinancialItemDTO
+ * @description: service数据处理
+ * @date 2022/3/25 2:29
+ */
 public class FinancialItemDTO {
-
+    /*
+     * @MethodName toFinancialItemTableDTO
+     * @author Wky1742095859
+     * @Description entity转前端表格对象
+     * @Date 2022/3/25 2:30
+     * @Param [financialItems]
+     * @Return com.seckill.seckill_manager.controller.dto.FinancialItemTableDTO
+     **/
     public static FinancialItemTableDTO toFinancialItemTableDTO(FinancialItems financialItems) {
         FinancialItemTableDTO financialItemTableDTO = new FinancialItemTableDTO();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -93,6 +107,14 @@ public class FinancialItemDTO {
         return financialItemTableDTO;
     }
 
+    /*
+     * @MethodName toFinancialItemTableDTO
+     * @author Wky1742095859
+     * @Description 批量entity转前端表格对象
+     * @Date 2022/3/25 2:30
+     * @Param [financialItemsList]
+     * @Return java.util.List<com.seckill.seckill_manager.controller.dto.FinancialItemTableDTO>
+     **/
     public static List<FinancialItemTableDTO> toFinancialItemTableDTO(List<FinancialItems> financialItemsList) {
         List<FinancialItemTableDTO> financialItemDTOLinkedList = new LinkedList<>();
         for (FinancialItems items : financialItemsList) {
@@ -101,6 +123,14 @@ public class FinancialItemDTO {
         return financialItemDTOLinkedList;
     }
 
+    /*
+     * @MethodName toFinancialItemPostFormDTO
+     * @author Wky1742095859
+     * @Description entity转前端表单对象
+     * @Date 2022/3/25 2:31
+     * @Param [financialItems]
+     * @Return com.seckill.seckill_manager.controller.dto.FinancialItemPostFormDTO
+     **/
     public static FinancialItemPostFormDTO toFinancialItemPostFormDTO(FinancialItems financialItems) {
         FinancialItemPostFormDTO financialItemVO = new FinancialItemPostFormDTO();
         BeanUtil.copyProperties(financialItems, financialItemVO, true);
@@ -108,6 +138,14 @@ public class FinancialItemDTO {
         return financialItemVO;
     }
 
+    /*
+     * @MethodName toFinancialItemPostFormDTO
+     * @author Wky1742095859
+     * @Description 批量entity转前端表单对象
+     * @Date 2022/3/25 2:31
+     * @Param [financialItemsList]
+     * @Return java.util.List<com.seckill.seckill_manager.controller.dto.FinancialItemPostFormDTO>
+     **/
     public static List<FinancialItemPostFormDTO> toFinancialItemPostFormDTO(List<FinancialItems> financialItemsList) {
         List<FinancialItemPostFormDTO> financialItemVOList = new LinkedList<>();
         for (FinancialItems items : financialItemsList) {

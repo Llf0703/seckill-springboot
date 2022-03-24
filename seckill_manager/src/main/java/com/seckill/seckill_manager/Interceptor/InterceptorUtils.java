@@ -13,7 +13,13 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Objects;
-
+/**
+ * @ClassName InterceptorUtils
+ * @description:  权限处理类
+ * @author Wky1742095859
+ * @date 2022/3/25 2:28
+ * @version 1.0
+ */
 @Component
 public class InterceptorUtils {
     private static ManagerUsersMapper managerUsersMapper;

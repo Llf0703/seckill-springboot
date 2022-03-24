@@ -13,7 +13,7 @@ interface Code {
     int SYSTEM_ERR = 500;
     int DATA_NOT_FOUND = 404;
     int PARAMS_ERR = 400;
-    int DATA_ERR=402;
+    int DATA_ERR = 402;
 }
 
 /**
@@ -97,18 +97,36 @@ public class Response {
      * @Date 2022/3/19 15:54
      * @Param [msg]
      * @Return com.example.seckill_manager.common.Response
-    **/
-    public static Response paramsErr(String msg){
+     **/
+    public static Response paramsErr(String msg) {
         Date nowTime = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return new Response(Code.PARAMS_ERR, false, null, msg, sdf.format(nowTime), nowTime.getTime());
     }
-    public static Response dataErr(String msg){
+
+    /*
+     * @MethodName dataErr
+     * @author Wky1742095859
+     * @Description 数据库,redis异常返回
+     * @Date 2022/3/25 2:32
+     * @Param [msg]
+     * @Return com.seckill.seckill_manager.common.Response
+     **/
+    public static Response dataErr(String msg) {
         Date nowTime = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return new Response(Code.DATA_ERR, false, null, msg, sdf.format(nowTime), nowTime.getTime());
     }
-    public static Response dataNotFoundErr(String msg){
+
+    /*
+     * @MethodName dataNotFoundErr
+     * @author Wky1742095859
+     * @Description 查询数据不存在返回
+     * @Date 2022/3/25 2:32
+     * @Param [msg]
+     * @Return com.seckill.seckill_manager.common.Response
+     **/
+    public static Response dataNotFoundErr(String msg) {
         Date nowTime = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return new Response(Code.DATA_NOT_FOUND, false, null, msg, sdf.format(nowTime), nowTime.getTime());

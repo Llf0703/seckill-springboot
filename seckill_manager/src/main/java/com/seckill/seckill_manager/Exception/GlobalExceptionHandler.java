@@ -61,6 +61,14 @@ public class GlobalExceptionHandler {
         return Response.paramsErr("参数异常");
     }
 
+    /*
+     * @MethodName JWTExceptionHandler
+     * @author Wky1742095859
+     * @Description 捕获权限验证失败
+     * @Date 2022/3/25 2:27
+     * @Param [req, e]
+     * @Return com.seckill.seckill_manager.common.Response
+    **/
     @ExceptionHandler(value = InterceptorJWTException.class)
     public @ResponseBody
     Response JWTExceptionHandler(HttpServletRequest req, InterceptorJWTException e) {
