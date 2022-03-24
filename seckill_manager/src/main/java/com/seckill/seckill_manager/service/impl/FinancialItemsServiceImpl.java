@@ -48,7 +48,7 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
             return Response.paramsErr("错误的允许提前支取选项");
         if (!Validator.isValidRate(financialItemVO.getInterestRate()))
             return Response.paramsErr("利率超出范围");
-        if (!Validator.isValidShelfLife(financialItemVO.getShelfLife()))
+        if (!Validator.isValidDays(financialItemVO.getShelfLife()))
             return Response.paramsErr("存期超出范围");
         if (financialItemVO.getMinimumDepositAmount().compareTo(financialItemVO.getMaximumSinglePurchaseAmount()) > 0)
             return Response.paramsErr("起存金额不能大于单笔最大金额");
@@ -70,8 +70,9 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
             financialItem.setUpdatedAt(localDateTime);//初始化更新时间
             //百分数化小数
             financialItem.setInterestRate(financialItemVO.getInterestRate().divide(new BigDecimal("100"), 8, RoundingMode.HALF_UP));
-            save(financialItem);
-            return Response.success("新增成功");
+            boolean res = save(financialItem);
+            if (res) return Response.success("新增成功");
+            return Response.dataErr("保存失败,数据库异常");
         }
         //id存在,修改数据
         financialItem = getFinancialItemById(financialItemVO.getId());
