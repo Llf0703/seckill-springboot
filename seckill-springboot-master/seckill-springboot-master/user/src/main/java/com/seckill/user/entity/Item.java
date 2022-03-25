@@ -24,7 +24,6 @@ public class Item {
     private String description;
 
     private BigInteger remaining_stock;
-
 //    private BigInteger stock;
 //    private Date created_at;
 //    private Date updated_at;
