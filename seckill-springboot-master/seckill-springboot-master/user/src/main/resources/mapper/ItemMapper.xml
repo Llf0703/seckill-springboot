@@ -5,14 +5,9 @@
 
 <mapper namespace="com.seckill.user.mapper.ItemMapper">
 
-<!--<resultMap id="test" type="com.seckill.user.entity.Item">-->
-<!--    <id property="id" column="id"/>-->
-<!--    <result property="start_time" column="start_time"/>-->
-<!--</resultMap>-->
-<!--    <select id="find_all" resultType="com.seckill.user.entity.Items">-->
-<!--        select * from item ORDER BY start_time-->
-<!--    </select>-->
-
+    <select id="find_all" resultType="com.seckill.user.entity.Items">
+        select * from item ORDER BY start_time
+    </select>
     <select id="find_by_id" resultType="com.seckill.user.entity.Item">
         select * from item WHERE id = #{id,jdbcType=INTEGER}
     </select>
