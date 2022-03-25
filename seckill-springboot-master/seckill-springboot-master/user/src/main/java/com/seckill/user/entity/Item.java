@@ -9,7 +9,6 @@ import java.util.Date;
 
 @Data
 @Builder(toBuilder = true)
-@TableName("item")
 public class Item {
 
     private String title;
