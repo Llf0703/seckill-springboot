@@ -8,6 +8,6 @@ import java.util.List;
 
 @Mapper
 public interface ItemMapper {
-    List<Items> find_all();
     Item find_by_id(int id);
+    List<Items> find_all();
 }

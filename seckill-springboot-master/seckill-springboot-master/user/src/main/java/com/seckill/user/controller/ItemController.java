@@ -24,29 +24,28 @@ public class ItemController {
     public com.seckill.user.controller.DTO dto;
     @Resource
     public ItemService itemService;
-
     @GetMapping("/sorted_list/{order}")
     public JSONObject sort_controller(@PathVariable("order") int order) {
         switch (order) {
-            case 1:{
+            case 1 -> {
                 List<Items> list = itemService.findAll();
                 JSONObject jsonObject = new JSONObject(new LinkedHashMap<>());
                 jsonObject.put("data", list);
                 return jsonObject;
             }
-            case 2: {
+            case 2 -> {
                 List<Items> list = dto.TimeComparator_1();
                 JSONObject jsonObject = new JSONObject(new LinkedHashMap<>());
                 jsonObject.put("data", list);
                 return jsonObject;
             }
-            case 3: {
+            case 3 -> {
                 List<Items> list = dto.TimeComparator_2();
                 JSONObject jsonObject = new JSONObject(new LinkedHashMap<>());
                 jsonObject.put("data", list);
                 return jsonObject;
             }
-            case 4: {
+            case 4 -> {
                 List<Items> list = dto.TimeComparator_3();
                 JSONObject jsonObject = new JSONObject(new LinkedHashMap<>());
                 jsonObject.put("data", list);

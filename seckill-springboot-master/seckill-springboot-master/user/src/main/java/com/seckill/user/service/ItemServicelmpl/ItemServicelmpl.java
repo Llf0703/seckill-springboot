@@ -18,6 +18,7 @@ public class ItemServicelmpl implements ItemService {
     public List<Items> findAll(){
         return itemMapper.find_all();
     }
+
     @Override
     public Item findById(int id){
         return itemMapper.find_by_id(id);

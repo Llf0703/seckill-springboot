@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class DTO {
+public class  DTO {
     @Resource
     private ItemService itemService;
     public List<Items> TimeComparator_1(){

@@ -40,7 +40,6 @@
 			<artifactId>fastjson</artifactId>
 			<version>1.2.46</version>
 		</dependency>
-
 		<!-- mybatis依赖 -->
 		<dependency>
 			<groupId>org.mybatis.spring.boot</groupId>

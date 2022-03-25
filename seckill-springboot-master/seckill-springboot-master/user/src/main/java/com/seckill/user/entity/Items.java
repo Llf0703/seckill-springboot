@@ -19,5 +19,4 @@ public class Items {
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private Date start_time, end_time;
-
 }
