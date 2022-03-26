@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    username: root
+    password: tjz020603
+    url: jdbc:mysql://localhost:3306/test
+    driver-class-name: com.mysql.cj.jdbc.Driver
+mybatis:
+  mapper-locations: classpath*:mapper/ItemMapper.xml

@@ -1,0 +1,28 @@
+server:
+  port: 8099
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/seckill?serverTimezone=GMT%2b8
+    username: root
+    password: seckill
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: seckill
+    timeout: 30000
+    jedis:
+      pool:
+        max-active: 500
+        max-idle: 10
+        min-idle: 0
+        max-wait: -1
+
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
