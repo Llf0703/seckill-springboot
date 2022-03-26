@@ -53,9 +53,16 @@ public class FinancialItemsController {
     }
 
     @LoginRequired
-    @Permission(level = LevelCode.READ,permission = PermissionType.FinancialItemPermission)
+    @Permission(level = LevelCode.READ, permission = PermissionType.FinancialItemPermission)
     @PostMapping("/get_page")
-    public Response getPage(@RequestBody PageVO pageVO){
+    public Response getPage(@RequestBody PageVO pageVO) {
         return financialItemsService.getFinancialItemPage(pageVO);
+    }
+
+    @LoginRequired
+    @Permission(level = LevelCode.EDIT, permission = PermissionType.FinancialItemPermission)
+    @PostMapping("/delete_item")
+    public Response deleteItem(@RequestBody QueryByIdVO queryByIdVO) {
+        return financialItemsService.deleteFinancialItem(queryByIdVO);
     }
 }

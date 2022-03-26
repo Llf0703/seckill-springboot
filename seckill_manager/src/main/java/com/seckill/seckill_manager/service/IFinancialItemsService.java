@@ -19,4 +19,5 @@ public interface IFinancialItemsService extends IService<FinancialItems> {
     Response editFinancialItem(FinancialItemVO financialItemVO);
     Response getFinancialItem(QueryByIdVO queryByIdVO);
     Response getFinancialItemPage(PageVO pageVO);
+    Response deleteFinancialItem(QueryByIdVO queryByIdVO);
 }

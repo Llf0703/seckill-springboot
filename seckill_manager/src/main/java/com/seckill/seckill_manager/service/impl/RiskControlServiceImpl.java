@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seckill.seckill_manager.common.Response;
+import com.seckill.seckill_manager.controller.vo.PageVO;
 import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
 import com.seckill.seckill_manager.controller.vo.RiskControlVO;
 import com.seckill.seckill_manager.entity.RiskControl;
@@ -51,7 +52,7 @@ public class RiskControlServiceImpl extends ServiceImpl<RiskControlMapper, RiskC
             if (res) return Response.success("保存成功");
             return Response.dataErr("保存失败,数据库异常");
         }
-        if (riskControlVO.getId()<=0)return Response.dataNotFoundErr("保存失败,产品不存在");
+        if (riskControlVO.getId() <= 0) return Response.dataNotFoundErr("保存失败,产品不存在");
         riskControl = getRiskControlById(riskControlVO.getId());
         if (riskControl == null) return Response.dataErr("保存失败,产品不存在");
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -63,12 +64,24 @@ public class RiskControlServiceImpl extends ServiceImpl<RiskControlMapper, RiskC
 
     @Override
     public Response getRiskControl(QueryByIdVO queryByIdVO) {
-        if (queryByIdVO.getId() == null||queryByIdVO.getId()<=0) return Response.paramsErr("参数异常");
+        if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
         RiskControl riskControl = getRiskControlById(queryByIdVO.getId());
         if (riskControl == null) return Response.dataNotFoundErr("未查询到相关数据");
         RiskControlVO riskControlVO = new RiskControlVO();
         BeanUtil.copyProperties(riskControl, riskControlVO, true);
         return Response.success(riskControlVO, "获取成功");
+    }
+
+    @Override
+    public Response getRiskControlPage(PageVO pageVO) {
+        //待实现
+        return null;
+    }
+
+    @Override
+    public Response deleteRiskControl(QueryByIdVO queryByIdVO) {
+        //待实现
+        return null;
     }
 
     private RiskControl getRiskControlById(Integer id) {

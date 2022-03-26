@@ -6,6 +6,7 @@ import com.seckill.seckill_manager.Interceptor.PermissionType;
 import com.seckill.seckill_manager.Interceptor.Type.LoginRequired;
 import com.seckill.seckill_manager.Interceptor.Type.Permission;
 import com.seckill.seckill_manager.common.Response;
+import com.seckill.seckill_manager.controller.vo.PageVO;
 import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
 import com.seckill.seckill_manager.controller.vo.RiskControlVO;
 import com.seckill.seckill_manager.service.impl.RiskControlServiceImpl;
@@ -37,16 +38,32 @@ public class RiskControlController {
     public Response addItem(@RequestBody RiskControlVO riskControlVO) {
         return riskControlService.editRiskControl(riskControlVO);
     }
+
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.RiskControlPermission)
     @PostMapping("/edit_item")
     public Response editItem(@RequestBody RiskControlVO riskControlVO) {
         return riskControlService.editRiskControl(riskControlVO);
     }
+
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.RiskControlPermission)
     @PostMapping("/get_item")
     public Response getItem(@RequestBody QueryByIdVO queryByIdVO) {
         return riskControlService.getRiskControl(queryByIdVO);
+    }
+
+    @LoginRequired
+    @Permission(level = LevelCode.READ, permission = PermissionType.RiskControlPermission)
+    @PostMapping("/get_page")
+    public Response getPage(@RequestBody PageVO pageVO) {
+        return riskControlService.getRiskControlPage(pageVO);
+    }
+
+    @LoginRequired
+    @Permission(level = LevelCode.EDIT, permission = PermissionType.RiskControlPermission)
+    @PostMapping("/delete_item")
+    public Response deleteItem(@RequestBody QueryByIdVO queryByIdVO) {
+        return riskControlService.deleteRiskControl(queryByIdVO);
     }
 }
