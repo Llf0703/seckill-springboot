@@ -41,4 +41,5 @@ public class SeckillItemsController {
     public Response editItemController(HttpServletRequest request, @RequestBody SeckillItemVO item) {
         return seckillItemsService.editSeckillItem(item);
     }
+
 }

@@ -1,10 +1,12 @@
 package com.seckill.seckill_manager.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seckill.seckill_manager.common.Response;
+import com.seckill.seckill_manager.controller.dto.ManagerUserDTO;
 import com.seckill.seckill_manager.controller.vo.ManagerUsersVO;
+import com.seckill.seckill_manager.controller.vo.PageVO;
 import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
 import com.seckill.seckill_manager.entity.ManagerUsers;
 import com.seckill.seckill_manager.mapper.ManagerUsersMapper;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -140,9 +143,19 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (queryByIdVO.getId() == null) return Response.paramsErr("参数异常");
         ManagerUsers managerUsers = getManagerUserById(queryByIdVO.getId());
         if (managerUsers == null) return Response.dataNotFoundErr("未查询到相关数据");
-        ManagerUsersVO managerUsersVO = new ManagerUsersVO();
-        BeanUtil.copyProperties(managerUsers, managerUsersVO, true);
-        return Response.success(managerUsersVO, "获取成功");
+        return Response.success(ManagerUserDTO.toManagerUserPostFormDTO(managerUsers), "获取成功");
+    }
+
+    @Override
+    public Response getAdminPage(PageVO pageVO) {
+        if (!Validator.isValidPageCurrent(pageVO.getCurrent())) return Response.paramsErr("页数异常");
+        if (!Validator.isValidPageSize(pageVO.getSize())) return Response.paramsErr("请求数量超出范围");
+        Page<ManagerUsers> page = new Page<>(pageVO.getCurrent(), pageVO.getSize());
+        QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNull("deleted_at");
+        managerUsersMapper.selectPage(page, queryWrapper);
+        List<ManagerUsers> itemsList = page.getRecords();
+        return Response.success(ManagerUserDTO.toManagerUserTableDTO(itemsList), "获取成功");
     }
 
     private ManagerUsers getManagerUserByAccount(String account) {
