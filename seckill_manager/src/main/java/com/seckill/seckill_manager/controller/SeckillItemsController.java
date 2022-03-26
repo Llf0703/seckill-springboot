@@ -6,6 +6,8 @@ import com.seckill.seckill_manager.Interceptor.PermissionType;
 import com.seckill.seckill_manager.Interceptor.Type.LoginRequired;
 import com.seckill.seckill_manager.Interceptor.Type.Permission;
 import com.seckill.seckill_manager.common.Response;
+import com.seckill.seckill_manager.controller.vo.PageVO;
+import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
 import com.seckill.seckill_manager.controller.vo.SeckillItemVO;
 import com.seckill.seckill_manager.service.impl.SeckillItemsServiceImpl;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +33,7 @@ public class SeckillItemsController {
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.SeckillItemPermission)
     @PostMapping("/add_item")
-    public Response add_item_controller(HttpServletRequest request, @RequestBody SeckillItemVO item) {
+    public Response addItemController(HttpServletRequest request, @RequestBody SeckillItemVO item) {
         return seckillItemsService.editSeckillItem(item);
     }
 
@@ -42,4 +44,25 @@ public class SeckillItemsController {
         return seckillItemsService.editSeckillItem(item);
     }
 
+
+    @LoginRequired
+    @Permission(level = LevelCode.READ, permission = PermissionType.SeckillItemPermission)
+    @PostMapping("/get_item")
+    public Response getItem(@RequestBody QueryByIdVO queryByIdVO) {
+        return seckillItemsService.getSeckillItem(queryByIdVO);
+    }
+
+    @LoginRequired
+    @Permission(level = LevelCode.READ, permission = PermissionType.SeckillItemPermission)
+    @PostMapping("/get_page")
+    public Response getPage(@RequestBody PageVO pageVO) {
+        return seckillItemsService.getSeckillItemPage(pageVO);
+    }
+
+    @LoginRequired
+    @Permission(level = LevelCode.EDIT, permission = PermissionType.SeckillItemPermission)
+    @PostMapping("/delete_item")
+    public Response deleteItem(QueryByIdVO queryByIdVO) {
+        return seckillItemsService.deleteSeckillItemPage(queryByIdVO);
+    }
 }

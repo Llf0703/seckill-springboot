@@ -77,4 +77,11 @@ public class ManagerUsersController {
     public Response getPage(@RequestBody PageVO pageVO) {
         return managerUsersService.getAdminPage(pageVO);
     }
+
+    @LoginRequired
+    @Permission(level = LevelCode.EDIT, permission = PermissionType.AdminInfoPermission)
+    @PostMapping("/admin/delete_admin")
+    public Response deleteAdmin(@RequestBody QueryByIdVO queryByIdVO) {
+        return managerUsersService.deleteAdmin(queryByIdVO);
+    }
 }

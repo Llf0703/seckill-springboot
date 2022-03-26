@@ -51,8 +51,9 @@ public class RiskControlServiceImpl extends ServiceImpl<RiskControlMapper, RiskC
             if (res) return Response.success("保存成功");
             return Response.dataErr("保存失败,数据库异常");
         }
+        if (riskControlVO.getId()<=0)return Response.dataNotFoundErr("保存失败,产品不存在");
         riskControl = getRiskControlById(riskControlVO.getId());
-        if (riskControl == null) return Response.dataErr("保存失败,未找到该产品");
+        if (riskControl == null) return Response.dataErr("保存失败,产品不存在");
         LocalDateTime localDateTime = LocalDateTime.now();
         BeanUtil.copyProperties(riskControlVO, riskControl, true);
         riskControl.setUpdatedAt(localDateTime);
@@ -62,7 +63,7 @@ public class RiskControlServiceImpl extends ServiceImpl<RiskControlMapper, RiskC
 
     @Override
     public Response getRiskControl(QueryByIdVO queryByIdVO) {
-        if (queryByIdVO.getId() == null) return Response.paramsErr("参数异常");
+        if (queryByIdVO.getId() == null||queryByIdVO.getId()<=0) return Response.paramsErr("参数异常");
         RiskControl riskControl = getRiskControlById(queryByIdVO.getId());
         if (riskControl == null) return Response.dataNotFoundErr("未查询到相关数据");
         RiskControlVO riskControlVO = new RiskControlVO();

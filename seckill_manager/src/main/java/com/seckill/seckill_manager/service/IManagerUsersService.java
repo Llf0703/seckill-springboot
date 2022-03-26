@@ -22,4 +22,5 @@ public interface IManagerUsersService extends IService<ManagerUsers> {
     Response editAdmin(ManagerUsersVO managerUsersVO);
     Response getAdmin(QueryByIdVO queryByIdVO);
     Response getAdminPage(PageVO pageVO);
+    Response deleteAdmin(QueryByIdVO queryByIdVO);
 }

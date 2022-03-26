@@ -140,7 +140,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
 
     @Override
     public Response getAdmin(QueryByIdVO queryByIdVO) {
-        if (queryByIdVO.getId() == null) return Response.paramsErr("参数异常");
+        if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
         ManagerUsers managerUsers = getManagerUserById(queryByIdVO.getId());
         if (managerUsers == null) return Response.dataNotFoundErr("未查询到相关数据");
         return Response.success(ManagerUserDTO.toManagerUserPostFormDTO(managerUsers), "获取成功");
@@ -156,6 +156,16 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         managerUsersMapper.selectPage(page, queryWrapper);
         List<ManagerUsers> itemsList = page.getRecords();
         return Response.success(ManagerUserDTO.toManagerUserTableDTO(itemsList), "获取成功");
+    }
+
+    @Override
+    public Response deleteAdmin(QueryByIdVO queryByIdVO) {
+        if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
+        ManagerUsers managerUsers = getManagerUserById(queryByIdVO.getId());
+        if (managerUsers == null) return Response.dataNotFoundErr("未查询到相关数据");
+        int res = managerUsersMapper.deleteById(managerUsers);
+        System.out.println(res);
+        return Response.success(String.valueOf(res));
     }
 
     private ManagerUsers getManagerUserByAccount(String account) {

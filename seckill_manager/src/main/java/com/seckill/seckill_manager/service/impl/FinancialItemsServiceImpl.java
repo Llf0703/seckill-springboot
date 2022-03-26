@@ -79,6 +79,7 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
             return Response.dataErr("保存失败,数据库异常");
         }
         //id存在,修改数据
+        if (financialItemVO.getId()<=0)return Response.dataErr("保存失败,产品不存在");
         financialItem = getFinancialItemById(financialItemVO.getId());
         if (financialItem == null) return Response.dataErr("保存失败,产品不存在");
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -92,7 +93,7 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
 
     @Override
     public Response getFinancialItem(QueryByIdVO queryByIdVO) {
-        if (queryByIdVO.getId() == null) return Response.paramsErr("参数异常");
+        if (queryByIdVO.getId() == null||queryByIdVO.getId()<=0) return Response.paramsErr("参数异常");
         FinancialItems financialItem = getFinancialItemById(queryByIdVO.getId());
         if (financialItem == null) return Response.dataNotFoundErr("产品不存在");
         return Response.success(FinancialItemDTO.toFinancialItemPostFormDTO(financialItem), "获取成功");

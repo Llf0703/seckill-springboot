@@ -2,8 +2,12 @@ package com.seckill.seckill_manager.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seckill.seckill_manager.common.Response;
+import com.seckill.seckill_manager.controller.dto.SeckillItemDTO;
+import com.seckill.seckill_manager.controller.vo.PageVO;
+import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
 import com.seckill.seckill_manager.controller.vo.SeckillItemVO;
 import com.seckill.seckill_manager.entity.SeckillItems;
 import com.seckill.seckill_manager.mapper.SeckillItemsMapper;
@@ -14,6 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 /**
@@ -36,14 +41,14 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
      * @Date 2022/3/23 23:10
      * @Param [item_VO]
      * @Return com.seckill.seckill_manager.common.Response
-    **/
+     **/
     @Override
     public Response editSeckillItem(SeckillItemVO item_VO) {
         BigDecimal amount = item_VO.getAmount();
         Long stock = item_VO.getStock();
         if (!Validator.isValidAmountCanNotBeZERO(amount) || stock <= 0) return Response.systemErr("数值无效");
         SeckillItems seckillItem = new SeckillItems();
-        BeanUtil.copyProperties(item_VO,seckillItem,true);//复制属性
+        BeanUtil.copyProperties(item_VO, seckillItem, true);//复制属性
         //VO id为空,设置更新,创建时间,进行新增
         LocalDateTime localDateTime = LocalDateTime.now();
         seckillItem.setCreatedAt(localDateTime);//初始化创建时间
@@ -80,7 +85,37 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         return Response.success("success");*/
     }
 
-    private SeckillItems getSeckillItemById(Integer id){
+    @Override
+    public Response getSeckillItem(QueryByIdVO queryByIdVO) {
+        if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
+        SeckillItems seckillItems = getSeckillItemById(queryByIdVO.getId());
+        if (seckillItems == null) return Response.dataNotFoundErr("未查询到相关数据");
+        return Response.success(SeckillItemDTO.toSeckillPostFormDTO(seckillItems), "获取成功");
+    }
+
+    @Override
+    public Response getSeckillItemPage(PageVO pageVO) {
+        if (!Validator.isValidPageCurrent(pageVO.getCurrent())) return Response.paramsErr("页数异常");
+        if (!Validator.isValidPageSize(pageVO.getSize())) return Response.paramsErr("请求数量超出范围");
+        Page<SeckillItems> page = new Page<>(pageVO.getCurrent(), pageVO.getSize());
+        QueryWrapper<SeckillItems> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNull("deleted_at");
+        seckillItemsMapper.selectPage(page, queryWrapper);
+        List<SeckillItems> itemsList = page.getRecords();
+        return Response.success(SeckillItemDTO.toSeckillItemTableDTO(itemsList), "获取成功");
+    }
+
+    @Override
+    public Response deleteSeckillItemPage(QueryByIdVO queryByIdVO) {
+        if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
+        SeckillItems seckillItems = getSeckillItemById(queryByIdVO.getId());
+        if (seckillItems == null) return Response.dataNotFoundErr("未查询到相关数据");
+        int res = seckillItemsMapper.deleteById(seckillItems);
+        System.out.println(res);
+        return Response.success(String.valueOf(res));
+    }
+
+    private SeckillItems getSeckillItemById(Integer id) {
         QueryWrapper<SeckillItems> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("deleted_at").eq("id", id);
         return seckillItemsMapper.selectOne(queryWrapper);
