@@ -7,6 +7,7 @@ import com.seckill.seckill_manager.Interceptor.Type.LoginRequired;
 import com.seckill.seckill_manager.Interceptor.Type.Permission;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.ManagerUsersVO;
+import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
 import com.seckill.seckill_manager.service.impl.ManagerUsersServiceImpl;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,5 +61,11 @@ public class ManagerUsersController {
     @PostMapping("/admin/edit_admin")
     public Response editAdmin(@RequestBody ManagerUsersVO managerUsersVO) {
         return managerUsersService.editAdmin(managerUsersVO);
+    }
+    @LoginRequired
+    @Permission(level = LevelCode.READ,permission = PermissionType.AdminInfoPermission)
+    @PostMapping("/admin/get_admin")
+    public Response getAdmin(@RequestBody QueryByIdVO queryByIdVO){
+        return managerUsersService.getAdmin(queryByIdVO);
     }
 }

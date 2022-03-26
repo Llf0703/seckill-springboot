@@ -1,1 +1,13 @@
+com\seckill\seckill_manager\mapper\RiskControlMapper.class
 com\seckill\seckill_manager\controller\vo\QueryByIdVO.class
+com\seckill\seckill_manager\entity\RiskControl.class
+com\seckill\seckill_manager\controller\dto\FinancialItemTableDTO.class
+com\seckill\seckill_manager\controller\vo\PageVO.class
+com\seckill\seckill_manager\controller\vo\RiskControlVO.class
+com\seckill\seckill_manager\controller\dto\SeckillItemDTO.class
+com\seckill\seckill_manager\controller\dto\FinancialItemDTO.class
+com\seckill\seckill_manager\service\IRiskControlService.class
+com\seckill\seckill_manager\controller\RiskControlController.class
+com\seckill\seckill_manager\controller\dto\ManagerUserDTO.class
+com\seckill\seckill_manager\service\impl\RiskControlServiceImpl.class
+com\seckill\seckill_manager\controller\dto\FinancialItemPostFormDTO.class
