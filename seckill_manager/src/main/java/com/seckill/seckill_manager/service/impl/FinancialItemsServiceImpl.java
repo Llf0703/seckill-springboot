@@ -64,7 +64,7 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
             return Response.paramsErr("产品失效日期不能为空");
         if (financialItemVO.getProductEffectiveDate() == null)
             return Response.paramsErr("产品生效日期不能为空");
-        if (financialItemVO.getProductEffectiveDate().isBefore(financialItemVO.getProductExpirationDate()))
+        if (!financialItemVO.getProductEffectiveDate().isBefore(financialItemVO.getProductExpirationDate()))
             return Response.paramsErr("产品失效日期应大于产品生效日期");
         FinancialItems financialItem = new FinancialItems();
         if (financialItemVO.getId() == null) {//id不存在,新增数据
