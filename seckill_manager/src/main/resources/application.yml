@@ -20,7 +20,9 @@ spring:
         max-idle: 10
         min-idle: 0
         max-wait: -1
-
+  jackson:
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd HH:mm:ss
 
 mybatis-plus:
   configuration:
