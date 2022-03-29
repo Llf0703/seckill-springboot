@@ -91,4 +91,10 @@ public class ManagerUsersController {
     public Response deleteAdmin(@RequestBody QueryByIdVO queryByIdVO) {
         return managerUsersService.deleteAdmin(queryByIdVO);
     }
+
+    @LoginRequired
+    @PostMapping("/admin/get_user_info")
+    public Response getUserInfo(HttpServletRequest request){
+        return managerUsersService.getUserInfo(request);
+    }
 }
