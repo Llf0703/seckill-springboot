@@ -55,9 +55,9 @@ public class ManagerUserDTO {
     private static String toPermissionsDTO(Integer permission) {
         switch (permission) {
             case 1:
-                return "可自由查看";
+                return "可查看";
             case 2:
-                return "可自由查看,增添,修改,删除";
+                return "可查看,增添,修改,删除";
             case 0:
             default:
                 return "无权限";
