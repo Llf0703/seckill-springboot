@@ -39,11 +39,18 @@ CREATE TABLE manager_user
     deleted_at datetime,
     account varchar(50) NOT NULL,
     password varchar(255) NOT NULL,
-    product_permissions int NOT NULL,
+    seckill_items_permissions int NOT NULL,
     seckill_record_permissions int NOT NULL,
     recharge_record_permissions int NOT NULL,
-    add_admin_rights int NOT NULL
+    admin_info_permissions int NOT NULL,
+    financial_items_permissions int NOT NULL,
+    risk_control_permissions int NOT NULL,
+    guest_info_permissions int NOT NULL
 );
+
+insert into manager_user (created_at, updated_at, account, password, seckill_items_permissions, seckill_record_permissions, recharge_record_permissions, admin_info_permissions, financial_items_permissions, risk_control_permissions, guest_info_permissions)
+values
+(NOW(), NOW(), 'LLF0703', '15e72c0b5047a5aca24fe15071ffc50a', 2, 0, 0, 0, 0, 0, 0);
 
 CREATE TABLE `seckill_items` (
   `id` int primary key NOT NULL AUTO_INCREMENT,
@@ -56,5 +63,7 @@ CREATE TABLE `seckill_items` (
   `description` varchar(255) NOT NULL,
   `start_time` datetime NOT NULL,
   `end_time` datetime NOT NULL,
-  `remaining_stock` bigint NOT NULL
+  `remaining_stock` bigint NOT NULL,
+  `financial_item_id` int NOT NULL,
+  `risk_control_id` int NOT NULL
 );

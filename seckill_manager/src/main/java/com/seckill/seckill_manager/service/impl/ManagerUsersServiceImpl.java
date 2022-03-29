@@ -170,7 +170,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
 
     private ManagerUsers getManagerUserByAccount(String account) {
         QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at").eq("account", account);
+        queryWrapper.isNull("deleted_at").eq("binary account", account);
         return managerUsersMapper.selectOne(queryWrapper);
     }
 

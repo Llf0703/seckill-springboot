@@ -2,6 +2,7 @@ package com.seckill.seckill_manager.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.PageVO;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -74,14 +76,25 @@ public class RiskControlServiceImpl extends ServiceImpl<RiskControlMapper, RiskC
 
     @Override
     public Response getRiskControlPage(PageVO pageVO) {
-        //待实现
-        return null;
+        if (!Validator.isValidPageCurrent(pageVO.getCurrent())) return Response.paramsErr("页数异常");
+        if (!Validator.isValidPageSize(pageVO.getSize())) return Response.paramsErr("请求数量超出范围");
+        Page<RiskControl> page = new Page<>(pageVO.getCurrent(), pageVO.getSize());
+        QueryWrapper<RiskControl> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNull("deleted_at");
+        riskControlMapper.selectPage(page, queryWrapper);
+        List<RiskControl> itemsList = page.getRecords();
+        return Response.success(itemsList, "获取成功");
     }
 
     @Override
     public Response deleteRiskControl(QueryByIdVO queryByIdVO) {
-        //待实现
-        return null;
+        if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
+        RiskControl riskControl = getRiskControlById(queryByIdVO.getId());
+        if (riskControl == null) return Response.dataNotFoundErr("未查询到相关数据");
+        LocalDateTime localDateTime = LocalDateTime.now();
+        riskControl.setDeletedAt(localDateTime);
+        if (!updateById(riskControl)) return Response.systemErr("数据库错误");
+        return Response.success("删除成功");
     }
 
     private RiskControl getRiskControlById(Integer id) {
