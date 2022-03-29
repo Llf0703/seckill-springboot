@@ -49,7 +49,14 @@ public class ManagerUsersController {
         String ip = request.getHeader("X-real-ip");
         return managerUsersService.loginOut(token, ip);
     }
-
+    /*
+     * @MethodName addAdmin
+     * @author Wky1742095859
+     * @Description 可能是多余的,暂时不去除
+     * @Date 2022/3/29 1:18
+     * @Param [managerUsersVO]
+     * @Return com.seckill.seckill_manager.common.Response
+    **/
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.AdminInfoPermission)
     @PostMapping("/admin/add_admin")
