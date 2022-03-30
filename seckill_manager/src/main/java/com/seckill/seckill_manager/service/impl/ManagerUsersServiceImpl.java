@@ -15,6 +15,7 @@ import com.seckill.seckill_manager.utils.*;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -168,9 +169,15 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         return Response.success(String.valueOf(res));
     }
 
+    @Override
+    public Response getUserInfo(HttpServletRequest request) {
+        ManagerUsers user = (ManagerUsers) request.getAttribute("user");
+        return Response.success(ManagerUserDTO.toManagerUserTableDTO(user), "获取成功");
+    }
+
     private ManagerUsers getManagerUserByAccount(String account) {
         QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at").eq("account", account);
+        queryWrapper.isNull("deleted_at").eq("binary account", account);
         return managerUsersMapper.selectOne(queryWrapper);
     }
 

@@ -16,7 +16,7 @@ import com.seckill.seckill_manager.entity.SeckillItems;
  * @since 2022-03-20
  */
 public interface ISeckillItemsService extends IService<SeckillItems> {
-    Response editSeckillItem(SeckillItemVO item_VO);
+    Response editSeckillItem(SeckillItemVO itemVO);
     Response getSeckillItem(QueryByIdVO queryByIdVO);
     Response getSeckillItemPage(PageVO pageVO);
     Response deleteSeckillItemPage(QueryByIdVO queryByIdVO);

@@ -113,8 +113,13 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
 
     @Override
     public Response deleteFinancialItem(QueryByIdVO queryByIdVO) {
-        //待实现
-        return null;
+        if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
+        FinancialItems financialItem = getFinancialItemById(queryByIdVO.getId());
+        if (financialItem == null) return Response.dataNotFoundErr("产品不存在");
+        LocalDateTime localDateTime = LocalDateTime.now();
+        financialItem.setDeletedAt(localDateTime);
+        if (!updateById(financialItem)) return Response.systemErr("数据库错误");
+        return Response.success("删除成功");
     }
 
     private FinancialItems getFinancialItemById(Integer id) {

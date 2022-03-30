@@ -7,6 +7,8 @@ import com.seckill.seckill_manager.controller.vo.PageVO;
 import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
 import com.seckill.seckill_manager.entity.ManagerUsers;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * <p>
  *  服务类
@@ -23,4 +25,5 @@ public interface IManagerUsersService extends IService<ManagerUsers> {
     Response getAdmin(QueryByIdVO queryByIdVO);
     Response getAdminPage(PageVO pageVO);
     Response deleteAdmin(QueryByIdVO queryByIdVO);
+    Response getUserInfo(HttpServletRequest request);
 }

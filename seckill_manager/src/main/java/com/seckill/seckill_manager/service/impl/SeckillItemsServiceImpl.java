@@ -39,24 +39,35 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
      * @author llf
      * @Description 新增,修改秒杀产品接口
      * @Date 2022/3/23 23:10
-     * @Param [item_VO]
+     * @Param [itemVO]
      * @Return com.seckill.seckill_manager.common.Response
      **/
     @Override
-    public Response editSeckillItem(SeckillItemVO item_VO) {
-        BigDecimal amount = item_VO.getAmount();
-        Long stock = item_VO.getStock();
+    public Response editSeckillItem(SeckillItemVO itemVO) {
+        BigDecimal amount = itemVO.getAmount();
+        Long stock = itemVO.getStock();
         if (!Validator.isValidAmountCanNotBeZERO(amount) || stock <= 0) return Response.systemErr("数值无效");
         SeckillItems seckillItem = new SeckillItems();
-        BeanUtil.copyProperties(item_VO, seckillItem, true);//复制属性
+        BeanUtil.copyProperties(itemVO, seckillItem, true);//复制属性
         //VO id为空,设置更新,创建时间,进行新增
         LocalDateTime localDateTime = LocalDateTime.now();
-        seckillItem.setCreatedAt(localDateTime);//初始化创建时间
-        seckillItem.setUpdatedAt(localDateTime);//初始化更新时间
-        save(seckillItem);
-        return Response.success("test");
+        Integer id = seckillItem.getId();
+
+        if (id == null) {
+            seckillItem.setCreatedAt(localDateTime);//初始化创建时间
+            seckillItem.setUpdatedAt(localDateTime);//初始化更新时间
+            boolean res = save(seckillItem);
+            if (res) return Response.success("success");
+            return Response.systemErr("database error");
+        }
+        
+        if (id <= 0) return Response.dataErr("invalid id");
+        if (getSeckillItemById(id) == null) return Response.dataErr("invalid id");
+        seckillItem.setUpdatedAt(localDateTime);
+        if (!updateById(seckillItem)) return Response.systemErr("database error");
+        return Response.success("success");
         //VO id不为空,查询数据是否存在,不存在返回dataErr,存在进行新增,同时修改更新时间
-        //getSeckillItemById(item_VO.getId());
+        //getSeckillItemById(itemVO.getId());
         /*
         Date date = new Date();
         DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -65,15 +76,15 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         SeckillItems item = SeckillItems.builder()
                 .created_at(date)
                 .updated_at(date)
-                .title(item_VO.getTitle())
-                .description(item_VO.getDescription())
-                .amount(item_VO.getAmount())
-                .stock(item_VO.getStock())
-                .remaining_stock(item_VO.getStock())
+                .title(itemVO.getTitle())
+                .description(itemVO.getDescription())
+                .amount(itemVO.getAmount())
+                .stock(itemVO.getStock())
+                .remaining_stock(itemVO.getStock())
                 .build();
         try {
-            Date start_time = fmt.parse(item_VO.getStart_time());
-            Date end_time = fmt.parse(item_VO.getEnd_time());
+            Date start_time = fmt.parse(itemVO.getStart_time());
+            Date end_time = fmt.parse(itemVO.getEnd_time());
             item = item.toBuilder()
                     .start_time(start_time)
                     .end_time(end_time)
