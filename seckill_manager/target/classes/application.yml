@@ -1,6 +1,8 @@
 server:
   port: 8099
 spring:
+  application:
+    name: manager
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/seckill?serverTimezone=GMT%2b8
@@ -12,7 +14,7 @@ spring:
   redis:
     host: 127.0.0.1
     port: 6379
-    password: seckill
+    password: Wky15878295798
     timeout: 30000
     jedis:
       pool:
@@ -20,11 +22,14 @@ spring:
         max-idle: 10
         min-idle: 0
         max-wait: -1
-  jackson:
-    time-zone: Asia/Shanghai
-    date-format: yyyy-MM-dd HH:mm:ss
+  cloud:
+    sentinel:
+      eager: true
+      transport:
+        dashboard: localhost:9100
+  main:
+    allow-circular-references: true
 
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-

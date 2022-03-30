@@ -18,6 +18,8 @@ public class ManagerUsersVO {
 
     private String password;
 
+    private String token;
+
     private Integer seckillItemsPermissions;
 
     private Integer seckillRecordPermissions;

@@ -1,6 +1,9 @@
 package com.seckill.seckill_manager;
 
+import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.mapper.GoodsMapper;
+import com.seckill.seckill_manager.utils.crypto.AESUtil;
+import com.seckill.seckill_manager.utils.crypto.RSAUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -13,20 +16,13 @@ class SeckillManagerApplicationTests {
     private GoodsMapper goodsMapper;
 
     @Test
-    void contextLoads() {
-        /*
-        long time1=System.currentTimeMillis();
-        Page<Goods> page=new Page<>(490000,10);
-        QueryWrapper<Goods> queryWrapper=new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at").orderByAsc("start_time");
-        goodsMapper.selectPage(page,queryWrapper);
-        long time2=System.currentTimeMillis();
-        List<Goods> records=page.getRecords();
-        System.out.println(time2-time1);
-        System.out.println(page.getTotal());
-        System.out.println(records);
-
-         */
+    void contextLoads() throws Exception {
+        Response test=Response.success("ok");
+        String key=test.getTimeStamp()+"000";
+        System.out.println(key);
+        String cip=AESUtil.encrypt(RSAUtil.getPublicKey(),key);
+        System.out.println(cip);
+        System.out.println(AESUtil.decrypt(cip,key));
     }
 
 }

@@ -49,6 +49,25 @@ public class ManagerUsersController {
         String ip = request.getHeader("X-real-ip");
         return managerUsersService.loginOut(token, ip);
     }
+
+    @LoginRequired
+    @PostMapping("/auth/get_user_info")
+    public Response getUserInfo(HttpServletRequest request) {
+        return managerUsersService.getUserInfo(request);
+    }
+
+    @LoginRequired
+    @PostMapping("/auth/reset_password/valid_password")
+    public Response validPassword(HttpServletRequest request, @RequestBody ManagerUsersVO managerUsersVO) {
+        return managerUsersService.validPassword(request, managerUsersVO);
+    }
+
+
+    @PostMapping("/auth/reset_password/reset/{uid}")
+    public Response resetPassword(HttpServletRequest request, @PathVariable("uid") String uid, @RequestBody ManagerUsersVO managerUsersVO) {
+        return managerUsersService.resetPassword(request, uid, managerUsersVO);
+    }
+
     /*
      * @MethodName addAdmin
      * @author Wky1742095859
@@ -56,7 +75,7 @@ public class ManagerUsersController {
      * @Date 2022/3/29 1:18
      * @Param [managerUsersVO]
      * @Return com.seckill.seckill_manager.common.Response
-    **/
+     **/
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.AdminInfoPermission)
     @PostMapping("/admin/add_admin")
@@ -92,9 +111,5 @@ public class ManagerUsersController {
         return managerUsersService.deleteAdmin(queryByIdVO);
     }
 
-    @LoginRequired
-    @PostMapping("/admin/get_user_info")
-    public Response getUserInfo(HttpServletRequest request){
-        return managerUsersService.getUserInfo(request);
-    }
+
 }

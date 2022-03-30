@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
  * @since 2022-03-19
  */
 public interface IManagerUsersService extends IService<ManagerUsers> {
+    Response beforeLogin(ManagerUsersVO managerUsersVO,String ip);
     Response login(ManagerUsersVO managerUsersVO,String ip);
     Response checkVersion(String token,String ip);
     Response loginOut(String token,String ip);
@@ -26,4 +27,6 @@ public interface IManagerUsersService extends IService<ManagerUsers> {
     Response getAdminPage(PageVO pageVO);
     Response deleteAdmin(QueryByIdVO queryByIdVO);
     Response getUserInfo(HttpServletRequest request);
+    Response validPassword(HttpServletRequest request,ManagerUsersVO managerUsersVO);
+    Response resetPassword(HttpServletRequest request,String pathParams,ManagerUsersVO managerUsersVO);
 }
