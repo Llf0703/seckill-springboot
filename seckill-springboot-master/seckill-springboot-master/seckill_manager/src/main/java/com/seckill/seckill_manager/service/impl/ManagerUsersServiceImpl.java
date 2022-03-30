@@ -1,5 +1,6 @@
 package com.seckill.seckill_manager.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seckill.seckill_manager.common.Response;
@@ -11,6 +12,7 @@ import com.seckill.seckill_manager.utils.*;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -120,9 +122,39 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
     }
 
     @Override
-    public Response editAdmin(ManagerUsersVO managerUsersVO) {
-        return Response.success("成功");
-    }
+    public Response editAdmin(ManagerUsersVO managerUsersVO) {//修改或添加管理员信息的接口
+        if(!Validator.isValidAccount(managerUsersVO.getAccount()))
+            return Response.paramsErr("账号格式不合规");
+        if(!Validator.isValidPassword(managerUsersVO.getPassword()))
+            return Response.paramsErr("密码格式不合规");
+        //给权限编辑管理员信息
+        if(managerUsersVO.getAdminInfoPermissions()!=2)
+            return Response.paramsErr("无权限");
+        //这个是修改或添加管理员信息的接口
+        ManagerUsers managerUsers = new ManagerUsers();
+        //根据id是否为空来判断当前操作是修改还是新增管理员
+        if(managerUsers.getId() != null) {  //id为空，新增
+            //新增管理员信息
+            BeanUtil.copyProperties(managerUsersVO, managerUsers, true);
+            LocalDateTime localDateTime = LocalDateTime.now();
+            managerUsers.setCreatedAt(localDateTime);
+            managerUsers.setUpdatedAt(localDateTime);
+            save(managerUsers);
+            return Response.success("新增成功");
+        }
+        //id不为空修改
+        managerUsers = getManagerUserById(managerUsersVO);//id不为空的话需要事先查一次数据库：
+        // 如果不存在id为xxx的数据，则返回管理员不存在
+        if (managerUsers == null)
+            return Response.paramsErr("未找到该管理员");
+        //id存在
+        LocalDateTime localDateTime = LocalDateTime.now();
+        BeanUtil.copyProperties(managerUsersVO,managerUsers,true);//更改字段(VO源，managerUsers靶，忽略不需要的字段）
+        managerUsers.setUpdatedAt(localDateTime);
+        if(!updateById(managerUsers))
+            return Response.dataErr("保存失败");
+        return Response.success("保存成功");
+  }
 
     private ManagerUsers getManagerUserByAccount(String account) {
         QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
