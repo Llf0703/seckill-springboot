@@ -18,8 +18,6 @@ public class ManagerUsersVO {
 
     private String password;
 
-    private String token;
-
     private Integer seckillItemsPermissions;
 
     private Integer seckillRecordPermissions;
@@ -33,4 +31,8 @@ public class ManagerUsersVO {
     private Integer riskControlPermissions;
 
     private Integer guestInfoPermissions;
+
+    private String token;//非数据库字段,用于添加额外的安全校验信息
+
+    private String uid;//登录环节需要
 }

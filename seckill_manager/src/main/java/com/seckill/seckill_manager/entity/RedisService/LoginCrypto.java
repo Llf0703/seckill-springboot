@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 public class LoginCrypto {
     private long timeStamp;
     private String ip;
-    private String fp;
     private String aesKey;
     private String rsaPubKey;
     private String rsaPrvKey;

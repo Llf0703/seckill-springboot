@@ -11,4 +11,6 @@ public class LoginAdmin {
     private String account;
     private String MD5Password;
     private String fp;
+    private String token;
+    private String ip;
 }

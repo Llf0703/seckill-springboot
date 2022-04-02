@@ -8,13 +8,13 @@ spring:
     url: jdbc:mysql://localhost:3306/seckill?serverTimezone=GMT%2b8
     username: root
     password: seckill
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
+#  mvc:
+#    pathmatch:
+#      #matching-strategy: ant_path_matcher
   redis:
     host: 127.0.0.1
     port: 6379
-    password: Wky15878295798
+    password: seckill
     timeout: 30000
     jedis:
       pool:
@@ -27,8 +27,6 @@ spring:
       eager: true
       transport:
         dashboard: localhost:9100
-  main:
-    allow-circular-references: true
 
 mybatis-plus:
   configuration:
