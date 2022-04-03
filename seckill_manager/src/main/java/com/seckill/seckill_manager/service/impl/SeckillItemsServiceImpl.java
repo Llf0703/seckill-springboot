@@ -82,8 +82,11 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
             return Response.systemErr("database error");
         }
         if (id <= 0) return Response.dataErr("invalid id");
-        if (getSeckillItemById(id) == null)
+        SeckillItems query=getSeckillItemById(id);
+        if (query == null)
             return Response.dataErr("invalid id");
+        if (!query.getStartTime().isBefore(LocalDateTime.now().plusHours(-2)))
+            return Response.paramsErr("活动已开始或距开始小于两小时,无法修改");
         if (!updateById(seckillItem)) return Response.systemErr("database error");
         return Response.success("修改成功");
     }

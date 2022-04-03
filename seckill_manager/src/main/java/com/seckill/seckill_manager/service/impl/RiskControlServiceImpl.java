@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seckill.seckill_manager.common.Response;
+import com.seckill.seckill_manager.controller.dto.RiskControlDTO;
 import com.seckill.seckill_manager.controller.vo.PageVO;
 import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
 import com.seckill.seckill_manager.controller.vo.RiskControlVO;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -45,8 +47,8 @@ public class RiskControlServiceImpl extends ServiceImpl<RiskControlMapper, RiskC
             return Response.paramsErr("例外金额超出范围");
         if (!Validator.isValidDays(riskControlVO.getExceptionDays())) return Response.paramsErr("例外天数超出范围");
         RiskControl riskControl = new RiskControl();
-        RiskControl query=getRiskControlByName(riskControlVO.getPolicyName());
-        if (query!=null)return Response.paramsErr("存在相同的决策名");
+        RiskControl query = getRiskControlByName(riskControlVO.getPolicyName());
+        if (query != null) return Response.paramsErr("存在相同的决策名");
         if (riskControlVO.getId() == null) {
             BeanUtil.copyProperties(riskControlVO, riskControl, true);
             LocalDateTime localDateTime = LocalDateTime.now();
@@ -85,7 +87,10 @@ public class RiskControlServiceImpl extends ServiceImpl<RiskControlMapper, RiskC
         queryWrapper.isNull("deleted_at");
         riskControlMapper.selectPage(page, queryWrapper);
         List<RiskControl> itemsList = page.getRecords();
-        return Response.success(itemsList, "获取成功");
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("items", RiskControlDTO.toRiskControlTableDTO(itemsList));
+        data.put("total", page.getTotal());
+        return Response.success(data, "获取成功");
     }
 
     @Override
@@ -104,7 +109,8 @@ public class RiskControlServiceImpl extends ServiceImpl<RiskControlMapper, RiskC
         queryWrapper.isNull("deleted_at").eq("id", id);
         return riskControlMapper.selectOne(queryWrapper);
     }
-    private RiskControl getRiskControlByName(String name){
+
+    private RiskControl getRiskControlByName(String name) {
         QueryWrapper<RiskControl> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("deleted_at").eq("binary policy_name", name);
         return riskControlMapper.selectOne(queryWrapper);
