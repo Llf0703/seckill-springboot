@@ -106,7 +106,8 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (loginCryptoStr == null) return Response.systemErr("请重新输入验证码");
         LoginCrypto loginCrypto = JSONUtils.toEntity(loginCryptoStr, LoginCrypto.class);
         if (loginCrypto == null) return Response.systemErr("登录失败,系统异常");
-        if (!Objects.equals(loginCrypto.getCaptcha(), managerUsersVO.getCaptcha().toLowerCase())) return Response.authErr("验证码错误");
+        if (!Objects.equals(loginCrypto.getCaptcha(), managerUsersVO.getCaptcha().toLowerCase()))
+            return Response.authErr("验证码错误");
         byte[] VOPasswordBytes;
         byte[] VOAccountBytes;
         byte[] VOFPBytes;
@@ -123,7 +124,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (!Validator.isValidAccount(VOAccount) || !Validator.isValidPassword(VOPassword) || VOFP.length() != 32)
             return Response.authErr("账号或密码错误");//正则判断
         String MD5Password = MD5.MD5Password(VOAccount + VOPassword);
-        String ManagerUserStr = RedisUtils.get("M:ManagerUser:"+VOAccount);//获取缓存的用户信息
+        String ManagerUserStr = RedisUtils.get("M:ManagerUser:" + VOAccount);//获取缓存的用户信息
         String managerUserPassword = null;
         ManagerUsers managerUser;
         if (ManagerUserStr != null) {//用户缓存不为空,进行str到实体类转换,并从实体类获取加密后的密码
@@ -275,7 +276,10 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         queryWrapper.isNull("deleted_at");
         managerUsersMapper.selectPage(page, queryWrapper);
         List<ManagerUsers> itemsList = page.getRecords();
-        return Response.success(ManagerUserDTO.toManagerUserTableDTO(itemsList), "获取成功");
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("items", ManagerUserDTO.toManagerUserTableDTO(itemsList));
+        data.put("total", page.getTotal());
+        return Response.success(data, "获取成功");
     }
 
     @Override
