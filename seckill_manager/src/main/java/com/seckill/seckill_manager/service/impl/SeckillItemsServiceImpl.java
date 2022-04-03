@@ -57,19 +57,16 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
     public Response editSeckillItem(SeckillItemVO itemVO) {
         BigDecimal amount = itemVO.getAmount();
         Long stock = itemVO.getStock();
-        if (itemVO.getTitle() == null || !Validator.isValidProductName(itemVO.getTitle()))
-            return Response.paramsErr("活动名不合法");
-        if (itemVO.getDescription() == null || !Validator.isValidDescription(itemVO.getDescription()))
-            return Response.paramsErr("活动描述不合法");
+        if (!Validator.isValidProductName(itemVO.getTitle())) return Response.paramsErr("活动名不合法");
+        if (!Validator.isValidDescription(itemVO.getDescription())) return Response.paramsErr("活动描述不合法");
         if (!Validator.isValidAmountCanNotBeZERO(amount) || stock == null || stock <= 0 || stock > 9999999999L)
             return Response.systemErr("数值无效");
-        if (itemVO.getFinancialItemId() == null ||
-                itemVO.getFinancialItemId() <= 0 ||
-                itemVO.getRiskControlId() == null ||
-                itemVO.getRiskControlId() <= 0)
+        if (itemVO.getFinancialItemId() == null || itemVO.getFinancialItemId() <= 0 || itemVO.getRiskControlId() == null || itemVO.getRiskControlId() <= 0)
             return Response.paramsErr("请输入正确的理财产品或风险引擎");
         if (!Validator.isValidSeckillTime(itemVO.getStartTime(), itemVO.getEndTime()))
             Response.paramsErr("开始时间或结束时间异常");
+        if (getRiskControlById(itemVO.getRiskControlId()) == null) return Response.paramsErr("不存在该决策引擎");
+        if (getFinancialItemsById(itemVO.getFinancialItemId()) == null) return Response.paramsErr("不存在该理财产品");
         SeckillItems seckillItem = new SeckillItems();
         BeanUtil.copyProperties(itemVO, seckillItem, true);//复制属性
         //VO id为空,设置更新,创建时间,进行新增
@@ -80,17 +77,14 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         if (id == null) {
             seckillItem.setCreatedAt(localDateTime);//初始化创建时间
             boolean res = save(seckillItem);
-            if (res) return Response.success("success");
+            if (res) return Response.success("添加成功");
             return Response.systemErr("database error");
         }
         if (id <= 0) return Response.dataErr("invalid id");
-        if (getSeckillItemById(id) == null ||
-                getFinancialItemsById(itemVO.getFinancialItemId()) == null ||
-                getRiskControlById(itemVO.getRiskControlId()) == null)
+        if (getSeckillItemById(id) == null)
             return Response.dataErr("invalid id");
-        seckillItem.setUpdatedAt(localDateTime);
         if (!updateById(seckillItem)) return Response.systemErr("database error");
-        return Response.success("success");
+        return Response.success("修改成功");
     }
 
     @Override

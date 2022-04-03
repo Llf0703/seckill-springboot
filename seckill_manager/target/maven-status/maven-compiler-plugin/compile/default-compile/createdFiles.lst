@@ -6,6 +6,7 @@ com\seckill\seckill_manager\controller\dto\RiskControlDTO.class
 com\seckill\seckill_manager\entity\RiskControl.class
 com\seckill\seckill_manager\controller\dto\ManagerUserPostFormDTO.class
 com\seckill\seckill_manager\controller\dto\FinancialItemTableDTO.class
+com\seckill\seckill_manager\controller\dto\RiskControlTableDTO.class
 com\seckill\seckill_manager\controller\vo\PageVO.class
 com\seckill\seckill_manager\controller\vo\RiskControlVO.class
 com\seckill\seckill_manager\controller\dto\SeckillItemDTO.class

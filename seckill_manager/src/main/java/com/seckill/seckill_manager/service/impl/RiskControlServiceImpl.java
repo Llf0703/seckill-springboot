@@ -106,7 +106,7 @@ public class RiskControlServiceImpl extends ServiceImpl<RiskControlMapper, RiskC
     }
     private RiskControl getRiskControlByName(String name){
         QueryWrapper<RiskControl> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at").eq("policy_name", name);
+        queryWrapper.isNull("deleted_at").eq("binary policy_name", name);
         return riskControlMapper.selectOne(queryWrapper);
     }
 }

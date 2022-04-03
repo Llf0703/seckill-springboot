@@ -132,7 +132,7 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
 
     private FinancialItems getFinancialItemByName(String name) {
         QueryWrapper<FinancialItems> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at").eq("product_name", name);
+        queryWrapper.isNull("deleted_at").eq("binary product_name", name);
         return financialItemsMapper.selectOne(queryWrapper);
     }
 }

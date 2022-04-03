@@ -13,8 +13,7 @@ import com.seckill.seckill_manager.service.impl.RiskControlServiceImpl;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
@@ -26,7 +25,7 @@ import javax.annotation.Resource;
  * @author wky1742095859
  * @since 2022-03-24
  */
-@Controller
+@RestController
 @RequestMapping("/api/risk_control")
 public class RiskControlController {
     @Resource

@@ -22,6 +22,7 @@ interface RegexStr {
  */
 public class Validator {
     public static boolean isValidDescription(String str) {
+        if (str==null)return false;
         return Pattern.matches(RegexStr.REGEX_DESCRIPTION, str);
     }
 
