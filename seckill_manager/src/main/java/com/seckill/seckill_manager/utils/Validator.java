@@ -68,7 +68,7 @@ public class Validator {
      **/
     public static boolean isValidAmountCanNotBeZERO(BigDecimal amount) {
         if (amount == null) return false;
-        return amount.compareTo(BigDecimal.ZERO) > 0 && amount.compareTo(new BigDecimal(99999999999.9999)) <= 0;
+        return amount.compareTo(BigDecimal.ZERO) > 0 && amount.compareTo(new BigDecimal("99999999999.9999")) <= 0;
     }
 
     /*
