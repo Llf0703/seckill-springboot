@@ -45,6 +45,8 @@ public class RiskControlServiceImpl extends ServiceImpl<RiskControlMapper, RiskC
             return Response.paramsErr("例外金额超出范围");
         if (!Validator.isValidDays(riskControlVO.getExceptionDays())) return Response.paramsErr("例外天数超出范围");
         RiskControl riskControl = new RiskControl();
+        RiskControl query=getRiskControlByName(riskControlVO.getPolicyName());
+        if (query!=null)return Response.paramsErr("存在相同的决策名");
         if (riskControlVO.getId() == null) {
             BeanUtil.copyProperties(riskControlVO, riskControl, true);
             LocalDateTime localDateTime = LocalDateTime.now();
@@ -100,6 +102,11 @@ public class RiskControlServiceImpl extends ServiceImpl<RiskControlMapper, RiskC
     private RiskControl getRiskControlById(Integer id) {
         QueryWrapper<RiskControl> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("deleted_at").eq("id", id);
+        return riskControlMapper.selectOne(queryWrapper);
+    }
+    private RiskControl getRiskControlByName(String name){
+        QueryWrapper<RiskControl> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNull("deleted_at").eq("policy_name", name);
         return riskControlMapper.selectOne(queryWrapper);
     }
 }

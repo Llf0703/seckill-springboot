@@ -15,6 +15,7 @@ com\seckill\seckill_manager\controller\dto\SeckillItemPostFormDTO.class
 com\seckill\seckill_manager\controller\RiskControlController.class
 com\seckill\seckill_manager\controller\dto\ManagerUserDTO.class
 com\seckill\seckill_manager\controller\vo\QueryByNameVO.class
+com\seckill\seckill_manager\controller\dto\RiskControlOptionsDTO.class
 com\seckill\seckill_manager\service\impl\RiskControlServiceImpl.class
 com\seckill\seckill_manager\controller\dto\FinancialItemOptionsDTO.class
 com\seckill\seckill_manager\controller\dto\FinancialItemPostFormDTO.class

@@ -29,6 +29,7 @@ E:\大创and服创\llf\seckill_manager\src\main\java\com\seckill\seckill_manager
 E:\大创and服创\llf\seckill_manager\src\main\java\com\seckill\seckill_manager\entity\Goods.java
 E:\大创and服创\llf\seckill_manager\src\main\java\com\seckill\seckill_manager\config\RedisConfig.java
 E:\大创and服创\llf\seckill_manager\src\main\java\com\seckill\seckill_manager\service\impl\RiskControlServiceImpl.java
+E:\大创and服创\llf\seckill_manager\src\main\java\com\seckill\seckill_manager\controller\vo\QueryByNameVO.java
 E:\大创and服创\llf\seckill_manager\src\main\java\com\seckill\seckill_manager\config\MybatisPlusConfig.java
 E:\大创and服创\llf\seckill_manager\src\main\java\com\seckill\seckill_manager\entity\SeckillItems.java
 E:\大创and服创\llf\seckill_manager\src\main\java\com\seckill\seckill_manager\controller\vo\RiskControlVO.java
@@ -42,6 +43,7 @@ E:\大创and服创\llf\seckill_manager\src\main\java\com\seckill\seckill_manager
 E:\大创and服创\llf\seckill_manager\src\main\java\com\seckill\seckill_manager\utils\crypto\AESUtil.java
 E:\大创and服创\llf\seckill_manager\src\main\java\com\seckill\seckill_manager\Exception\InterceptorJWTException.java
 E:\大创and服创\llf\seckill_manager\src\main\java\com\seckill\seckill_manager\mapper\ManagerUsersMapper.java
+E:\大创and服创\llf\seckill_manager\src\main\java\com\seckill\seckill_manager\utils\Captcha.java
 E:\大创and服创\llf\seckill_manager\src\main\java\com\seckill\seckill_manager\controller\GoodsController.java
 E:\大创and服创\llf\seckill_manager\src\main\java\com\seckill\seckill_manager\controller\vo\ManagerUsersVO.java
 E:\大创and服创\llf\seckill_manager\src\main\java\com\seckill\seckill_manager\entity\RedisService\LoginAdmin.java
