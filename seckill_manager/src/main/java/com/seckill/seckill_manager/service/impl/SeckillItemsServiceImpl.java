@@ -61,14 +61,17 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
                 itemVO.getRiskControlId() == null ||
                 itemVO.getRiskControlId() <= 0)
             return Response.paramsErr("请输入正确的理财产品或风险引擎");
+        if (!Validator.isValidSeckillTime(itemVO.getStartTime(), itemVO.getEndTime()))
+            Response.paramsErr("开始时间或结束时间异常");
         SeckillItems seckillItem = new SeckillItems();
         BeanUtil.copyProperties(itemVO, seckillItem, true);//复制属性
         //VO id为空,设置更新,创建时间,进行新增
         LocalDateTime localDateTime = LocalDateTime.now();
+        seckillItem.setRemainingStock(seckillItem.getStock());//更新剩余库存
+        seckillItem.setUpdatedAt(localDateTime);//初始化更新时间
         Integer id = seckillItem.getId();
         if (id == null) {
             seckillItem.setCreatedAt(localDateTime);//初始化创建时间
-            seckillItem.setUpdatedAt(localDateTime);//初始化更新时间
             boolean res = save(seckillItem);
             if (res) return Response.success("success");
             return Response.systemErr("database error");
