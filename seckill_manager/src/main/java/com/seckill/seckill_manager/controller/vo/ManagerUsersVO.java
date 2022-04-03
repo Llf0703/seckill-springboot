@@ -35,4 +35,5 @@ public class ManagerUsersVO {
     private String token;//非数据库字段,用于添加额外的安全校验信息
 
     private String uid;//登录环节需要
+    private String captcha;//验证码
 }
