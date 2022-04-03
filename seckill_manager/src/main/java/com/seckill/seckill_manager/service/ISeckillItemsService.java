@@ -22,4 +22,5 @@ public interface ISeckillItemsService extends IService<SeckillItems> {
     Response getSeckillItemPage(PageVO pageVO);
     Response deleteSeckillItemPage(QueryByIdVO queryByIdVO);
     Response searchFinancialItemOptions(QueryByNameVO queryByNameVO);
+    Response searchRiskControlOptions(QueryByNameVO queryByNameVO);
 }

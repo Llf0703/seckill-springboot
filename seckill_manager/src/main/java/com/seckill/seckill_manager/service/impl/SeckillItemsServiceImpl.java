@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.dto.FinancialItemDTO;
+import com.seckill.seckill_manager.controller.dto.RiskControlDTO;
 import com.seckill.seckill_manager.controller.dto.SeckillItemDTO;
 import com.seckill.seckill_manager.controller.vo.PageVO;
 import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
@@ -128,6 +129,18 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         financialItemsMapper.selectPage(page, queryWrapper);
         List<FinancialItems> itemsList = page.getRecords();
         return Response.success(FinancialItemDTO.toFinancialItemOptionsDTO(itemsList), "OK");
+    }
+
+    @Override
+    public Response searchRiskControlOptions(QueryByNameVO queryByNameVO) {
+        if (queryByNameVO.getKeyWord() == null) return null;
+        if (!Validator.isValidProductName(queryByNameVO.getKeyWord())) return Response.success("OK");
+        Page<RiskControl> page = new Page<>(1, 25);
+        QueryWrapper<RiskControl> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNull("deleted_at").like("policy_name", queryByNameVO.getKeyWord());
+        riskControlMapper.selectPage(page, queryWrapper);
+        List<RiskControl> itemsList = page.getRecords();
+        return Response.success(RiskControlDTO.toRiskControlOptionsDTO(itemsList), "OK");
     }
 
     private SeckillItems getSeckillItemById(Integer id) {
