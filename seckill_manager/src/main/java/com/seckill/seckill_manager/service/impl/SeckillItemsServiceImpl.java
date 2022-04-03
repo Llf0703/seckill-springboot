@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seckill.seckill_manager.common.Response;
+import com.seckill.seckill_manager.controller.dto.FinancialItemDTO;
 import com.seckill.seckill_manager.controller.dto.SeckillItemDTO;
 import com.seckill.seckill_manager.controller.vo.PageVO;
 import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
+import com.seckill.seckill_manager.controller.vo.QueryByNameVO;
 import com.seckill.seckill_manager.controller.vo.SeckillItemVO;
 import com.seckill.seckill_manager.entity.FinancialItems;
 import com.seckill.seckill_manager.entity.RiskControl;
@@ -116,6 +118,18 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         return Response.success(String.valueOf(res));
     }
 
+    @Override
+    public Response searchFinancialItemOptions(QueryByNameVO queryByNameVO) {
+        if (queryByNameVO.getKeyWord() == null) return null;
+        if (!Validator.isValidProductName(queryByNameVO.getKeyWord())) return Response.success("OK");
+        Page<FinancialItems> page = new Page<>(1, 25);
+        QueryWrapper<FinancialItems> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNull("deleted_at").like("product_name", queryByNameVO.getKeyWord());
+        financialItemsMapper.selectPage(page, queryWrapper);
+        List<FinancialItems> itemsList = page.getRecords();
+        return Response.success(FinancialItemDTO.toFinancialItemOptionsDTO(itemsList), "OK");
+    }
+
     private SeckillItems getSeckillItemById(Integer id) {
         QueryWrapper<SeckillItems> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("deleted_at").eq("id", id);
@@ -133,4 +147,6 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         queryWrapper.isNull("deleted_at").eq("id", id);
         return riskControlMapper.selectOne(queryWrapper);
     }
+
+
 }

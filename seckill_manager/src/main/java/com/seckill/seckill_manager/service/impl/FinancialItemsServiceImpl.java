@@ -67,6 +67,8 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
         if (!financialItemVO.getProductEffectiveDate().isBefore(financialItemVO.getProductExpirationDate()))
             return Response.paramsErr("产品失效日期应大于产品生效日期");
         FinancialItems financialItem = new FinancialItems();
+        FinancialItems query = getFinancialItemByName(financialItemVO.getProductName());
+        if (query != null) return Response.dataErr("存在相同名称的产品");
         if (financialItemVO.getId() == null) {//id不存在,新增数据
             BeanUtil.copyProperties(financialItemVO, financialItem, true);
             LocalDateTime localDateTime = LocalDateTime.now();
@@ -125,6 +127,12 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
     private FinancialItems getFinancialItemById(Integer id) {
         QueryWrapper<FinancialItems> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("deleted_at").eq("id", id);
+        return financialItemsMapper.selectOne(queryWrapper);
+    }
+
+    private FinancialItems getFinancialItemByName(String name) {
+        QueryWrapper<FinancialItems> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNull("deleted_at").eq("product_name", name);
         return financialItemsMapper.selectOne(queryWrapper);
     }
 }

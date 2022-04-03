@@ -8,6 +8,7 @@ import com.seckill.seckill_manager.Interceptor.Type.Permission;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.PageVO;
 import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
+import com.seckill.seckill_manager.controller.vo.QueryByNameVO;
 import com.seckill.seckill_manager.controller.vo.SeckillItemVO;
 import com.seckill.seckill_manager.service.impl.SeckillItemsServiceImpl;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +45,12 @@ public class SeckillItemsController {
         return seckillItemsService.editSeckillItem(item);
     }
 
+    @LoginRequired
+    @Permission(level = LevelCode.EDIT,permission = PermissionType.SeckillItemPermission)
+    @PostMapping("/search_financial_item")
+    public Response searchFinancialItemOptions(@RequestBody QueryByNameVO queryByNameVO){
+        return seckillItemsService.searchFinancialItemOptions(queryByNameVO);
+    }
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.SeckillItemPermission)

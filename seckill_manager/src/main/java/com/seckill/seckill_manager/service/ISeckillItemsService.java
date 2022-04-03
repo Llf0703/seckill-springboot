@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.PageVO;
 import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
+import com.seckill.seckill_manager.controller.vo.QueryByNameVO;
 import com.seckill.seckill_manager.controller.vo.SeckillItemVO;
 import com.seckill.seckill_manager.entity.SeckillItems;
 
@@ -20,4 +21,5 @@ public interface ISeckillItemsService extends IService<SeckillItems> {
     Response getSeckillItem(QueryByIdVO queryByIdVO);
     Response getSeckillItemPage(PageVO pageVO);
     Response deleteSeckillItemPage(QueryByIdVO queryByIdVO);
+    Response searchFinancialItemOptions(QueryByNameVO queryByNameVO);
 }

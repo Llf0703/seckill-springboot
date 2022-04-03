@@ -12,6 +12,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+class FinancialItemOptionsDTO {
+    private String label;
+    private Integer value;
+}
+
 /**
  * @author Wky1742095859
  * @version 1.0
@@ -152,5 +160,17 @@ public class FinancialItemDTO {
             financialItemVOList.add(toFinancialItemPostFormDTO(items));
         }
         return financialItemVOList;
+    }
+
+    public static FinancialItemOptionsDTO toFinancialItemOptionsDTO(FinancialItems financialItems) {
+        return new FinancialItemOptionsDTO(financialItems.getProductName(), financialItems.getId());
+    }
+
+    public static List<FinancialItemOptionsDTO> toFinancialItemOptionsDTO(List<FinancialItems> financialItemsList) {
+        List<FinancialItemOptionsDTO> financialItemOptionsDTOList = new LinkedList<>();
+        for (FinancialItems item : financialItemsList) {
+            financialItemOptionsDTOList.add(toFinancialItemOptionsDTO(item));
+        }
+        return financialItemOptionsDTOList;
     }
 }

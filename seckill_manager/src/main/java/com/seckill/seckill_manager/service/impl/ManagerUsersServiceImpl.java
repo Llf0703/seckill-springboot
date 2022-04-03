@@ -123,7 +123,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (!Validator.isValidAccount(VOAccount) || !Validator.isValidPassword(VOPassword) || VOFP.length() != 32)
             return Response.authErr("账号或密码错误");//正则判断
         String MD5Password = MD5.MD5Password(VOAccount + VOPassword);
-        String ManagerUserStr = RedisUtils.get(VOAccount);//获取缓存的用户信息
+        String ManagerUserStr = RedisUtils.get("M:ManagerUser:"+VOAccount);//获取缓存的用户信息
         String managerUserPassword = null;
         ManagerUsers managerUser;
         if (ManagerUserStr != null) {//用户缓存不为空,进行str到实体类转换,并从实体类获取加密后的密码
