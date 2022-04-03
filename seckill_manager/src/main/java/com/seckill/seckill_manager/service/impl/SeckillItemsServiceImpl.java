@@ -57,7 +57,11 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
     public Response editSeckillItem(SeckillItemVO itemVO) {
         BigDecimal amount = itemVO.getAmount();
         Long stock = itemVO.getStock();
-        if (!Validator.isValidAmountCanNotBeZERO(amount) || stock == null || stock <= 0)
+        if (itemVO.getTitle() == null || !Validator.isValidProductName(itemVO.getTitle()))
+            return Response.paramsErr("活动名不合法");
+        if (itemVO.getDescription() == null || !Validator.isValidDescription(itemVO.getDescription()))
+            return Response.paramsErr("活动描述不合法");
+        if (!Validator.isValidAmountCanNotBeZERO(amount) || stock == null || stock <= 0 || stock > 9999999999L)
             return Response.systemErr("数值无效");
         if (itemVO.getFinancialItemId() == null ||
                 itemVO.getFinancialItemId() <= 0 ||

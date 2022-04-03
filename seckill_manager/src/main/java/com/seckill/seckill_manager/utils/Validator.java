@@ -10,6 +10,7 @@ interface RegexStr {
     String REGEX_ACCOUNT = "^[A-Za-z0-9]{1,10}$";
     String REGEX_PASSWORD = "^(?:(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])).{6,20}$";
     String REGEX_PRODUCT_NAME = "^[\u4E00-\u9FA5A-Za-z0-9_]{1,20}$";
+    String REGEX_DESCRIPTION = "^[\u4E00-\u9FA5A-Za-z0-9_]{1,255}$";
 }
 
 /**
@@ -20,12 +21,16 @@ interface RegexStr {
  * @date 2022/3/19 1:41
  */
 public class Validator {
+    public static boolean isValidDescription(String str) {
+        return Pattern.matches(RegexStr.REGEX_DESCRIPTION, str);
+    }
+
 
     public static boolean isValidSeckillTime(LocalDateTime startTime, LocalDateTime endTime) {
         if (startTime == null || endTime == null) return false;
-        LocalDateTime nowTime=LocalDateTime.now();
-        if (startTime.isBefore(nowTime)|| endTime.isBefore(nowTime))return false;
-        if (!startTime.isBefore(endTime))return false;
+        LocalDateTime nowTime = LocalDateTime.now();
+        if (startTime.isBefore(nowTime) || endTime.isBefore(nowTime)) return false;
+        if (!startTime.isBefore(endTime)) return false;
         return startTime.isBefore(nowTime.plusHours(-2));
     }
 
