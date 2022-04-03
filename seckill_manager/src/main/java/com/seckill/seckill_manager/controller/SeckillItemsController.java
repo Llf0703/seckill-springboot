@@ -55,7 +55,7 @@ public class SeckillItemsController {
     @Permission(level = LevelCode.EDIT,permission = PermissionType.SeckillItemPermission)
     @PostMapping("/search_risk_control")
     public Response searchRiskControlOptions(@RequestBody QueryByNameVO queryByNameVO){
-        return seckillItemsService.searchFinancialItemOptions(queryByNameVO);
+        return seckillItemsService.searchRiskControlOptions(queryByNameVO);
     }
 
     @LoginRequired
