@@ -6,4 +6,5 @@ import lombok.Data;
 public class PageVO {
     Integer current;
     Integer size;
+    Integer order;
 }

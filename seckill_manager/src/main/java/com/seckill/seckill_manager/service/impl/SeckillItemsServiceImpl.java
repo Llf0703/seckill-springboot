@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -104,7 +105,10 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         queryWrapper.isNull("deleted_at");
         seckillItemsMapper.selectPage(page, queryWrapper);
         List<SeckillItems> itemsList = page.getRecords();
-        return Response.success(SeckillItemDTO.toSeckillItemTableDTO(itemsList), "获取成功");
+        HashMap<String,Object> data=new HashMap<>();
+        data.put("items",SeckillItemDTO.toSeckillItemTableDTO(itemsList));
+        data.put("total",page.getTotal());
+        return Response.success(data, "获取成功");
     }
 
     @Override
