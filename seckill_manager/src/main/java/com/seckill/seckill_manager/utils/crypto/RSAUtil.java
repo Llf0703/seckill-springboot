@@ -59,7 +59,7 @@ public class RSAUtil {
     /**
      * 后端RSA的密钥对(公钥和私钥)Map，由静态代码块赋值
      */
-    private static final Map<String, Object> genKeyPair = new HashMap<>();
+    private static Map<String, Object> genKeyPair = new HashMap<>();
 
     static {
         try {

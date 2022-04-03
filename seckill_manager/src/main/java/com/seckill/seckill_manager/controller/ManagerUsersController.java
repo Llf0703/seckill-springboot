@@ -29,6 +29,11 @@ public class ManagerUsersController {
     @Resource
     private ManagerUsersServiceImpl managerUsersService;
 
+    @PostMapping("/auth/login_check")
+    public Response loginCheck(HttpServletRequest request) {
+        String ip = request.getHeader("X-real-ip");
+        return managerUsersService.LoginCheck(ip);
+    }
 
     @PostMapping("/auth/login")
     public Response login(HttpServletRequest request, @RequestBody ManagerUsersVO managerUsersVO) {

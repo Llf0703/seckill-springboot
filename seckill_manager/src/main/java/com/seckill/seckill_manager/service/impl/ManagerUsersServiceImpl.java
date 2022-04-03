@@ -1,5 +1,6 @@
 package com.seckill.seckill_manager.service.impl;
 
+import cn.hutool.core.codec.Base64;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -47,7 +48,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
      * @Return com.seckill.seckill_manager.common.Response
      **/
     @Override
-    public Response LoginCheck(ManagerUsersVO managerUsersVO, String ip) {
+    public Response LoginCheck(String ip) {
         //if (managerUsersVO.getAccount() == null) return Response.paramsErr("参数错误");
         String RSAPubKey = RSAUtil.getPublicKey();//生成RSA公钥
         Response res = Response.success("OK");
@@ -56,7 +57,15 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         String aesKey = MD5ID.substring(16);//生成AES密钥
         String RSAPrvKey = RSAUtil.getPrivateKey();//生成RSA私钥
         HashMap<String, Object> data = new HashMap<>();
-        data.put("encKey", AESUtil.decrypt(RSAPubKey, aesKey));//AES加密RSA公钥
+        String encKey;
+        try {
+            encKey = AESUtil.encrypt(RSAPubKey, aesKey);
+        } catch (Exception e) {
+            return Response.systemErr("登录失败,系统异常");
+        }
+        if (encKey == null) return Response.systemErr("登录失败,系统异常");
+        encKey = Base64.encode(encKey.getBytes(StandardCharsets.UTF_8));
+        data.put("encKey", encKey);//AES加密RSA公钥
         data.put("uid", MD5ID);
         res.setData(data);
         LoginCrypto loginCrypto = new LoginCrypto();//生成Redis对象
@@ -96,9 +105,9 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         byte[] VOAccountBytes;
         byte[] VOFPBytes;
         try {
-            VOAccountBytes = RSAUtil.decryptByPrivateKey(managerUsersVO.getAccount().getBytes(StandardCharsets.UTF_8), loginCrypto.getRsaPrvKey());
-            VOPasswordBytes = RSAUtil.decryptByPrivateKey(managerUsersVO.getPassword().getBytes(StandardCharsets.UTF_8), loginCrypto.getRsaPrvKey());
-            VOFPBytes = RSAUtil.decryptByPrivateKey(managerUsersVO.getToken().getBytes(StandardCharsets.UTF_8), loginCrypto.getRsaPrvKey());
+            VOAccountBytes = RSAUtil.decryptByPrivateKey(Base64.decode(managerUsersVO.getAccount()), loginCrypto.getRsaPrvKey());
+            VOPasswordBytes = RSAUtil.decryptByPrivateKey(Base64.decode(managerUsersVO.getPassword()), loginCrypto.getRsaPrvKey());
+            VOFPBytes = RSAUtil.decryptByPrivateKey(Base64.decode(managerUsersVO.getToken()), loginCrypto.getRsaPrvKey());
         } catch (Exception e) {
             return Response.authErr("账号或密码错误");
         }
