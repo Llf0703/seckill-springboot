@@ -16,6 +16,25 @@ class RiskControlOptionsDTO {
     private Integer value;
 }
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+class RiskControlTableDTO {
+    private Integer id;
+
+    private String policyName;
+
+    private String workingStatusLimit;
+
+    private String untrustworthyPersonLimit;
+
+    private String ageLimit;
+
+    private String overdueLimit;
+
+    private String exceptionLimit;
+}
+
 /**
  * @author Wky1742095859
  * @version 1.0
@@ -34,5 +53,33 @@ public class RiskControlDTO {
             riskControlOptionsDTOList.add(toRiskControlOptionsDTO(item));
         }
         return riskControlOptionsDTOList;
+    }
+
+    public static RiskControlTableDTO toRiskControlTableDTO(RiskControl riskControl) {
+        RiskControlTableDTO riskControlTableDTO = new RiskControlTableDTO();
+        riskControlTableDTO.setId(riskControl.getId());
+        riskControlTableDTO.setPolicyName(riskControl.getPolicyName());
+        riskControlTableDTO.setAgeLimit(riskControl.getAgeLimit().toString());
+        if (riskControl.getUntrustworthyPersonLimit() == 0) {
+            riskControlTableDTO.setUntrustworthyPersonLimit("否");
+        } else {
+            riskControlTableDTO.setUntrustworthyPersonLimit("是");
+        }
+        if (riskControl.getWorkingStatusLimit() == 0) {
+            riskControlTableDTO.setWorkingStatusLimit("否");
+        } else {
+            riskControlTableDTO.setWorkingStatusLimit("是");
+        }
+        riskControlTableDTO.setOverdueLimit("最近" + riskControl.getOverdueYearLimit() + "年逾期" + riskControl.getOverdueNumberLimit() + "次");
+        riskControlTableDTO.setExceptionLimit("金额小于" + riskControl.getExceptionAmount() + "元," + riskControl.getExceptionDays() + "天内还清");
+        return riskControlTableDTO;
+    }
+
+    public static List<RiskControlTableDTO> toRiskControlTableDTO(List<RiskControl> riskControlList) {
+        List<RiskControlTableDTO> riskControlTableDTOList = new LinkedList<>();
+        for (RiskControl item : riskControlList) {
+            riskControlTableDTOList.add(toRiskControlTableDTO(item));
+        }
+        return riskControlTableDTOList;
     }
 }
