@@ -9,7 +9,11 @@ import com.seckill.seckill_manager.controller.dto.SeckillItemDTO;
 import com.seckill.seckill_manager.controller.vo.PageVO;
 import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
 import com.seckill.seckill_manager.controller.vo.SeckillItemVO;
+import com.seckill.seckill_manager.entity.FinancialItems;
+import com.seckill.seckill_manager.entity.RiskControl;
 import com.seckill.seckill_manager.entity.SeckillItems;
+import com.seckill.seckill_manager.mapper.FinancialItemsMapper;
+import com.seckill.seckill_manager.mapper.RiskControlMapper;
 import com.seckill.seckill_manager.mapper.SeckillItemsMapper;
 import com.seckill.seckill_manager.service.ISeckillItemsService;
 import com.seckill.seckill_manager.utils.Validator;
@@ -33,6 +37,10 @@ import java.util.List;
 public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, SeckillItems> implements ISeckillItemsService {
     @Resource
     private SeckillItemsMapper seckillItemsMapper;
+    @Resource
+    private RiskControlMapper riskControlMapper;
+    @Resource
+    private FinancialItemsMapper financialItemsMapper;
 
     /*
      * @MethodName editSeckillItem
@@ -46,54 +54,36 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
     public Response editSeckillItem(SeckillItemVO itemVO) {
         BigDecimal amount = itemVO.getAmount();
         Long stock = itemVO.getStock();
-        if (!Validator.isValidAmountCanNotBeZERO(amount) || stock <= 0) return Response.systemErr("数值无效");
+        if (!Validator.isValidAmountCanNotBeZERO(amount) || stock == null || stock <= 0)
+            return Response.systemErr("数值无效");
+        if (itemVO.getFinancialItemId() == null ||
+                itemVO.getFinancialItemId() <= 0 ||
+                itemVO.getRiskControlId() == null ||
+                itemVO.getRiskControlId() <= 0)
+            return Response.paramsErr("请输入正确的理财产品或风险引擎");
+        if (!Validator.isValidSeckillTime(itemVO.getStartTime(), itemVO.getEndTime()))
+            Response.paramsErr("开始时间或结束时间异常");
         SeckillItems seckillItem = new SeckillItems();
         BeanUtil.copyProperties(itemVO, seckillItem, true);//复制属性
         //VO id为空,设置更新,创建时间,进行新增
         LocalDateTime localDateTime = LocalDateTime.now();
+        seckillItem.setRemainingStock(seckillItem.getStock());//更新剩余库存
+        seckillItem.setUpdatedAt(localDateTime);//初始化更新时间
         Integer id = seckillItem.getId();
-
         if (id == null) {
             seckillItem.setCreatedAt(localDateTime);//初始化创建时间
-            seckillItem.setUpdatedAt(localDateTime);//初始化更新时间
             boolean res = save(seckillItem);
             if (res) return Response.success("success");
             return Response.systemErr("database error");
         }
-        
         if (id <= 0) return Response.dataErr("invalid id");
-        if (getSeckillItemById(id) == null) return Response.dataErr("invalid id");
+        if (getSeckillItemById(id) == null ||
+                getFinancialItemsById(itemVO.getFinancialItemId()) == null ||
+                getRiskControlById(itemVO.getRiskControlId()) == null)
+            return Response.dataErr("invalid id");
         seckillItem.setUpdatedAt(localDateTime);
         if (!updateById(seckillItem)) return Response.systemErr("database error");
         return Response.success("success");
-        //VO id不为空,查询数据是否存在,不存在返回dataErr,存在进行新增,同时修改更新时间
-        //getSeckillItemById(itemVO.getId());
-        /*
-        Date date = new Date();
-        DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        fmt.setLenient(false);
-        fmt.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
-        SeckillItems item = SeckillItems.builder()
-                .created_at(date)
-                .updated_at(date)
-                .title(itemVO.getTitle())
-                .description(itemVO.getDescription())
-                .amount(itemVO.getAmount())
-                .stock(itemVO.getStock())
-                .remaining_stock(itemVO.getStock())
-                .build();
-        try {
-            Date start_time = fmt.parse(itemVO.getStart_time());
-            Date end_time = fmt.parse(itemVO.getEnd_time());
-            item = item.toBuilder()
-                    .start_time(start_time)
-                    .end_time(end_time)
-                    .build();
-        } catch (ParseException e) {
-            return Response.systemErr("error");
-        }
-        seckillItemsMapper.insert(item);
-        return Response.success("success");*/
     }
 
     @Override
@@ -130,5 +120,17 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         QueryWrapper<SeckillItems> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("deleted_at").eq("id", id);
         return seckillItemsMapper.selectOne(queryWrapper);
+    }
+
+    private FinancialItems getFinancialItemsById(Integer id) {
+        QueryWrapper<FinancialItems> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNull("deleted_at").eq("id", id);
+        return financialItemsMapper.selectOne(queryWrapper);
+    }
+
+    private RiskControl getRiskControlById(Integer id) {
+        QueryWrapper<RiskControl> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNull("deleted_at").eq("id", id);
+        return riskControlMapper.selectOne(queryWrapper);
     }
 }

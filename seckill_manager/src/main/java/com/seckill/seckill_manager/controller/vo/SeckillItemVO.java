@@ -21,7 +21,7 @@ public class SeckillItemVO {
 
     private LocalDateTime endTime;
 
-    private Long remainingStock;
+    //private Long remainingStock;
 
     private Integer financialItemId;
 

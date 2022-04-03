@@ -13,4 +13,6 @@ public class LoginCrypto {
     private String aesKey;
     private String rsaPubKey;
     private String rsaPrvKey;
+    private String captcha;
+    //private String captchaImgB64;
 }

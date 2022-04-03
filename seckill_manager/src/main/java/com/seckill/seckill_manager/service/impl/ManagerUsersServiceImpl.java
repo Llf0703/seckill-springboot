@@ -61,10 +61,12 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         try {
             encKey = AESUtil.encrypt(RSAPubKey, aesKey);
         } catch (Exception e) {
-            return Response.systemErr("登录失败,系统异常");
+            return Response.systemErr("系统异常");
         }
-        if (encKey == null) return Response.systemErr("登录失败,系统异常");
+        if (encKey == null) return Response.systemErr("系统异常");
         encKey = Base64.encode(encKey.getBytes(StandardCharsets.UTF_8));
+        HashMap<String, Object> cat = Captcha.getCircleCaptcha();
+        data.put("captcha", cat.get("img"));
         data.put("encKey", encKey);//AES加密RSA公钥
         data.put("uid", MD5ID);
         res.setData(data);
@@ -73,10 +75,12 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         loginCrypto.setRsaPrvKey(RSAPrvKey);//保存RSA私钥
         loginCrypto.setRsaPubKey(RSAPubKey);//保存RSA公钥
         loginCrypto.setTimeStamp(res.getTimeStamp());//保存生成时间
+        loginCrypto.setCaptcha((String) cat.get("code"));//保存验证码
         //loginCrypto.setFp(managerUsersVO.getToken());//保存浏览器指纹
         loginCrypto.setIp(ip);//保存ip
-        String result = RedisUtils.set("M:LoginCrypto:" + MD5ID, JSONUtils.toJSONStr(loginCrypto), 30);
-        if (!Objects.equals(result, "OK")) return Response.systemErr("登录失败,系统异常");
+
+        String result = RedisUtils.set("M:LoginCrypto:" + MD5ID, JSONUtils.toJSONStr(loginCrypto), 90);
+        if (!Objects.equals(result, "OK")) return Response.systemErr("系统异常");
         return res;
     }
 
@@ -92,15 +96,17 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
     public Response login(ManagerUsersVO managerUsersVO, String ip) {
         /*经修改后不再限制ip只能登录一个号,前端传输的账号密码也进行了加密处理*/
         /*account:rsa加密账号 password:rsa加密密码 token:加密后的浏览器指纹,uid:即loginCheck中uid*/
+        if (managerUsersVO.getCaptcha() == null) return Response.paramsErr("请输入验证码");
         if (managerUsersVO.getAccount() == null ||
                 managerUsersVO.getPassword() == null ||
                 managerUsersVO.getToken() == null || managerUsersVO.getUid() == null)//判断是否为空
             return Response.authErr("账号或密码错误");
         if (ip == null) return Response.systemErr("登录失败,系统异常");//判断是否为空
         String loginCryptoStr = RedisUtils.get("M:LoginCrypto:" + managerUsersVO.getUid());
-        if (loginCryptoStr == null) return Response.systemErr("登录失败,系统异常");
+        if (loginCryptoStr == null) return Response.systemErr("请重新输入验证码");
         LoginCrypto loginCrypto = JSONUtils.toEntity(loginCryptoStr, LoginCrypto.class);
         if (loginCrypto == null) return Response.systemErr("登录失败,系统异常");
+        if (!Objects.equals(loginCrypto.getCaptcha(), managerUsersVO.getCaptcha().toLowerCase())) return Response.authErr("验证码错误");
         byte[] VOPasswordBytes;
         byte[] VOAccountBytes;
         byte[] VOFPBytes;

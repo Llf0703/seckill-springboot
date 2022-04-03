@@ -2,6 +2,7 @@ package com.seckill.seckill_manager.utils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.regex.Pattern;
 
 
@@ -19,6 +20,15 @@ interface RegexStr {
  * @date 2022/3/19 1:41
  */
 public class Validator {
+
+    public static boolean isValidSeckillTime(LocalDateTime startTime, LocalDateTime endTime) {
+        if (startTime == null || endTime == null) return false;
+        LocalDateTime nowTime=LocalDateTime.now();
+        if (startTime.isBefore(nowTime)|| endTime.isBefore(nowTime))return false;
+        if (!startTime.isBefore(endTime))return false;
+        return startTime.isBefore(nowTime.plusHours(-2));
+    }
+
     /*
      * @MethodName isValidAccount
      * @author Wky1742095859
@@ -68,7 +78,7 @@ public class Validator {
      **/
     public static boolean isValidAmountCanNotBeZERO(BigDecimal amount) {
         if (amount == null) return false;
-        return amount.compareTo(BigDecimal.ZERO) > 0 && amount.compareTo(new BigDecimal(99999999999.9999)) <= 0;
+        return amount.compareTo(BigDecimal.ZERO) > 0 && amount.compareTo(new BigDecimal("99999999999.9999")) <= 0;
     }
 
     /*
