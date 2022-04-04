@@ -3,8 +3,8 @@ com\seckill\seckill_manager\service\IOperateRecordService.class
 com\seckill\seckill_manager\controller\dto\FinancialItemDTO.class
 com\seckill\seckill_manager\service\IRiskControlService.class
 com\seckill\seckill_manager\entity\OperateRecord.class
+com\seckill\seckill_manager\controller\vo\QueryVO.class
 com\seckill\seckill_manager\controller\dto\ManagerUserDTO.class
-com\seckill\seckill_manager\controller\vo\QueryByNameVO.class
 com\seckill\seckill_manager\controller\OperateRecordController.class
 com\seckill\seckill_manager\service\impl\RiskControlServiceImpl.class
 com\seckill\seckill_manager\controller\dto\FinancialItemPostFormDTO.class
@@ -12,11 +12,11 @@ com\seckill\seckill_manager\mapper\OperateRecordMapper.class
 com\seckill\seckill_manager\controller\dto\SeckillItemTableDTO.class
 com\seckill\seckill_manager\mapper\RiskControlMapper.class
 com\seckill\seckill_manager\controller\dto\ManagerUserTableDTO.class
-com\seckill\seckill_manager\controller\vo\QueryByIdVO.class
 com\seckill\seckill_manager\controller\dto\RiskControlDTO.class
 com\seckill\seckill_manager\controller\dto\ManagerUserPostFormDTO.class
 com\seckill\seckill_manager\controller\dto\FinancialItemTableDTO.class
 com\seckill\seckill_manager\Interceptor\Type\OperateRecord.class
+com\seckill\seckill_manager\controller\dto\OperateRecordDTO.class
 com\seckill\seckill_manager\controller\dto\RiskControlTableDTO.class
 com\seckill\seckill_manager\controller\vo\PageVO.class
 com\seckill\seckill_manager\controller\vo\RiskControlVO.class
@@ -24,6 +24,7 @@ com\seckill\seckill_manager\Interceptor\OperateRecordInterceptor.class
 com\seckill\seckill_manager\controller\dto\SeckillItemDTO.class
 com\seckill\seckill_manager\controller\dto\SeckillItemPostFormDTO.class
 com\seckill\seckill_manager\controller\RiskControlController.class
+com\seckill\seckill_manager\controller\dto\OperateRecordTableDTO.class
 com\seckill\seckill_manager\controller\dto\RiskControlOptionsDTO.class
 com\seckill\seckill_manager\service\impl\OperateRecordServiceImpl.class
 com\seckill\seckill_manager\controller\dto\FinancialItemOptionsDTO.class
