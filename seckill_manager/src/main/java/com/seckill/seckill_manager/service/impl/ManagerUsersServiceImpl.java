@@ -233,7 +233,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (!Validator.isValidPageSize(pageVO.getSize())) return Response.paramsErr("请求数量超出范围");
         Page<ManagerUsers> page = new Page<>(pageVO.getCurrent(), pageVO.getSize());
         QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at");
+        queryWrapper.isNull("deleted_at").orderByDesc("id");;
         managerUsersMapper.selectPage(page, queryWrapper);
         List<ManagerUsers> itemsList = page.getRecords();
         HashMap<String, Object> data = new HashMap<>();

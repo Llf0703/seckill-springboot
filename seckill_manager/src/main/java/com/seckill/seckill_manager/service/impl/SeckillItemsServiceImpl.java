@@ -104,7 +104,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         if (!Validator.isValidPageSize(pageVO.getSize())) return Response.paramsErr("请求数量超出范围");
         Page<SeckillItems> page = new Page<>(pageVO.getCurrent(), pageVO.getSize());
         QueryWrapper<SeckillItems> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at");
+        queryWrapper.isNull("deleted_at").orderByDesc("id");;
         seckillItemsMapper.selectPage(page, queryWrapper);
         List<SeckillItems> itemsList = page.getRecords();
         HashMap<String,Object> data=new HashMap<>();

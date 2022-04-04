@@ -107,7 +107,7 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
         if (!Validator.isValidPageSize(pageVO.getSize())) return Response.paramsErr("请求数量超出范围");
         Page<FinancialItems> page = new Page<>(pageVO.getCurrent(), pageVO.getSize());
         QueryWrapper<FinancialItems> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at");
+        queryWrapper.isNull("deleted_at").orderByDesc("id");;
         financialItemsMapper.selectPage(page, queryWrapper);
         List<FinancialItems> itemsList = page.getRecords();
         return Response.success(FinancialItemDTO.toFinancialItemTableDTO(itemsList), "获取成功", 0);

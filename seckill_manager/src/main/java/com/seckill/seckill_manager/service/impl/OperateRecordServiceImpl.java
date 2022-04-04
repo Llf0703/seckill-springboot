@@ -34,7 +34,7 @@ public class OperateRecordServiceImpl extends ServiceImpl<OperateRecordMapper, O
         if (!Validator.isValidPageSize(pageVO.getSize())) return Response.paramsErr("请求数量超出范围");
         Page<OperateRecord> page = new Page<>(pageVO.getCurrent(), pageVO.getSize());
         QueryWrapper<OperateRecord> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at");
+        queryWrapper.isNull("deleted_at").orderByDesc("id");
         operateRecordMapper.selectPage(page, queryWrapper);
         List<OperateRecord> itemsList = page.getRecords();
         HashMap<String,Object> data=new HashMap<>();

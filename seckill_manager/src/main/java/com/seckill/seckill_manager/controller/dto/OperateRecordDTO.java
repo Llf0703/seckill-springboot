@@ -42,6 +42,7 @@ public class OperateRecordDTO {
         operateRecordTableDTO.setId(operateRecord.getId());
         operateRecordTableDTO.setCreatedAt(operateRecord.getCreatedAt().format(dateTimeFormatter));
         operateRecordTableDTO.setManagerUserId(operateRecord.getManagerUserId());
+        operateRecordTableDTO.setManagerUserAccount(operateRecord.getManagerUserAccount());
         operateRecordTableDTO.setOperate(operateRecord.getOperate());
         operateRecordTableDTO.setLevel(operateRecord.getLevel());
         operateRecordTableDTO.setOperateId(operateRecord.getOperateId());
