@@ -1,5 +1,6 @@
 package com.seckill.seckill_manager.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.codec.Base64;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -98,9 +99,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         /*经修改后不再限制ip只能登录一个号,前端传输的账号密码也进行了加密处理*/
         /*account:rsa加密账号 password:rsa加密密码 token:加密后的浏览器指纹,uid:即loginCheck中uid*/
         if (managerUsersVO.getCaptcha() == null) return Response.paramsErr("请输入验证码");
-        if (managerUsersVO.getAccount() == null ||
-                managerUsersVO.getPassword() == null ||
-                managerUsersVO.getToken() == null || managerUsersVO.getUid() == null)//判断是否为空
+        if (managerUsersVO.getAccount() == null || managerUsersVO.getPassword() == null || managerUsersVO.getToken() == null || managerUsersVO.getUid() == null)//判断是否为空
             return Response.authErr("账号或密码错误");
         if (ip == null) return Response.systemErr("登录失败,系统异常");//判断是否为空
         String loginCryptoStr = RedisUtils.get("M:LoginCrypto:" + managerUsersVO.getUid());
@@ -179,8 +178,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (!Objects.equals(loginUser.getIp(), ip)) return Response.authErr("登录失效");//当前ip无登录信息
         String managerUserStr = RedisUtils.get("M:ManagerUser:" + account);//获取用户信息
         ManagerUsers managerUser = null;
-        if (managerUserStr != null)
-            managerUser = JSONUtils.toEntity(managerUserStr, ManagerUsers.class);
+        if (managerUserStr != null) managerUser = JSONUtils.toEntity(managerUserStr, ManagerUsers.class);
         if (managerUser == null) {//未查到用户信息,查询数据库
             ManagerUsers managerUsers = getManagerUserByAccount(account);
             if (managerUsers == null) return Response.authErr("登录失效");//账号不存在
@@ -215,8 +213,77 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
      **/
     @Override
     public Response editAdmin(ManagerUsersVO managerUsersVO) {
-        String MD5Password = MD5.MD5Password(managerUsersVO.getAccount() + managerUsersVO.getPassword());
-        return Response.success("成功", 0);
+        if (managerUsersVO.getCaptcha() == null) return Response.paramsErr("请输入验证码");
+        if (managerUsersVO.getToken() == null || managerUsersVO.getUid() == null)//判断是否为空
+            return Response.systemErr("保存失败,系统异常");
+        String loginCryptoStr = RedisUtils.get("M:LoginCrypto:" + managerUsersVO.getUid());
+        if (loginCryptoStr == null) return Response.systemErr("请重新输入验证码");
+        LoginCrypto loginCrypto = JSONUtils.toEntity(loginCryptoStr, LoginCrypto.class);
+        if (loginCrypto == null) return Response.systemErr("保存失败,系统异常");
+        if (!Objects.equals(loginCrypto.getCaptcha(), managerUsersVO.getCaptcha().toLowerCase()))
+            return Response.authErr("验证码错误");
+        byte[] VOPasswordBytes = null;
+        byte[] VOAccountBytes = null;
+        byte[] VOFPBytes;
+        try {
+            VOFPBytes = RSAUtil.decryptByPrivateKey(Base64.decode(managerUsersVO.getToken()), loginCrypto.getRsaPrvKey());
+        } catch (Exception e) {
+            return Response.paramsErr("保存失败,数据异常");
+        }
+        if (managerUsersVO.getPassword() != null) {//密码不为空,对密码进行解密
+            try {
+                VOPasswordBytes = RSAUtil.decryptByPrivateKey(Base64.decode(managerUsersVO.getPassword()), loginCrypto.getRsaPrvKey());
+            } catch (Exception e) {
+                return Response.paramsErr("保存失败,数据异常");
+            }
+        }
+        if (managerUsersVO.getId() == null) {//id为空,对账号进行解密
+            try {
+                VOAccountBytes = RSAUtil.decryptByPrivateKey(Base64.decode(managerUsersVO.getAccount()), loginCrypto.getRsaPrvKey());
+            } catch (Exception e) {
+                return Response.paramsErr("保存失败,数据异常");
+            }
+        }
+        String VOAccount = null;
+        String VOPassword = null;
+        if (VOAccountBytes != null) VOAccount = new String(VOAccountBytes);
+        if (VOPasswordBytes != null) VOPassword = new String(VOPasswordBytes);
+        String VOFP = new String(VOFPBytes);
+        if (VOFP.length() != 32) return Response.paramsErr("保存失败,数据异常");
+        if (managerUsersVO.getId() != null) {
+            if (!Validator.isValidAccount(VOAccount)) return Response.paramsErr("账号格式不合规");
+        }
+        if (managerUsersVO.getPassword() != null) {
+            if (!Validator.isValidPassword(VOPassword)) return Response.paramsErr("密码格式不合规");
+        }
+        //给权限编辑管理员信息
+        //这个是修改或添加管理员信息的接口
+        ManagerUsers managerUsers = new ManagerUsers();
+        //根据id是否为空来判断当前操作是修改还是新增管理员
+        if (managerUsers.getId() != null) {  //id为空，新增
+            //新增管理员信息
+            BeanUtil.copyProperties(managerUsersVO, managerUsers, true);
+            LocalDateTime localDateTime = LocalDateTime.now();
+            managerUsers.setCreatedAt(localDateTime);
+            managerUsers.setUpdatedAt(localDateTime);
+            managerUsers.setAccount(VOAccount);
+            managerUsers.setPassword(MD5.MD5Password(VOAccount + VOPassword));
+            boolean res = save(managerUsers);
+            if (!res) return Response.dataErr("保存失败,数据库异常");
+            return Response.success("新增成功", managerUsers.getId());
+        }
+        //id不为空修改
+        managerUsers = getManagerUserById(managerUsersVO.getId());//id不为空的话需要事先查一次数据库：
+        // 如果不存在id为xxx的数据，则返回管理员不存在
+        if (managerUsers == null) return Response.paramsErr("未找到该管理员");
+        //id存在
+        LocalDateTime localDateTime = LocalDateTime.now();
+        BeanUtil.copyProperties(managerUsersVO, managerUsers, true);//更改字段(VO源，managerUsers靶，忽略不需要的字段）
+        managerUsers.setUpdatedAt(localDateTime);
+        if (managerUsersVO.getPassword()!=null)
+            managerUsers.setPassword(MD5.MD5Password(managerUsers.getAccount()+VOPassword));
+        if (!updateById(managerUsers)) return Response.dataErr("保存失败,数据库异常");
+        return Response.success("保存成功", managerUsers.getId());
     }
 
     @Override
@@ -233,7 +300,8 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (!Validator.isValidPageSize(pageVO.getSize())) return Response.paramsErr("请求数量超出范围");
         Page<ManagerUsers> page = new Page<>(pageVO.getCurrent(), pageVO.getSize());
         QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at").orderByDesc("id");;
+        queryWrapper.isNull("deleted_at").orderByDesc("id");
+        ;
         managerUsersMapper.selectPage(page, queryWrapper);
         List<ManagerUsers> itemsList = page.getRecords();
         HashMap<String, Object> data = new HashMap<>();

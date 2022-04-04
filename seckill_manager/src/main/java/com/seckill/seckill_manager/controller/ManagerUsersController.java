@@ -103,7 +103,7 @@ public class ManagerUsersController {
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.AdminInfoPermission)
-    @OperateRecord(operateName = "获取单个管理员信息",level = LevelCode.OPERATE_READ)
+    //@OperateRecord(operateName = "获取单个管理员信息",level = LevelCode.OPERATE_READ)
     @PostMapping("/admin/get_admin")
     public Response getAdmin(HttpServletRequest request, @RequestBody QueryVO queryByIdVO) {
         Response res = managerUsersService.getAdmin(queryByIdVO);
@@ -136,6 +136,4 @@ public class ManagerUsersController {
         }
         return res;
     }
-
-
 }

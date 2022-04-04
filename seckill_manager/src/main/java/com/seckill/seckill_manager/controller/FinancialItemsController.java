@@ -48,7 +48,7 @@ public class FinancialItemsController {
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.FinancialItemPermission)
-    @OperateRecord(operateName = "获取单个理财产品信息",level = LevelCode.OPERATE_READ)
+    //@OperateRecord(operateName = "获取单个理财产品信息",level = LevelCode.OPERATE_READ)
     @PostMapping("/get_item")
     public Response getItem(HttpServletRequest request, @RequestBody QueryVO queryByIdVO) {
         Response res = financialItemsService.getFinancialItem(queryByIdVO);

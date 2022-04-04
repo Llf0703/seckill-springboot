@@ -68,7 +68,7 @@ public class SeckillItemsController {
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.SeckillItemPermission)
-    @OperateRecord(operateName = "获取单个秒杀活动信息",level = LevelCode.OPERATE_READ)
+    //@OperateRecord(operateName = "获取单个秒杀活动信息",level = LevelCode.OPERATE_READ)
     @PostMapping("/get_item")
     public Response getItem(HttpServletRequest request, @RequestBody QueryVO queryByIdVO) {
         Response res= seckillItemsService.getSeckillItem(queryByIdVO);

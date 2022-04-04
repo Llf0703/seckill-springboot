@@ -47,7 +47,7 @@ public class RiskControlController {
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.RiskControlPermission)
-    @OperateRecord(operateName = "获取单个决策引擎信息",level = LevelCode.OPERATE_READ)
+    //@OperateRecord(operateName = "获取单个决策引擎信息",level = LevelCode.OPERATE_READ)
     @PostMapping("/get_item")
     public Response getItem(HttpServletRequest request, @RequestBody QueryVO queryByIdVO) {
         Response res = riskControlService.getRiskControl(queryByIdVO);
