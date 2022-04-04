@@ -9,8 +9,7 @@ import com.seckill.seckill_manager.controller.dto.FinancialItemDTO;
 import com.seckill.seckill_manager.controller.dto.RiskControlDTO;
 import com.seckill.seckill_manager.controller.dto.SeckillItemDTO;
 import com.seckill.seckill_manager.controller.vo.PageVO;
-import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
-import com.seckill.seckill_manager.controller.vo.QueryByNameVO;
+import com.seckill.seckill_manager.controller.vo.QueryVO;
 import com.seckill.seckill_manager.controller.vo.SeckillItemVO;
 import com.seckill.seckill_manager.entity.FinancialItems;
 import com.seckill.seckill_manager.entity.RiskControl;
@@ -92,7 +91,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
     }
 
     @Override
-    public Response getSeckillItem(QueryByIdVO queryByIdVO) {
+    public Response getSeckillItem(QueryVO queryByIdVO) {
         if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
         SeckillItems seckillItems = getSeckillItemById(queryByIdVO.getId());
         if (seckillItems == null) return Response.dataNotFoundErr("未查询到相关数据");
@@ -115,7 +114,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
     }
 
     @Override
-    public Response deleteSeckillItemPage(QueryByIdVO queryByIdVO) {
+    public Response deleteSeckillItemPage(QueryVO queryByIdVO) {
         if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
         SeckillItems seckillItems = getSeckillItemById(queryByIdVO.getId());
         if (seckillItems == null) return Response.dataNotFoundErr("未查询到相关数据");
@@ -127,7 +126,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
     }
 
     @Override
-    public Response searchFinancialItemOptions(QueryByNameVO queryByNameVO) {
+    public Response searchFinancialItemOptions(QueryVO queryByNameVO) {
         if (queryByNameVO.getKeyWord() == null) return null;
         if (!Validator.isValidProductName(queryByNameVO.getKeyWord())) return Response.success("OK",0);
         Page<FinancialItems> page = new Page<>(1, 25);
@@ -139,7 +138,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
     }
 
     @Override
-    public Response searchRiskControlOptions(QueryByNameVO queryByNameVO) {
+    public Response searchRiskControlOptions(QueryVO queryByNameVO) {
         if (queryByNameVO.getKeyWord() == null) return null;
         if (!Validator.isValidProductName(queryByNameVO.getKeyWord())) return Response.success("OK",0);
         Page<RiskControl> page = new Page<>(1, 25);

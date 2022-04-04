@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.FinancialItemVO;
 import com.seckill.seckill_manager.controller.vo.PageVO;
-import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
+import com.seckill.seckill_manager.controller.vo.QueryVO;
 import com.seckill.seckill_manager.entity.FinancialItems;
 
 /**
@@ -17,7 +17,7 @@ import com.seckill.seckill_manager.entity.FinancialItems;
  */
 public interface IFinancialItemsService extends IService<FinancialItems> {
     Response editFinancialItem(FinancialItemVO financialItemVO);
-    Response getFinancialItem(QueryByIdVO queryByIdVO);
+    Response getFinancialItem(QueryVO queryByIdVO);
     Response getFinancialItemPage(PageVO pageVO);
-    Response deleteFinancialItem(QueryByIdVO queryByIdVO);
+    Response deleteFinancialItem(QueryVO queryByIdVO);
 }

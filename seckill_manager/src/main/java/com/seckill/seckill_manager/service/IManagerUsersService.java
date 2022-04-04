@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.ManagerUsersVO;
 import com.seckill.seckill_manager.controller.vo.PageVO;
-import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
+import com.seckill.seckill_manager.controller.vo.QueryVO;
 import com.seckill.seckill_manager.entity.ManagerUsers;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,9 +23,9 @@ public interface IManagerUsersService extends IService<ManagerUsers> {
     Response checkVersion(String token, String ip);
     Response loginOut(String token,String ip);
     Response editAdmin(ManagerUsersVO managerUsersVO);
-    Response getAdmin(QueryByIdVO queryByIdVO);
+    Response getAdmin(QueryVO queryByIdVO);
     Response getAdminPage(PageVO pageVO);
-    Response deleteAdmin(QueryByIdVO queryByIdVO);
+    Response deleteAdmin(QueryVO queryByIdVO);
     Response getUserInfo(HttpServletRequest request);
     Response validPassword(HttpServletRequest request,ManagerUsersVO managerUsersVO);
     Response resetPassword(HttpServletRequest request,String pathParams,ManagerUsersVO managerUsersVO);

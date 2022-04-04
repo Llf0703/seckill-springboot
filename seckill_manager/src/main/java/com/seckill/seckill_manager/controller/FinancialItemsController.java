@@ -9,7 +9,7 @@ import com.seckill.seckill_manager.Interceptor.Type.Permission;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.FinancialItemVO;
 import com.seckill.seckill_manager.controller.vo.PageVO;
-import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
+import com.seckill.seckill_manager.controller.vo.QueryVO;
 import com.seckill.seckill_manager.service.impl.FinancialItemsServiceImpl;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,7 +36,7 @@ public class FinancialItemsController {
 
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.FinancialItemPermission)
-    @OperateRecord(operateName = "编辑理财产品")
+    @OperateRecord(operateName = "编辑理财产品",level = LevelCode.OPERATE_EDIT)
     @PostMapping("/edit_item")
     public Response editItem(HttpServletRequest request, @RequestBody FinancialItemVO financialItemVO) {
         Response res = financialItemsService.editFinancialItem(financialItemVO);
@@ -48,9 +48,9 @@ public class FinancialItemsController {
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.FinancialItemPermission)
-    @OperateRecord(operateName = "获取单个理财产品信息")
+    @OperateRecord(operateName = "获取单个理财产品信息",level = LevelCode.OPERATE_READ)
     @PostMapping("/get_item")
-    public Response getItem(HttpServletRequest request, @RequestBody QueryByIdVO queryByIdVO) {
+    public Response getItem(HttpServletRequest request, @RequestBody QueryVO queryByIdVO) {
         Response res = financialItemsService.getFinancialItem(queryByIdVO);
         if (res.getStatus()) {
             request.setAttribute("operateId", res.getId());
@@ -60,7 +60,7 @@ public class FinancialItemsController {
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.FinancialItemPermission)
-    @OperateRecord(operateName = "分页查询理财产品信息")
+    @OperateRecord(operateName = "分页查询理财产品信息",level = LevelCode.OPERATE_READ)
     @PostMapping("/get_page")
     public Response getPage(HttpServletRequest request, @RequestBody PageVO pageVO) {
         Response res = financialItemsService.getFinancialItemPage(pageVO);
@@ -72,9 +72,9 @@ public class FinancialItemsController {
 
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.FinancialItemPermission)
-    @OperateRecord(operateName = "删除理财产品")
+    @OperateRecord(operateName = "删除理财产品",level = LevelCode.OPERATE_DELETE)
     @PostMapping("/delete_item")
-    public Response deleteItem(HttpServletRequest request, @RequestBody QueryByIdVO queryByIdVO) {
+    public Response deleteItem(HttpServletRequest request, @RequestBody QueryVO queryByIdVO) {
         Response res = financialItemsService.deleteFinancialItem(queryByIdVO);
         if (res.getStatus()) {
             request.setAttribute("operateId", res.getId());

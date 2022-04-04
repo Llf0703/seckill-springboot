@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author wky1742095859
@@ -44,21 +44,25 @@ public class OperateRecord implements Serializable {
 
     private String operate;
 
-    @ApiModelProperty("如果为增删查改此处为id,分页查询此处为空")
+    @ApiModelProperty("0读/登录,1改,2删除")
+    private Integer level;
+
+    @ApiModelProperty("如果为增删查改此处为id,分页查询此处为0")
     private Integer operateId;
 
 
     @Override
     public String toString() {
         return "OperateRecord{" +
-            "id=" + id +
-            ", createdAt=" + createdAt +
-            ", updatedAt=" + updatedAt +
-            ", deletedAt=" + deletedAt +
-            ", managerUserId=" + managerUserId +
-            ", managerUserAccount=" + managerUserAccount +
-            ", operate=" + operate +
-            ", operateId=" + operateId +
-        "}";
+                "id=" + id +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", deletedAt=" + deletedAt +
+                ", managerUserId=" + managerUserId +
+                ", managerUserAccount=" + managerUserAccount +
+                ", operate=" + operate +
+                ", level=" + level +
+                ", operateId=" + operateId +
+                "}";
     }
 }

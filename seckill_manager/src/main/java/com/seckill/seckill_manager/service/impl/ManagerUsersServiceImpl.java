@@ -8,7 +8,7 @@ import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.dto.ManagerUserDTO;
 import com.seckill.seckill_manager.controller.vo.ManagerUsersVO;
 import com.seckill.seckill_manager.controller.vo.PageVO;
-import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
+import com.seckill.seckill_manager.controller.vo.QueryVO;
 import com.seckill.seckill_manager.entity.ManagerUsers;
 import com.seckill.seckill_manager.entity.RedisService.LoginAdmin;
 import com.seckill.seckill_manager.entity.RedisService.LoginCrypto;
@@ -220,7 +220,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
     }
 
     @Override
-    public Response getAdmin(QueryByIdVO queryByIdVO) {
+    public Response getAdmin(QueryVO queryByIdVO) {
         if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
         ManagerUsers managerUsers = getManagerUserById(queryByIdVO.getId());
         if (managerUsers == null) return Response.dataNotFoundErr("未查询到相关数据");
@@ -243,7 +243,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
     }
 
     @Override
-    public Response deleteAdmin(QueryByIdVO queryByIdVO) {
+    public Response deleteAdmin(QueryVO queryByIdVO) {
         if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
         ManagerUsers managerUsers = getManagerUserById(queryByIdVO.getId());
         if (managerUsers == null) return Response.dataNotFoundErr("未查询到相关数据");

@@ -9,7 +9,7 @@ import com.seckill.seckill_manager.Interceptor.Type.Permission;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.ManagerUsersVO;
 import com.seckill.seckill_manager.controller.vo.PageVO;
-import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
+import com.seckill.seckill_manager.controller.vo.QueryVO;
 import com.seckill.seckill_manager.service.impl.ManagerUsersServiceImpl;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +37,7 @@ public class ManagerUsersController {
 
     }
 
-    @OperateRecord(operateName = "登录")
+    @OperateRecord(operateName = "登录",level = LevelCode.OPERATE_READ)
     @PostMapping("/auth/login")
     public Response login(HttpServletRequest request, @RequestBody ManagerUsersVO managerUsersVO) {
         String ip = request.getHeader("X-real-ip");
@@ -91,7 +91,7 @@ public class ManagerUsersController {
 
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.AdminInfoPermission)
-    @OperateRecord(operateName = "编辑管理员")
+    @OperateRecord(operateName = "编辑管理员",level = LevelCode.OPERATE_EDIT)
     @PostMapping("/admin/edit_admin")
     public Response editAdmin(HttpServletRequest request, @RequestBody ManagerUsersVO managerUsersVO) {
         Response res = managerUsersService.editAdmin(managerUsersVO);
@@ -103,9 +103,9 @@ public class ManagerUsersController {
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.AdminInfoPermission)
-    @OperateRecord(operateName = "获取单个管理员信息")
+    @OperateRecord(operateName = "获取单个管理员信息",level = LevelCode.OPERATE_READ)
     @PostMapping("/admin/get_admin")
-    public Response getAdmin(HttpServletRequest request, @RequestBody QueryByIdVO queryByIdVO) {
+    public Response getAdmin(HttpServletRequest request, @RequestBody QueryVO queryByIdVO) {
         Response res = managerUsersService.getAdmin(queryByIdVO);
         if (res.getStatus()) {
             request.setAttribute("operateId", res.getId());
@@ -115,7 +115,7 @@ public class ManagerUsersController {
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.AdminInfoPermission)
-    @OperateRecord(operateName = "分页查询管理员信息")
+    @OperateRecord(operateName = "分页查询管理员信息",level = LevelCode.OPERATE_READ)
     @PostMapping("/admin/get_page")
     public Response getPage(HttpServletRequest request, @RequestBody PageVO pageVO) {
         Response res = managerUsersService.getAdminPage(pageVO);
@@ -127,9 +127,9 @@ public class ManagerUsersController {
 
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.AdminInfoPermission)
-    @OperateRecord(operateName = "删除管理员")
+    @OperateRecord(operateName = "删除管理员",level = LevelCode.OPERATE_DELETE)
     @PostMapping("/admin/delete_admin")
-    public Response deleteAdmin(HttpServletRequest request, @RequestBody QueryByIdVO queryByIdVO) {
+    public Response deleteAdmin(HttpServletRequest request, @RequestBody QueryVO queryByIdVO) {
         Response res = managerUsersService.deleteAdmin(queryByIdVO);
         if (res.getStatus()) {
             request.setAttribute("operateId", res.getId());

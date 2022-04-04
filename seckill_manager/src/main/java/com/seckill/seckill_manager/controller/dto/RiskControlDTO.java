@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,6 +22,10 @@ class RiskControlOptionsDTO {
 @NoArgsConstructor
 class RiskControlTableDTO {
     private Integer id;
+
+    private String createdAt;
+
+    private String updatedAt;
 
     private String policyName;
 
@@ -57,6 +62,9 @@ public class RiskControlDTO {
 
     public static RiskControlTableDTO toRiskControlTableDTO(RiskControl riskControl) {
         RiskControlTableDTO riskControlTableDTO = new RiskControlTableDTO();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        riskControlTableDTO.setCreatedAt(riskControl.getCreatedAt().format(dateTimeFormatter));
+        riskControlTableDTO.setUpdatedAt(riskControl.getUpdatedAt().format(dateTimeFormatter));
         riskControlTableDTO.setId(riskControl.getId());
         riskControlTableDTO.setPolicyName(riskControl.getPolicyName());
         riskControlTableDTO.setAgeLimit(riskControl.getAgeLimit().toString());

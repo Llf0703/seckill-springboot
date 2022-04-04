@@ -3,7 +3,7 @@ package com.seckill.seckill_manager.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.PageVO;
-import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
+import com.seckill.seckill_manager.controller.vo.QueryVO;
 import com.seckill.seckill_manager.controller.vo.RiskControlVO;
 import com.seckill.seckill_manager.entity.RiskControl;
 
@@ -17,7 +17,7 @@ import com.seckill.seckill_manager.entity.RiskControl;
  */
 public interface IRiskControlService extends IService<RiskControl> {
     Response editRiskControl(RiskControlVO riskControlVO);
-    Response getRiskControl(QueryByIdVO queryByIdVO);
+    Response getRiskControl(QueryVO queryByIdVO);
     Response getRiskControlPage(PageVO pageVO);
-    Response deleteRiskControl(QueryByIdVO queryByIdVO);
+    Response deleteRiskControl(QueryVO queryByIdVO);
 }

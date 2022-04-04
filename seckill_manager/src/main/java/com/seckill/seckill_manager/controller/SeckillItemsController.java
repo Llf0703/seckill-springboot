@@ -8,8 +8,7 @@ import com.seckill.seckill_manager.Interceptor.Type.OperateRecord;
 import com.seckill.seckill_manager.Interceptor.Type.Permission;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.PageVO;
-import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
-import com.seckill.seckill_manager.controller.vo.QueryByNameVO;
+import com.seckill.seckill_manager.controller.vo.QueryVO;
 import com.seckill.seckill_manager.controller.vo.SeckillItemVO;
 import com.seckill.seckill_manager.service.impl.SeckillItemsServiceImpl;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +34,7 @@ public class SeckillItemsController {
 
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.SeckillItemPermission)
-    @OperateRecord(operateName = "编辑秒杀活动")
+    @OperateRecord(operateName = "编辑秒杀活动",level = LevelCode.OPERATE_EDIT)
     @PostMapping("/edit_item")
     public Response editItemController(HttpServletRequest request, @RequestBody SeckillItemVO item) {
         Response res= seckillItemsService.editSeckillItem(item);
@@ -48,7 +47,7 @@ public class SeckillItemsController {
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.SeckillItemPermission)
     @PostMapping("/search_financial_item")
-    public Response searchFinancialItemOptions(HttpServletRequest request, @RequestBody QueryByNameVO queryByNameVO) {
+    public Response searchFinancialItemOptions(HttpServletRequest request, @RequestBody QueryVO queryByNameVO) {
         Response res= seckillItemsService.searchFinancialItemOptions(queryByNameVO);
         if (res.getStatus()) {
             request.setAttribute("operateId", res.getId());
@@ -59,7 +58,7 @@ public class SeckillItemsController {
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.SeckillItemPermission)
     @PostMapping("/search_risk_control")
-    public Response searchRiskControlOptions(HttpServletRequest request, @RequestBody QueryByNameVO queryByNameVO) {
+    public Response searchRiskControlOptions(HttpServletRequest request, @RequestBody QueryVO queryByNameVO) {
         Response res= seckillItemsService.searchRiskControlOptions(queryByNameVO);
         if (res.getStatus()) {
             request.setAttribute("operateId", res.getId());
@@ -69,9 +68,9 @@ public class SeckillItemsController {
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.SeckillItemPermission)
-    @OperateRecord(operateName = "获取单个秒杀活动信息")
+    @OperateRecord(operateName = "获取单个秒杀活动信息",level = LevelCode.OPERATE_READ)
     @PostMapping("/get_item")
-    public Response getItem(HttpServletRequest request, @RequestBody QueryByIdVO queryByIdVO) {
+    public Response getItem(HttpServletRequest request, @RequestBody QueryVO queryByIdVO) {
         Response res= seckillItemsService.getSeckillItem(queryByIdVO);
         if (res.getStatus()) {
             request.setAttribute("operateId", res.getId());
@@ -81,7 +80,7 @@ public class SeckillItemsController {
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.SeckillItemPermission)
-    @OperateRecord(operateName = "分页查询秒杀活动信息")
+    @OperateRecord(operateName = "分页查询秒杀活动信息",level = LevelCode.OPERATE_READ)
     @PostMapping("/get_page")
     public Response getPage(HttpServletRequest request, @RequestBody PageVO pageVO) {
         Response res= seckillItemsService.getSeckillItemPage(pageVO);
@@ -93,9 +92,9 @@ public class SeckillItemsController {
 
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.SeckillItemPermission)
-    @OperateRecord(operateName = "删除秒杀活动")
+    @OperateRecord(operateName = "删除秒杀活动",level = LevelCode.OPERATE_DELETE)
     @PostMapping("/delete_item")
-    public Response deleteItem(HttpServletRequest request, QueryByIdVO queryByIdVO) {
+    public Response deleteItem(HttpServletRequest request, QueryVO queryByIdVO) {
         Response res= seckillItemsService.deleteSeckillItemPage(queryByIdVO);
         if (res.getStatus()) {
             request.setAttribute("operateId", res.getId());

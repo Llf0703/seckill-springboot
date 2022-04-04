@@ -17,4 +17,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)//表示在运行时有效
 public @interface OperateRecord {
     String operateName();
+    int level();
 }

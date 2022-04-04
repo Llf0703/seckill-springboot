@@ -8,7 +8,7 @@ import com.seckill.seckill_manager.Interceptor.Type.OperateRecord;
 import com.seckill.seckill_manager.Interceptor.Type.Permission;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.PageVO;
-import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
+import com.seckill.seckill_manager.controller.vo.QueryVO;
 import com.seckill.seckill_manager.controller.vo.RiskControlVO;
 import com.seckill.seckill_manager.service.impl.RiskControlServiceImpl;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,7 +35,7 @@ public class RiskControlController {
 
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.RiskControlPermission)
-    @OperateRecord(operateName = "编辑决策引擎")
+    @OperateRecord(operateName = "编辑决策引擎",level = LevelCode.OPERATE_EDIT)
     @PostMapping("/edit_item")
     public Response editItem(HttpServletRequest request, @RequestBody RiskControlVO riskControlVO) {
         Response res = riskControlService.editRiskControl(riskControlVO);
@@ -47,9 +47,9 @@ public class RiskControlController {
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.RiskControlPermission)
-    @OperateRecord(operateName = "获取单个决策引擎信息")
+    @OperateRecord(operateName = "获取单个决策引擎信息",level = LevelCode.OPERATE_READ)
     @PostMapping("/get_item")
-    public Response getItem(HttpServletRequest request, @RequestBody QueryByIdVO queryByIdVO) {
+    public Response getItem(HttpServletRequest request, @RequestBody QueryVO queryByIdVO) {
         Response res = riskControlService.getRiskControl(queryByIdVO);
         if (res.getStatus()) {
             request.setAttribute("operateId", res.getId());
@@ -59,7 +59,7 @@ public class RiskControlController {
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.RiskControlPermission)
-    @OperateRecord(operateName = "分页查询决策引擎信息")
+    @OperateRecord(operateName = "分页查询决策引擎信息",level = LevelCode.OPERATE_READ)
     @PostMapping("/get_page")
     public Response getPage(HttpServletRequest request, @RequestBody PageVO pageVO) {
         Response res = riskControlService.getRiskControlPage(pageVO);
@@ -71,9 +71,9 @@ public class RiskControlController {
 
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.RiskControlPermission)
-    @OperateRecord(operateName = "删除决策引擎")
+    @OperateRecord(operateName = "删除决策引擎",level = LevelCode.OPERATE_DELETE)
     @PostMapping("/delete_item")
-    public Response deleteItem(HttpServletRequest request, @RequestBody QueryByIdVO queryByIdVO) {
+    public Response deleteItem(HttpServletRequest request, @RequestBody QueryVO queryByIdVO) {
         Response res = riskControlService.deleteRiskControl(queryByIdVO);
         if (res.getStatus()) {
             request.setAttribute("operateId", res.getId());

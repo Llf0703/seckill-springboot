@@ -8,7 +8,7 @@ import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.dto.FinancialItemDTO;
 import com.seckill.seckill_manager.controller.vo.FinancialItemVO;
 import com.seckill.seckill_manager.controller.vo.PageVO;
-import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
+import com.seckill.seckill_manager.controller.vo.QueryVO;
 import com.seckill.seckill_manager.entity.FinancialItems;
 import com.seckill.seckill_manager.mapper.FinancialItemsMapper;
 import com.seckill.seckill_manager.service.IFinancialItemsService;
@@ -94,7 +94,7 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
     }
 
     @Override
-    public Response getFinancialItem(QueryByIdVO queryByIdVO) {
+    public Response getFinancialItem(QueryVO queryByIdVO) {
         if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
         FinancialItems financialItem = getFinancialItemById(queryByIdVO.getId());
         if (financialItem == null) return Response.dataNotFoundErr("产品不存在");
@@ -114,7 +114,7 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
     }
 
     @Override
-    public Response deleteFinancialItem(QueryByIdVO queryByIdVO) {
+    public Response deleteFinancialItem(QueryVO queryByIdVO) {
         if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
         FinancialItems financialItem = getFinancialItemById(queryByIdVO.getId());
         if (financialItem == null) return Response.dataNotFoundErr("产品不存在");

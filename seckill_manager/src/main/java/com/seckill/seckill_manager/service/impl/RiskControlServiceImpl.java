@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.dto.RiskControlDTO;
 import com.seckill.seckill_manager.controller.vo.PageVO;
-import com.seckill.seckill_manager.controller.vo.QueryByIdVO;
+import com.seckill.seckill_manager.controller.vo.QueryVO;
 import com.seckill.seckill_manager.controller.vo.RiskControlVO;
 import com.seckill.seckill_manager.entity.RiskControl;
 import com.seckill.seckill_manager.mapper.RiskControlMapper;
@@ -69,7 +69,7 @@ public class RiskControlServiceImpl extends ServiceImpl<RiskControlMapper, RiskC
     }
 
     @Override
-    public Response getRiskControl(QueryByIdVO queryByIdVO) {
+    public Response getRiskControl(QueryVO queryByIdVO) {
         if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
         RiskControl riskControl = getRiskControlById(queryByIdVO.getId());
         if (riskControl == null) return Response.dataNotFoundErr("未查询到相关数据");
@@ -94,7 +94,7 @@ public class RiskControlServiceImpl extends ServiceImpl<RiskControlMapper, RiskC
     }
 
     @Override
-    public Response deleteRiskControl(QueryByIdVO queryByIdVO) {
+    public Response deleteRiskControl(QueryVO queryByIdVO) {
         if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
         RiskControl riskControl = getRiskControlById(queryByIdVO.getId());
         if (riskControl == null) return Response.dataNotFoundErr("未查询到相关数据");
