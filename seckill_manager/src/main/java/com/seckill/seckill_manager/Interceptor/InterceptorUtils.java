@@ -2,7 +2,6 @@ package com.seckill.seckill_manager.Interceptor;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.seckill.seckill_manager.entity.ManagerUsers;
-import com.seckill.seckill_manager.entity.OperateRecord;
 import com.seckill.seckill_manager.entity.RedisService.LoginAdmin;
 import com.seckill.seckill_manager.mapper.ManagerUsersMapper;
 import com.seckill.seckill_manager.mapper.OperateRecordMapper;
@@ -133,10 +132,5 @@ public class InterceptorUtils {
         res.put("user", managerUser);
         return res;
         //return Objects.equals(userInfoStr[0], token) && Objects.equals(userInfoStr[1], userInfoStr);
-    }
-    public static void operateRecord(String operateName,Integer id){
-        OperateRecord operateRecord=new OperateRecord();
-        operateRecord.setOperate(operateName);
-
     }
 }
