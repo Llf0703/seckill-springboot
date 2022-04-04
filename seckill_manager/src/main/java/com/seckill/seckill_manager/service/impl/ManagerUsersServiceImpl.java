@@ -222,6 +222,20 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (loginCrypto == null) return Response.systemErr("保存失败,系统异常");
         if (!Objects.equals(loginCrypto.getCaptcha(), managerUsersVO.getCaptcha().toLowerCase()))
             return Response.authErr("验证码错误");
+        if (!Validator.isValidZeroOrOneOrTwo(managerUsersVO.getSeckillItemsPermissions()))
+            return Response.paramsErr("秒杀活动管理权限错误");
+        if (!Validator.isValidZeroOrOne(managerUsersVO.getRechargeRecordPermissions()))
+            return Response.paramsErr("充值记录管理权限错误");
+        if (!Validator.isValidZeroOrOne(managerUsersVO.getSeckillRecordPermissions()))
+            return Response.paramsErr("秒杀记录管理权限错误");
+        if (!Validator.isValidZeroOrOneOrTwo(managerUsersVO.getAdminInfoPermissions()))
+            return Response.paramsErr("管理员信息管理权限错误");
+        if (!Validator.isValidZeroOrOneOrTwo(managerUsersVO.getFinancialItemsPermissions()))
+            return Response.paramsErr("理财产品管理权限错误");
+        if (!Validator.isValidZeroOrOneOrTwo(managerUsersVO.getRiskControlPermissions()))
+            return Response.paramsErr("风险引擎管理权限错误");
+        if (!Validator.isValidZeroOrOneOrTwo(managerUsersVO.getGuestInfoPermissions()))
+            return Response.paramsErr("客户信息管理权限错误");
         byte[] VOPasswordBytes = null;
         byte[] VOAccountBytes = null;
         byte[] VOFPBytes;
@@ -270,6 +284,8 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
             managerUsers.setPassword(MD5.MD5Password(VOAccount + VOPassword));
             boolean res = save(managerUsers);
             if (!res) return Response.dataErr("保存失败,数据库异常");
+            String res1 = RedisUtils.set("M:ManagerUser:" + managerUsers.getAccount(), JSONUtils.toJSONStr(managerUsers), 25200);
+            if (!Objects.equals(res1, "OK")) return Response.success("新增成功", managerUsers.getId());
             return Response.success("新增成功", managerUsers.getId());
         }
         //id不为空修改
@@ -277,12 +293,19 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         // 如果不存在id为xxx的数据，则返回管理员不存在
         if (managerUsers == null) return Response.paramsErr("未找到该管理员");
         //id存在
+        VOAccount = managerUsers.getAccount();//防止账号被修改
         LocalDateTime localDateTime = LocalDateTime.now();
         BeanUtil.copyProperties(managerUsersVO, managerUsers, true);//更改字段(VO源，managerUsers靶，忽略不需要的字段）
         managerUsers.setUpdatedAt(localDateTime);
-        if (managerUsersVO.getPassword()!=null)
-            managerUsers.setPassword(MD5.MD5Password(managerUsers.getAccount()+VOPassword));
+        managerUsers.setAccount(VOAccount);
+        if (managerUsersVO.getPassword() != null)
+            managerUsers.setPassword(MD5.MD5Password(managerUsers.getAccount() + VOPassword));
         if (!updateById(managerUsers)) return Response.dataErr("保存失败,数据库异常");
+        String res1 = RedisUtils.set("M:ManagerUser:" + managerUsers.getAccount(), JSONUtils.toJSONStr(managerUsers), 25200);
+        if (!Objects.equals(res1, "OK")) {
+            RedisUtils.del("M:ManagerUser:" + managerUsers.getAccount());
+            return Response.success("保存成功,但可能需要等待一段时间才能应用变更", managerUsers.getId());
+        }
         return Response.success("保存成功", managerUsers.getId());
     }
 

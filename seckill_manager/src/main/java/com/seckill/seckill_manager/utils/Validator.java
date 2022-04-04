@@ -22,7 +22,7 @@ interface RegexStr {
  */
 public class Validator {
     public static boolean isValidDescription(String str) {
-        if (str==null)return false;
+        if (str == null) return false;
         return Pattern.matches(RegexStr.REGEX_DESCRIPTION, str);
     }
 
@@ -110,6 +110,10 @@ public class Validator {
      **/
     public static boolean isValidZeroOrOne(int n) {
         return n == 1 || n == 0;
+    }
+
+    public static boolean isValidZeroOrOneOrTwo(int n) {
+        return n == 0 || n == 1 || n == 2;
     }
 
     /*

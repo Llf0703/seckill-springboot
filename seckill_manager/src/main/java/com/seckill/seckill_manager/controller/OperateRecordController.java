@@ -4,7 +4,6 @@ package com.seckill.seckill_manager.controller;
 import com.seckill.seckill_manager.Interceptor.LevelCode;
 import com.seckill.seckill_manager.Interceptor.PermissionType;
 import com.seckill.seckill_manager.Interceptor.Type.LoginRequired;
-import com.seckill.seckill_manager.Interceptor.Type.OperateRecord;
 import com.seckill.seckill_manager.Interceptor.Type.Permission;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.PageVO;
@@ -33,7 +32,7 @@ public class OperateRecordController {
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.SeckillItemPermission)
-    @OperateRecord(operateName = "分页查询操作日志",level = LevelCode.OPERATE_READ)
+    //@OperateRecord(operateName = "分页查询操作日志",level = LevelCode.OPERATE_READ)
     @PostMapping("/get_page")
     public Response getPage(HttpServletRequest request, @RequestBody PageVO pageVO) {
         Response res= operateRecordService.getOperateRecordPage(pageVO);
