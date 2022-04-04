@@ -4,6 +4,7 @@ package com.seckill.seckill_manager.controller;
 import com.seckill.seckill_manager.Interceptor.LevelCode;
 import com.seckill.seckill_manager.Interceptor.PermissionType;
 import com.seckill.seckill_manager.Interceptor.Type.LoginRequired;
+import com.seckill.seckill_manager.Interceptor.Type.OperateRecord;
 import com.seckill.seckill_manager.Interceptor.Type.Permission;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.PageVO;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * <p>
@@ -33,36 +35,49 @@ public class RiskControlController {
 
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.RiskControlPermission)
-    @PostMapping("/add_item")
-    public Response addItem(@RequestBody RiskControlVO riskControlVO) {
-        return riskControlService.editRiskControl(riskControlVO);
-    }
-
-    @LoginRequired
-    @Permission(level = LevelCode.EDIT, permission = PermissionType.RiskControlPermission)
+    @OperateRecord(operateName = "编辑决策引擎")
     @PostMapping("/edit_item")
-    public Response editItem(@RequestBody RiskControlVO riskControlVO) {
-        return riskControlService.editRiskControl(riskControlVO);
+    public Response editItem(HttpServletRequest request, @RequestBody RiskControlVO riskControlVO) {
+        Response res = riskControlService.editRiskControl(riskControlVO);
+        if (res.getStatus()) {
+            request.setAttribute("operateId", res.getId());
+        }
+        return res;
     }
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.RiskControlPermission)
+    @OperateRecord(operateName = "获取单个决策引擎信息")
     @PostMapping("/get_item")
-    public Response getItem(@RequestBody QueryByIdVO queryByIdVO) {
-        return riskControlService.getRiskControl(queryByIdVO);
+    public Response getItem(HttpServletRequest request, @RequestBody QueryByIdVO queryByIdVO) {
+        Response res = riskControlService.getRiskControl(queryByIdVO);
+        if (res.getStatus()) {
+            request.setAttribute("operateId", res.getId());
+        }
+        return res;
     }
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.RiskControlPermission)
+    @OperateRecord(operateName = "分页查询决策引擎信息")
     @PostMapping("/get_page")
-    public Response getPage(@RequestBody PageVO pageVO) {
-        return riskControlService.getRiskControlPage(pageVO);
+    public Response getPage(HttpServletRequest request, @RequestBody PageVO pageVO) {
+        Response res = riskControlService.getRiskControlPage(pageVO);
+        if (res.getStatus()) {
+            request.setAttribute("operateId", res.getId());
+        }
+        return res;
     }
 
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.RiskControlPermission)
+    @OperateRecord(operateName = "删除决策引擎")
     @PostMapping("/delete_item")
-    public Response deleteItem(@RequestBody QueryByIdVO queryByIdVO) {
-        return riskControlService.deleteRiskControl(queryByIdVO);
+    public Response deleteItem(HttpServletRequest request, @RequestBody QueryByIdVO queryByIdVO) {
+        Response res = riskControlService.deleteRiskControl(queryByIdVO);
+        if (res.getStatus()) {
+            request.setAttribute("operateId", res.getId());
+        }
+        return res;
     }
 }

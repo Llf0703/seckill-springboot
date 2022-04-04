@@ -27,6 +27,10 @@ spring:
       eager: true
       transport:
         dashboard: localhost:9100
+  mvc:
+    throw-exception-if-no-handler-found: true
+  resources:
+    add-mappings: false
 
 mybatis-plus:
   configuration:

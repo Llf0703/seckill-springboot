@@ -78,7 +78,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         if (id == null) {
             seckillItem.setCreatedAt(localDateTime);//初始化创建时间
             boolean res = save(seckillItem);
-            if (res) return Response.success("添加成功");
+            if (res) return Response.success("添加成功",seckillItem.getId());
             return Response.systemErr("database error");
         }
         if (id <= 0) return Response.dataErr("invalid id");
@@ -88,7 +88,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         if (!query.getStartTime().isBefore(LocalDateTime.now().plusHours(-2)))
             return Response.paramsErr("活动已开始或距开始小于两小时,无法修改");
         if (!updateById(seckillItem)) return Response.systemErr("database error");
-        return Response.success("修改成功");
+        return Response.success("修改成功",seckillItem.getId());
     }
 
     @Override
@@ -96,7 +96,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
         SeckillItems seckillItems = getSeckillItemById(queryByIdVO.getId());
         if (seckillItems == null) return Response.dataNotFoundErr("未查询到相关数据");
-        return Response.success(SeckillItemDTO.toSeckillPostFormDTO(seckillItems), "获取成功");
+        return Response.success(SeckillItemDTO.toSeckillPostFormDTO(seckillItems), "获取成功", seckillItems.getId());
     }
 
     @Override
@@ -111,7 +111,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         HashMap<String,Object> data=new HashMap<>();
         data.put("items",SeckillItemDTO.toSeckillItemTableDTO(itemsList));
         data.put("total",page.getTotal());
-        return Response.success(data, "获取成功");
+        return Response.success(data, "获取成功",0);
     }
 
     @Override
@@ -119,33 +119,35 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
         SeckillItems seckillItems = getSeckillItemById(queryByIdVO.getId());
         if (seckillItems == null) return Response.dataNotFoundErr("未查询到相关数据");
-        int res = seckillItemsMapper.deleteById(seckillItems);
-        System.out.println(res);
-        return Response.success(String.valueOf(res));
+        LocalDateTime nowTime=LocalDateTime.now();
+        seckillItems.setDeletedAt(nowTime);
+        boolean res = updateById(seckillItems);
+        if (!res)return Response.dataErr("删除失败,数据库异常");
+        return Response.success("删除成功",seckillItems.getId());
     }
 
     @Override
     public Response searchFinancialItemOptions(QueryByNameVO queryByNameVO) {
         if (queryByNameVO.getKeyWord() == null) return null;
-        if (!Validator.isValidProductName(queryByNameVO.getKeyWord())) return Response.success("OK");
+        if (!Validator.isValidProductName(queryByNameVO.getKeyWord())) return Response.success("OK",0);
         Page<FinancialItems> page = new Page<>(1, 25);
         QueryWrapper<FinancialItems> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("deleted_at").like("product_name", queryByNameVO.getKeyWord());
         financialItemsMapper.selectPage(page, queryWrapper);
         List<FinancialItems> itemsList = page.getRecords();
-        return Response.success(FinancialItemDTO.toFinancialItemOptionsDTO(itemsList), "OK");
+        return Response.success(FinancialItemDTO.toFinancialItemOptionsDTO(itemsList), "OK",0);
     }
 
     @Override
     public Response searchRiskControlOptions(QueryByNameVO queryByNameVO) {
         if (queryByNameVO.getKeyWord() == null) return null;
-        if (!Validator.isValidProductName(queryByNameVO.getKeyWord())) return Response.success("OK");
+        if (!Validator.isValidProductName(queryByNameVO.getKeyWord())) return Response.success("OK",0);
         Page<RiskControl> page = new Page<>(1, 25);
         QueryWrapper<RiskControl> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("deleted_at").like("policy_name", queryByNameVO.getKeyWord());
         riskControlMapper.selectPage(page, queryWrapper);
         List<RiskControl> itemsList = page.getRecords();
-        return Response.success(RiskControlDTO.toRiskControlOptionsDTO(itemsList), "OK");
+        return Response.success(RiskControlDTO.toRiskControlOptionsDTO(itemsList), "OK",0);
     }
 
     private SeckillItems getSeckillItemById(Integer id) {

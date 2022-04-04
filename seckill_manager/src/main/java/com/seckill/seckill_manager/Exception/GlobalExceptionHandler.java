@@ -7,6 +7,7 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -19,6 +20,20 @@ import javax.servlet.http.HttpServletRequest;
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
+    /*
+     * @MethodName ExceptionHandler404
+     * @author Wky1742095859
+     * @Description 通用异常处理
+     * @Date 2022/4/4 19:00
+     * @Param [e]
+     * @Return com.seckill.seckill_manager.common.Response
+     **/
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public @ResponseBody
+    Response ExceptionHandler404(NoHandlerFoundException e) {
+        return Response.dataNotFoundErr("无效的接口");
+    }
+
     /*
      * @MethodName jsonExceptionHandler
      * @author Wky1742095859
@@ -68,7 +83,7 @@ public class GlobalExceptionHandler {
      * @Date 2022/3/25 2:27
      * @Param [req, e]
      * @Return com.seckill.seckill_manager.common.Response
-    **/
+     **/
     @ExceptionHandler(value = InterceptorJWTException.class)
     public @ResponseBody
     Response JWTExceptionHandler(HttpServletRequest req, InterceptorJWTException e) {

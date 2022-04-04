@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -51,7 +52,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
     public Response LoginCheck(String ip) {
         //if (managerUsersVO.getAccount() == null) return Response.paramsErr("参数错误");
         String RSAPubKey = RSAUtil.getPublicKey();//生成RSA公钥
-        Response res = Response.success("OK");
+        Response res = Response.success("OK", 0);
         String id = Snowflake.nextID();
         String MD5ID = MD5.toMD5String(id);
         String aesKey = MD5ID.substring(16);//生成AES密钥
@@ -93,7 +94,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
      * @Return com.example.seckill_manager.common.Response
      **/
     @Override
-    public Response login(ManagerUsersVO managerUsersVO, String ip) {
+    public Response login(ManagerUsersVO managerUsersVO, String ip, HttpServletRequest request) {
         /*经修改后不再限制ip只能登录一个号,前端传输的账号密码也进行了加密处理*/
         /*account:rsa加密账号 password:rsa加密密码 token:加密后的浏览器指纹,uid:即loginCheck中uid*/
         if (managerUsersVO.getCaptcha() == null) return Response.paramsErr("请输入验证码");
@@ -126,7 +127,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         String MD5Password = MD5.MD5Password(VOAccount + VOPassword);
         String ManagerUserStr = RedisUtils.get("M:ManagerUser:" + VOAccount);//获取缓存的用户信息
         String managerUserPassword = null;
-        ManagerUsers managerUser;
+        ManagerUsers managerUser = new ManagerUsers();
         if (ManagerUserStr != null) {//用户缓存不为空,进行str到实体类转换,并从实体类获取加密后的密码
             managerUser = JSONUtils.toEntity(ManagerUserStr, ManagerUsers.class);
             if (managerUser != null) {
@@ -145,7 +146,8 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
             //String res2 = RedisUtils.set(ip + "_user", VOAccount, 3600);//缓存ip登录的用户(一个ip只能登录一个用户);
             //|| !Objects.equals(res2, "OK") 考虑到一个公网ip可能对应多个内网用户,记录ip弃用
             if (!Objects.equals(res, "OK")) return Response.systemErr("登录失败,系统异常");
-            return Response.success(data, "登录成功");
+            request.setAttribute("user", managerUser);
+            return Response.success(data, "登录成功", managerUser.getId());
         }
         //缓存未空,查询mysql
         ManagerUsers managerUsers = getManagerUserByAccount(VOAccount);
@@ -159,50 +161,8 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         String res2 = RedisUtils.set("M:ManagerUser:" + VOAccount, JSONUtils.toJSONStr(managerUsers), 25200);//缓存用户信息
         //String res3 = RedisUtils.set(ip + "_user", VOAccount, 3600);
         if (!Objects.equals(res, "OK") || !Objects.equals(res2, "OK")) return Response.systemErr("登录失败,系统异常");
-        return Response.success(data, "登录成功");
-        /*if (managerUsersVO.getAccount() == null || managerUsersVO.getPassword() == null)//判断是否为空
-            return Response.authErr("账号或密码错误");
-        if (ip == null) return Response.systemErr("登录失败,系统异常");//判断是否为空
-        String VOAccount = managerUsersVO.getAccount();
-        String VOPassword = managerUsersVO.getPassword();
-        if (!Validator.isValidAccount(VOAccount) || !Validator.isValidPassword(VOPassword))
-            return Response.authErr("账号或密码错误");//正则判断
-        String MD5Password = MD5.MD5Password(VOAccount + VOPassword);
-        String userInfoStr = RedisUtils.get(VOAccount);//获取缓存的用户信息
-        String userPassword = null;
-        ManagerUsers userInfo = null;
-        if (userInfoStr != null) {//用户缓存不为空,进行str到实体类转换,并从实体类获取加密后的密码
-            userInfo = JSONUtils.toEntity(userInfoStr, ManagerUsers.class);
-            if (userInfo != null) {
-                userPassword = userInfo.getPassword();
-            }
-        }
-        if (userInfo != null && !Objects.equals(userPassword, MD5Password)) {//缓存不为空且密码不相等
-            return Response.authErr("账号或密码错误");
-        }
-        if (userInfo != null && Objects.equals(userPassword, MD5Password)) {//缓存不为空且密码相等
-            String token = JWTAuth.releaseToken(managerUsersVO.getAccount());
-            HashMap<String, Object> data = new HashMap<>();
-            data.put("token", token);
-            String res = RedisUtils.set(VOAccount + "," + ip, token + "," + MD5Password, 3600);//缓存ip对应的token,及密码MD5(改密后需重新登录)
-            String res2 = RedisUtils.set(ip + "_user", VOAccount, 3600);//缓存ip登录的用户(一个ip只能登录一个用户);
-            if (!Objects.equals(res, "OK") || !Objects.equals(res2, "OK")) return Response.systemErr("登录失败,系统异常");
-            return Response.success(data, "登录成功");
-        }
-        //缓存未空,查询mysql
-        ManagerUsers managerUsers = getManagerUserByAccount(VOAccount);
-        if (managerUsers == null || !Objects.equals(managerUsers.getPassword(), MD5Password))//未查到或密码不相等
-            return Response.authErr("账号或密码错误");
-        HashMap<String, Object> data = new HashMap<>();
-        String token = JWTAuth.releaseToken(managerUsersVO.getAccount());
-        data.put("token", token);
-        String res = RedisUtils.set(VOAccount + "," + ip, token + "," + MD5Password, 3600);
-        String res2 = RedisUtils.set(managerUsers.getAccount(), JSONUtils.toJSONStr(managerUsers));//缓存用户信息
-        String res3 = RedisUtils.set(ip + "_user", VOAccount, 3600);
-        if (!Objects.equals(res, "OK") || !Objects.equals(res2, "OK") || !Objects.equals(res3, "OK"))
-            return Response.systemErr("登录失败,系统异常");
-        return Response.success(data, "登录成功");*/
-
+        request.setAttribute("user", managerUser);
+        return Response.success(data, "登录成功", managerUsers.getId());
     }
 
     @Override
@@ -228,21 +188,21 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
             //检查密码是否更改及ip所登录的token与传回的token是否一致
             if (!Objects.equals(managerUsers.getPassword(), loginUser.getMD5Password()) || !Objects.equals(token, loginUser.getToken()))
                 return Response.authErr("登录失效");//检查密码是否有更改,token是否一致
-            return Response.success("查询成功");
+            return Response.success("查询成功", 0);
         }
         if (!Objects.equals(loginUser.getToken(), token) || !Objects.equals(managerUser.getPassword(), loginUser.getMD5Password()))
             return Response.authErr("登录失效");
-        return Response.success("查询成功");
+        return Response.success("查询成功", 0);
     }
 
     @Override
     public Response loginOut(String token, String ip) {
         HashMap<String, Object> result = JWTAuth.parseToken(token);
-        if (!result.get("status").equals(true)) return Response.success("退出成功");//token过期,直接返回退出成功
+        if (!result.get("status").equals(true)) return Response.success("退出成功", 0);//token过期,直接返回退出成功
         String account = result.get("account").toString();
         //if (ip != null && RedisUtils.exist(account + "," + ip)) RedisUtils.del(account + "," + ip);
         if (ip != null && RedisUtils.exist("M:LoginUser:" + account)) RedisUtils.del("M:LoginUser:" + account);
-        return Response.success("退出成功");
+        return Response.success("退出成功", 0);
     }
 
     /*
@@ -256,7 +216,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
     @Override
     public Response editAdmin(ManagerUsersVO managerUsersVO) {
         String MD5Password = MD5.MD5Password(managerUsersVO.getAccount() + managerUsersVO.getPassword());
-        return Response.success("成功");
+        return Response.success("成功", 0);
     }
 
     @Override
@@ -264,7 +224,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
         ManagerUsers managerUsers = getManagerUserById(queryByIdVO.getId());
         if (managerUsers == null) return Response.dataNotFoundErr("未查询到相关数据");
-        return Response.success(ManagerUserDTO.toManagerUserPostFormDTO(managerUsers), "获取成功");
+        return Response.success(ManagerUserDTO.toManagerUserPostFormDTO(managerUsers), "获取成功", managerUsers.getId());
     }
 
     @Override
@@ -279,7 +239,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         HashMap<String, Object> data = new HashMap<>();
         data.put("items", ManagerUserDTO.toManagerUserTableDTO(itemsList));
         data.put("total", page.getTotal());
-        return Response.success(data, "获取成功");
+        return Response.success(data, "获取成功", 0);
     }
 
     @Override
@@ -287,15 +247,17 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
         ManagerUsers managerUsers = getManagerUserById(queryByIdVO.getId());
         if (managerUsers == null) return Response.dataNotFoundErr("未查询到相关数据");
-        int res = managerUsersMapper.deleteById(managerUsers);
-        System.out.println(res);
-        return Response.success(String.valueOf(res));
+        LocalDateTime nowTime = LocalDateTime.now();
+        managerUsers.setDeletedAt(nowTime);
+        boolean res = updateById(managerUsers);
+        if (!res) return Response.dataErr("删除失败,数据库异常");
+        return Response.success("删除成功", managerUsers.getId());
     }
 
     @Override
     public Response getUserInfo(HttpServletRequest request) {
         ManagerUsers user = (ManagerUsers) request.getAttribute("user");
-        return Response.success(ManagerUserDTO.toManagerUserTableDTO(user), "获取成功");
+        return Response.success(ManagerUserDTO.toManagerUserTableDTO(user), "获取成功", user.getId());
     }
 
     @Override
@@ -311,7 +273,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         HashMap<String, Object> data = new HashMap<>();
         data.put("token", token);
         data.put("account", uid);
-        return Response.success(data, "验证成功,请尽快修改密码,有效期五分钟");
+        return Response.success(data, "验证成功,请尽快修改密码,有效期五分钟", user.getId());
     }
 
     @Override
@@ -327,7 +289,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (!Objects.equals(res, "OK")) {
             long res1 = RedisUtils.del(user.getAccount());
         }
-        return Response.success("重置成功");
+        return Response.success("重置成功", user.getId());
     }
 
     private ManagerUsers getManagerUserByAccount(String account) {

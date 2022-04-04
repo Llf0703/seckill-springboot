@@ -1,7 +1,8 @@
 package com.seckill.seckill_manager;
 
 import com.seckill.seckill_manager.mapper.GoodsMapper;
-import com.seckill.seckill_manager.utils.Captcha;
+import com.seckill.seckill_manager.mapper.TestMapper;
+import com.seckill.seckill_manager.service.impl.TestServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -12,12 +13,13 @@ import javax.annotation.Resource;
 class SeckillManagerApplicationTests {
     @Resource
     private GoodsMapper goodsMapper;
-
+    @Resource
+    private TestMapper testMapper;
+    @Resource
+    private TestServiceImpl testService;
     @Test
     void contextLoads() throws Exception {
-        System.out.println(Captcha.getCircleCaptcha().get("code"));
-        System.out.println(Captcha.getGifCaptcha());
-        System.out.println(Captcha.getShearCaptcha());
+        testService.test();
     }
 
 }

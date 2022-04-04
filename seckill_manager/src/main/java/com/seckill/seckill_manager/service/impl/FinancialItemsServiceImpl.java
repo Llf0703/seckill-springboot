@@ -77,7 +77,7 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
             //百分数化小数
             financialItem.setInterestRate(financialItemVO.getInterestRate().divide(new BigDecimal("100"), 8, RoundingMode.HALF_UP));
             boolean res = save(financialItem);
-            if (res) return Response.success("新增成功");
+            if (res) return Response.success("新增成功", financialItem.getId());
             return Response.dataErr("保存失败,数据库异常");
         }
         //id存在,修改数据
@@ -90,7 +90,7 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
         //百分数化小数
         financialItem.setInterestRate(financialItemVO.getInterestRate().divide(new BigDecimal("100"), 8, RoundingMode.HALF_UP));
         if (!updateById(financialItem)) return Response.dataErr("保存失败,数据库异常");
-        return Response.success("保存成功");
+        return Response.success("保存成功", financialItem.getId());
     }
 
     @Override
@@ -98,7 +98,7 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
         if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
         FinancialItems financialItem = getFinancialItemById(queryByIdVO.getId());
         if (financialItem == null) return Response.dataNotFoundErr("产品不存在");
-        return Response.success(FinancialItemDTO.toFinancialItemPostFormDTO(financialItem), "获取成功");
+        return Response.success(FinancialItemDTO.toFinancialItemPostFormDTO(financialItem), "获取成功", financialItem.getId());
     }
 
     @Override
@@ -110,7 +110,7 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
         queryWrapper.isNull("deleted_at");
         financialItemsMapper.selectPage(page, queryWrapper);
         List<FinancialItems> itemsList = page.getRecords();
-        return Response.success(FinancialItemDTO.toFinancialItemTableDTO(itemsList), "获取成功");
+        return Response.success(FinancialItemDTO.toFinancialItemTableDTO(itemsList), "获取成功", 0);
     }
 
     @Override
@@ -121,7 +121,7 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
         LocalDateTime localDateTime = LocalDateTime.now();
         financialItem.setDeletedAt(localDateTime);
         if (!updateById(financialItem)) return Response.systemErr("数据库错误");
-        return Response.success("删除成功");
+        return Response.success("删除成功", queryByIdVO.getId());
     }
 
     private FinancialItems getFinancialItemById(Integer id) {

@@ -4,6 +4,7 @@ package com.seckill.seckill_manager.controller;
 import com.seckill.seckill_manager.Interceptor.LevelCode;
 import com.seckill.seckill_manager.Interceptor.PermissionType;
 import com.seckill.seckill_manager.Interceptor.Type.LoginRequired;
+import com.seckill.seckill_manager.Interceptor.Type.OperateRecord;
 import com.seckill.seckill_manager.Interceptor.Type.Permission;
 import com.seckill.seckill_manager.common.Response;
 import com.seckill.seckill_manager.controller.vo.ManagerUsersVO;
@@ -33,26 +34,40 @@ public class ManagerUsersController {
     public Response loginCheck(HttpServletRequest request) {
         String ip = request.getHeader("X-real-ip");
         return managerUsersService.LoginCheck(ip);
+
     }
 
+    @OperateRecord(operateName = "登录")
     @PostMapping("/auth/login")
     public Response login(HttpServletRequest request, @RequestBody ManagerUsersVO managerUsersVO) {
         String ip = request.getHeader("X-real-ip");
-        return managerUsersService.login(managerUsersVO, ip);
+        Response res = managerUsersService.login(managerUsersVO, ip, request);
+        if (res.getStatus()) {
+            request.setAttribute("operateId", res.getId());
+        }
+        return res;
     }
 
     @GetMapping("/auth/check_version")
     public Response checkVersion(HttpServletRequest request) {
         String token = request.getHeader("token");
         String ip = request.getHeader("X-real-ip");
-        return managerUsersService.checkVersion(token, ip);
+        Response res = managerUsersService.checkVersion(token, ip);
+        if (res.getStatus()) {
+            request.setAttribute("operateId", res.getId());
+        }
+        return res;
     }
 
     @PostMapping("/auth/log_out")
     public Response logOut(HttpServletRequest request) {
         String token = request.getHeader("token");
         String ip = request.getHeader("X-real-ip");
-        return managerUsersService.loginOut(token, ip);
+        Response res = managerUsersService.loginOut(token, ip);
+        if (res.getStatus()) {
+            request.setAttribute("operateId", res.getId());
+        }
+        return res;
     }
 
     @LoginRequired
@@ -73,47 +88,53 @@ public class ManagerUsersController {
         return managerUsersService.resetPassword(request, uid, managerUsersVO);
     }
 
-    /*
-     * @MethodName addAdmin
-     * @author Wky1742095859
-     * @Description 可能是多余的,暂时不去除
-     * @Date 2022/3/29 1:18
-     * @Param [managerUsersVO]
-     * @Return com.seckill.seckill_manager.common.Response
-     **/
-    @LoginRequired
-    @Permission(level = LevelCode.EDIT, permission = PermissionType.AdminInfoPermission)
-    @PostMapping("/admin/add_admin")
-    public Response addAdmin(@RequestBody ManagerUsersVO managerUsersVO) {
-        return managerUsersService.editAdmin(managerUsersVO);
-    }
 
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.AdminInfoPermission)
+    @OperateRecord(operateName = "编辑管理员")
     @PostMapping("/admin/edit_admin")
-    public Response editAdmin(@RequestBody ManagerUsersVO managerUsersVO) {
-        return managerUsersService.editAdmin(managerUsersVO);
+    public Response editAdmin(HttpServletRequest request, @RequestBody ManagerUsersVO managerUsersVO) {
+        Response res = managerUsersService.editAdmin(managerUsersVO);
+        if (res.getStatus()) {
+            request.setAttribute("operateId", res.getId());
+        }
+        return res;
     }
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.AdminInfoPermission)
+    @OperateRecord(operateName = "获取单个管理员信息")
     @PostMapping("/admin/get_admin")
-    public Response getAdmin(@RequestBody QueryByIdVO queryByIdVO) {
-        return managerUsersService.getAdmin(queryByIdVO);
+    public Response getAdmin(HttpServletRequest request, @RequestBody QueryByIdVO queryByIdVO) {
+        Response res = managerUsersService.getAdmin(queryByIdVO);
+        if (res.getStatus()) {
+            request.setAttribute("operateId", res.getId());
+        }
+        return res;
     }
 
     @LoginRequired
     @Permission(level = LevelCode.READ, permission = PermissionType.AdminInfoPermission)
+    @OperateRecord(operateName = "分页查询管理员信息")
     @PostMapping("/admin/get_page")
-    public Response getPage(@RequestBody PageVO pageVO) {
-        return managerUsersService.getAdminPage(pageVO);
+    public Response getPage(HttpServletRequest request, @RequestBody PageVO pageVO) {
+        Response res = managerUsersService.getAdminPage(pageVO);
+        if (res.getStatus()) {
+            request.setAttribute("operateId", res.getId());
+        }
+        return res;
     }
 
     @LoginRequired
     @Permission(level = LevelCode.EDIT, permission = PermissionType.AdminInfoPermission)
+    @OperateRecord(operateName = "删除管理员")
     @PostMapping("/admin/delete_admin")
-    public Response deleteAdmin(@RequestBody QueryByIdVO queryByIdVO) {
-        return managerUsersService.deleteAdmin(queryByIdVO);
+    public Response deleteAdmin(HttpServletRequest request, @RequestBody QueryByIdVO queryByIdVO) {
+        Response res = managerUsersService.deleteAdmin(queryByIdVO);
+        if (res.getStatus()) {
+            request.setAttribute("operateId", res.getId());
+        }
+        return res;
     }
 
 

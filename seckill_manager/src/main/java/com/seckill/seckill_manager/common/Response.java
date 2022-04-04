@@ -33,6 +33,18 @@ public class Response {
     private String message;//信息
     private String dateTime;//完成时间
     private long timeStamp;//完成时间
+    private int id;//操作的物品id
+
+    public Response(int success, boolean b, Object o, String msg, String format, long time, int id) {
+        this.code = success;
+        this.status = b;
+        this.data = o;
+        this.message = msg;
+        this.dateTime = format;
+        this.timeStamp = time;
+        this.id = id;
+    }
+
 
     /*
      * @MethodName success
@@ -42,10 +54,10 @@ public class Response {
      * @Param [msg]
      * @Return com.example.seckill_guest.common.Response
      **/
-    public static Response success(String msg) {
+    public static Response success(String msg, int id) {
         Date nowTime = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return new Response(Code.SUCCESS, true, null, msg, sdf.format(nowTime), nowTime.getTime());
+        return new Response(Code.SUCCESS, true, null, msg, sdf.format(nowTime), nowTime.getTime(), id);
     }
 
     /*
@@ -56,10 +68,10 @@ public class Response {
      * @Param [data, msg]
      * @Return com.example.seckill_guest.common.Response
      **/
-    public static Response success(Object data, String msg) {
+    public static Response success(Object data, String msg, int id) {
         Date nowTime = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return new Response(Code.SUCCESS, true, data, msg, sdf.format(nowTime), nowTime.getTime());
+        return new Response(Code.SUCCESS, true, data, msg, sdf.format(nowTime), nowTime.getTime(), id);
     }
 
     /*
@@ -73,7 +85,7 @@ public class Response {
     public static Response authErr(String msg) {
         Date nowTime = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return new Response(Code.AUTH_ERR, false, null, msg, sdf.format(nowTime), nowTime.getTime());
+        return new Response(Code.AUTH_ERR, false, null, msg, sdf.format(nowTime), nowTime.getTime(), 0);
     }
 
     /*
@@ -87,7 +99,7 @@ public class Response {
     public static Response systemErr(String msg) {
         Date nowTime = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return new Response(Code.SYSTEM_ERR, false, null, msg, sdf.format(nowTime), nowTime.getTime());
+        return new Response(Code.SYSTEM_ERR, false, null, msg, sdf.format(nowTime), nowTime.getTime(), 0);
     }
 
     /*
@@ -101,7 +113,7 @@ public class Response {
     public static Response paramsErr(String msg) {
         Date nowTime = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return new Response(Code.PARAMS_ERR, false, null, msg, sdf.format(nowTime), nowTime.getTime());
+        return new Response(Code.PARAMS_ERR, false, null, msg, sdf.format(nowTime), nowTime.getTime(), 0);
     }
 
     /*
@@ -115,7 +127,7 @@ public class Response {
     public static Response dataErr(String msg) {
         Date nowTime = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return new Response(Code.DATA_ERR, false, null, msg, sdf.format(nowTime), nowTime.getTime());
+        return new Response(Code.DATA_ERR, false, null, msg, sdf.format(nowTime), nowTime.getTime(), 0);
     }
 
     /*
@@ -129,6 +141,6 @@ public class Response {
     public static Response dataNotFoundErr(String msg) {
         Date nowTime = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return new Response(Code.DATA_NOT_FOUND, false, null, msg, sdf.format(nowTime), nowTime.getTime());
+        return new Response(Code.DATA_NOT_FOUND, false, null, msg, sdf.format(nowTime), nowTime.getTime(), 0);
     }
 }

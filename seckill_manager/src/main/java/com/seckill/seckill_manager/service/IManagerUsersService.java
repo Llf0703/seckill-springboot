@@ -19,8 +19,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface IManagerUsersService extends IService<ManagerUsers> {
     Response LoginCheck(String ip);
-    Response login(ManagerUsersVO managerUsersVO,String ip);
-    Response checkVersion(String token,String ip);
+    Response login(ManagerUsersVO managerUsersVO, String ip, HttpServletRequest request);
+    Response checkVersion(String token, String ip);
     Response loginOut(String token,String ip);
     Response editAdmin(ManagerUsersVO managerUsersVO);
     Response getAdmin(QueryByIdVO queryByIdVO);
