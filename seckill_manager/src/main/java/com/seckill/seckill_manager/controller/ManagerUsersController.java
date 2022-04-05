@@ -37,7 +37,7 @@ public class ManagerUsersController {
 
     }
 
-    @OperateRecord(operateName = "登录",level = LevelCode.OPERATE_READ)
+    @OperateRecord(operateName = "登录",level = LevelCode.OPERATE_EDIT)
     @PostMapping("/auth/login")
     public Response login(HttpServletRequest request, @RequestBody ManagerUsersVO managerUsersVO) {
         String ip = request.getHeader("X-real-ip");

@@ -33,19 +33,21 @@ public class OperateRecordInterceptor implements HandlerInterceptor {
             OperateRecord operateRecord = handlerMethod.getMethod().getAnnotation(OperateRecord.class);
             if (operateRecord != null) {
                 ManagerUsers user = (ManagerUsers) request.getAttribute("user");
-                int operateId = (int) request.getAttribute("operateId");
-                com.seckill.seckill_manager.entity.OperateRecord record = new com.seckill.seckill_manager.entity.OperateRecord();
-                LocalDateTime nowTime = LocalDateTime.now();
-                record.setUpdatedAt(nowTime);
-                record.setOperate(operateRecord.operateName());
-                record.setCreatedAt(nowTime);
-                record.setManagerUserId(user.getId());
-                record.setLevel(operateRecord.level());
-                record.setOperateId(operateId);
-                record.setManagerUserAccount(user.getAccount());
-                try {
-                    int res = operateRecordMapper.insert(record);
-                } catch (Exception ignored) {
+                Integer operateId = (Integer) request.getAttribute("operateId");
+                if (operateId!=null){
+                    com.seckill.seckill_manager.entity.OperateRecord record = new com.seckill.seckill_manager.entity.OperateRecord();
+                    LocalDateTime nowTime = LocalDateTime.now();
+                    record.setUpdatedAt(nowTime);
+                    record.setOperate(operateRecord.operateName());
+                    record.setCreatedAt(nowTime);
+                    record.setManagerUserId(user.getId());
+                    record.setLevel(operateRecord.level());
+                    record.setOperateId(operateId);
+                    record.setManagerUserAccount(user.getAccount());
+                    try {
+                        int res = operateRecordMapper.insert(record);
+                    } catch (Exception ignored) {
+                    }
                 }
             }
         }

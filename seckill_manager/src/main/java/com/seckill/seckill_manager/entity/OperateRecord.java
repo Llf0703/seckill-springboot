@@ -44,7 +44,7 @@ public class OperateRecord implements Serializable {
 
     private String operate;
 
-    @ApiModelProperty("0读/登录,1改,2删除")
+    @ApiModelProperty("0读,1改/登录,2删除")
     private Integer level;
 
     @ApiModelProperty("如果为增删查改此处为id,分页查询此处为0")

@@ -32,7 +32,7 @@ public class Validator {
         LocalDateTime nowTime = LocalDateTime.now();
         if (startTime.isBefore(nowTime) || endTime.isBefore(nowTime)) return false;
         if (!startTime.isBefore(endTime)) return false;
-        return startTime.isBefore(nowTime.plusHours(-2));
+        return startTime.isAfter(nowTime.plusHours(2));
     }
 
     /*

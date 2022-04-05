@@ -19,6 +19,7 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>
@@ -48,7 +49,7 @@ public class RiskControlServiceImpl extends ServiceImpl<RiskControlMapper, RiskC
         if (!Validator.isValidDays(riskControlVO.getExceptionDays())) return Response.paramsErr("例外天数超出范围");
         RiskControl riskControl = new RiskControl();
         RiskControl query = getRiskControlByName(riskControlVO.getPolicyName());
-        if (query != null) return Response.paramsErr("存在相同的决策名");
+        if (query != null && !Objects.equals(query.getId(), riskControlVO.getId())) return Response.paramsErr("存在相同的决策名");
         if (riskControlVO.getId() == null) {
             BeanUtil.copyProperties(riskControlVO, riskControl, true);
             LocalDateTime localDateTime = LocalDateTime.now();

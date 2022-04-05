@@ -149,6 +149,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
             return Response.success(data, "登录成功", managerUser.getId());
         }
         //缓存未空,查询mysql
+        System.out.println("查询sql");
         ManagerUsers managerUsers = getManagerUserByAccount(VOAccount);
         if (managerUsers == null || !Objects.equals(managerUsers.getPassword(), MD5Password))//未查到或密码不相等
             return Response.authErr("账号或密码错误");
@@ -215,7 +216,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
     public Response editAdmin(ManagerUsersVO managerUsersVO) {
         if (managerUsersVO.getCaptcha() == null) return Response.paramsErr("请输入验证码");
         if (managerUsersVO.getToken() == null || managerUsersVO.getUid() == null)//判断是否为空
-            return Response.systemErr("保存失败,系统异常");
+            return Response.systemErr("保存失败,数据异常");
         String loginCryptoStr = RedisUtils.get("M:LoginCrypto:" + managerUsersVO.getUid());
         if (loginCryptoStr == null) return Response.systemErr("请重新输入验证码");
         LoginCrypto loginCrypto = JSONUtils.toEntity(loginCryptoStr, LoginCrypto.class);
@@ -264,7 +265,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (VOPasswordBytes != null) VOPassword = new String(VOPasswordBytes);
         String VOFP = new String(VOFPBytes);
         if (VOFP.length() != 32) return Response.paramsErr("保存失败,数据异常");
-        if (managerUsersVO.getId() != null) {
+        if (managerUsersVO.getId() == null) {
             if (!Validator.isValidAccount(VOAccount)) return Response.paramsErr("账号格式不合规");
         }
         if (managerUsersVO.getPassword() != null) {
@@ -274,8 +275,10 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         //这个是修改或添加管理员信息的接口
         ManagerUsers managerUsers = new ManagerUsers();
         //根据id是否为空来判断当前操作是修改还是新增管理员
-        if (managerUsers.getId() != null) {  //id为空，新增
+        if (managerUsersVO.getId() == null) {  //id为空，新增
             //新增管理员信息
+            ManagerUsers query = getManagerUserByAccount(VOAccount);//禁止重复的账号名
+            if (query != null) return Response.paramsErr("此账号已被注册");
             BeanUtil.copyProperties(managerUsersVO, managerUsers, true);
             LocalDateTime localDateTime = LocalDateTime.now();
             managerUsers.setCreatedAt(localDateTime);

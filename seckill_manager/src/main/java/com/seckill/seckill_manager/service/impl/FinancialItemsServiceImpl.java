@@ -19,6 +19,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -110,7 +111,10 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
         queryWrapper.isNull("deleted_at").orderByDesc("id");;
         financialItemsMapper.selectPage(page, queryWrapper);
         List<FinancialItems> itemsList = page.getRecords();
-        return Response.success(FinancialItemDTO.toFinancialItemTableDTO(itemsList), "获取成功", 0);
+        HashMap<String,Object> data=new HashMap<>();
+        data.put("items", FinancialItemDTO.toFinancialItemTableDTO(itemsList));
+        data.put("total",page.getTotal());
+        return Response.success(data, "获取成功", 0);
     }
 
     @Override
