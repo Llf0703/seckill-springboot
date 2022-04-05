@@ -2,6 +2,7 @@ package com.seckill.user_new.utils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.regex.Pattern;
 
 
@@ -9,9 +10,11 @@ interface RegexStr {
     String REGEX_ACCOUNT = "^[A-Za-z0-9]{1,10}$";
     String REGEX_PASSWORD = "^(?:(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])).{6,20}$";
     String REGEX_PRODUCT_NAME = "^[\u4E00-\u9FA5A-Za-z0-9_]{1,20}$";
+    String REGEX_DESCRIPTION = "^[\u4E00-\u9FA5A-Za-z0-9_]{1,255}$";
     String REGEX_PHONE = "^(13[0-9]|14[01456879]|15[0-3,5-9]|16[2567]|17[0-8]|18[0-9]|19[0-3,5-9])\\d{8}$";
     String REGEX_NAME = "^[\u9FA6-\u9FCB\u3400-\u4DB5\u4E00-\u9FA5]{2,5}([\u25CF\u00B7][\u9FA6-\u9FCB\u3400-\u4DB5\u4E00-\u9FA5]{2,5})*$";
 }
+
 
 /**
  * @author Wky1742095859
@@ -21,6 +24,28 @@ interface RegexStr {
  * @date 2022/3/19 1:41
  */
 public class Validator {
+    public static boolean isValidDescription(String str) {
+        if (str == null) return false;
+        return Pattern.matches(RegexStr.REGEX_DESCRIPTION, str);
+    }
+
+    public static boolean isValidPhone(String phone) {
+        if (phone == null) return false;
+        return Pattern.matches(RegexStr.REGEX_PHONE, phone);
+    }
+
+    public static boolean isValidName(String name) {
+        if (name == null) return false;
+        return Pattern.matches(RegexStr.REGEX_NAME, name);
+    }
+    public static boolean isValidSeckillTime(LocalDateTime startTime, LocalDateTime endTime) {
+        if (startTime == null || endTime == null) return false;
+        LocalDateTime nowTime = LocalDateTime.now();
+        if (startTime.isBefore(nowTime) || endTime.isBefore(nowTime)) return false;
+        if (!startTime.isBefore(endTime)) return false;
+        return startTime.isAfter(nowTime.plusHours(2));
+    }
+
     /*
      * @MethodName isValidAccount
      * @author Wky1742095859
@@ -32,16 +57,6 @@ public class Validator {
     public static boolean isValidAccount(String account) {
         if (account == null) return false;
         return Pattern.matches(RegexStr.REGEX_ACCOUNT, account);
-    }
-
-    public static boolean isValidPhone(String phone) {
-        if (phone == null) return false;
-        return Pattern.matches(RegexStr.REGEX_PHONE, phone);
-    }
-
-    public static boolean isValidName(String name) {
-        if (name == null) return false;
-        return Pattern.matches(RegexStr.REGEX_NAME, name);
     }
 
     /*
@@ -80,7 +95,7 @@ public class Validator {
      **/
     public static boolean isValidAmountCanNotBeZERO(BigDecimal amount) {
         if (amount == null) return false;
-        return amount.compareTo(BigDecimal.ZERO) > 0 && amount.compareTo(new BigDecimal(99999999999.9999)) <= 0;
+        return amount.compareTo(BigDecimal.ZERO) > 0 && amount.compareTo(new BigDecimal("99999999999.9999")) <= 0;
     }
 
     /*
@@ -106,6 +121,10 @@ public class Validator {
      **/
     public static boolean isValidZeroOrOne(int n) {
         return n == 1 || n == 0;
+    }
+
+    public static boolean isValidZeroOrOneOrTwo(int n) {
+        return n == 0 || n == 1 || n == 2;
     }
 
     /*

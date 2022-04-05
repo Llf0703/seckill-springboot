@@ -176,20 +176,21 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (loginUserStr == null) return Response.authErr("登录失效");
         LoginAdmin loginUser = JSONUtils.toEntity(loginUserStr, LoginAdmin.class);
         if (loginUser == null) return Response.systemErr("系统异常");
-        if (!Objects.equals(loginUser.getIp(), ip)) return Response.authErr("登录失效");//当前ip无登录信息
+        if (!Objects.equals(loginUser.getIp(), ip) || !Objects.equals(token, loginUser.getToken()))
+            return Response.authErr("登录失效");//当前ip无登录信息或token无效
         String managerUserStr = RedisUtils.get("M:ManagerUser:" + account);//获取用户信息
         ManagerUsers managerUser = null;
         if (managerUserStr != null) managerUser = JSONUtils.toEntity(managerUserStr, ManagerUsers.class);
         if (managerUser == null) {//未查到用户信息,查询数据库
-            ManagerUsers managerUsers = getManagerUserByAccount(account);
-            if (managerUsers == null) return Response.authErr("登录失效");//账号不存在
-            RedisUtils.set("M:ManagerUser:" + account, JSONUtils.toJSONStr(managerUsers), 25200);//缓存用户信息
+            managerUser = getManagerUserByAccount(account);
+            if (managerUser == null) return Response.authErr("登录失效");//账号不存在
+            RedisUtils.set("M:ManagerUser:" + account, JSONUtils.toJSONStr(managerUser), 25200);//缓存用户信息
             //检查密码是否更改及ip所登录的token与传回的token是否一致
-            if (!Objects.equals(managerUsers.getPassword(), loginUser.getMD5Password()) || !Objects.equals(token, loginUser.getToken()))
+            if (!Objects.equals(managerUser.getPassword(), loginUser.getMD5Password()))
                 return Response.authErr("登录失效");//检查密码是否有更改,token是否一致
             return Response.success("查询成功", 0);
         }
-        if (!Objects.equals(loginUser.getToken(), token) || !Objects.equals(managerUser.getPassword(), loginUser.getMD5Password()))
+        if (!Objects.equals(managerUser.getPassword(), loginUser.getMD5Password()))
             return Response.authErr("登录失效");
         return Response.success("查询成功", 0);
     }

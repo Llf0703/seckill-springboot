@@ -22,7 +22,15 @@ spring:
         max-idle: 10
         min-idle: 0
         max-wait: -1
-
+  cloud:
+    sentinel:
+      eager: true
+      transport:
+        dashboard: localhost:9100
+  mvc:
+    throw-exception-if-no-handler-found: true
+  resources:
+    add-mappings: false
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

@@ -1,34 +1,35 @@
 package com.seckill.user_new.service.impl;
 
+import cn.hutool.core.codec.Base64;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.seckill.user_new.common.Response;
+import com.seckill.user_new.controller.vo.UserVO;
+import com.seckill.user_new.entity.RedisService.LoginCrypto;
+import com.seckill.user_new.entity.RedisService.LoginUser;
+import com.seckill.user_new.entity.User;
+import com.seckill.user_new.mapper.UserMapper;
+import com.seckill.user_new.service.IUserService;
+import com.seckill.user_new.utils.*;
+import com.seckill.user_new.utils.crypto.AESUtil;
+import com.seckill.user_new.utils.crypto.RSAUtil;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Objects;
 
-import javax.annotation.Resource;
-
-import cn.hutool.core.codec.Base64;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.seckill.user_new.common.Response;
-import com.seckill.user_new.controller.vo.UserVO;
-import com.seckill.user_new.entity.User;
-import com.seckill.user_new.entity.RedisService.LoginCrypto;
-import com.seckill.user_new.entity.RedisService.LoginUser;
-import com.seckill.user_new.mapper.UserMapper;
-import com.seckill.user_new.service.UserService;
-import com.seckill.user_new.utils.JSONUtils;
-import com.seckill.user_new.utils.JWTAuth;
-import com.seckill.user_new.utils.MD5;
-import com.seckill.user_new.utils.RedisUtils;
-import com.seckill.user_new.utils.Snowflake;
-import com.seckill.user_new.utils.Validator;
-import com.seckill.user_new.utils.crypto.AESUtil;
-import com.seckill.user_new.utils.crypto.RSAUtil;
-
-import org.springframework.stereotype.Service;
-
+/**
+ * <p>
+ * 服务实现类
+ * </p>
+ *
+ * @author wky1742095859
+ * @since 2022-04-05
+ */
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
     @Resource
     private UserMapper userMapper;
 
@@ -59,17 +60,16 @@ public class UserServiceImpl implements UserService {
         loginCrypto.setTimeStamp(res.getTimeStamp());//保存生成时间
         //loginCrypto.setFp(managerUsersVO.getToken());//保存浏览器指纹
         loginCrypto.setIp(ip);//保存ip
-        String result = RedisUtils.set("M:LoginCrypto:" + MD5ID, JSONUtils.toJSONStr(loginCrypto), 30);
+        String result = RedisUtils.set("U:LoginCrypto:" + MD5ID, JSONUtils.toJSONStr(loginCrypto), 30);
         if (!Objects.equals(result, "OK")) return Response.systemErr("登录失败,系统异常");
         return res;
     }
 
     @Override
     public Response loginService(UserVO userVO, String ip) {
-        if (userVO.getPhone() == null || userVO.getPassword() == null)
-            return Response.authErr("账号或密码错误");
+        if (userVO.getPhone() == null || userVO.getPassword() == null) return Response.authErr("账号或密码错误");
         if (ip == null) return Response.systemErr("登录失败,系统异常");
-        String loginCryptoStr = RedisUtils.get("M:LoginCrypto:" + userVO.getUid());
+        String loginCryptoStr = RedisUtils.get("U:LoginCrypto:" + userVO.getUid());
         if (loginCryptoStr == null) return Response.systemErr("登录失败,系统异常");
         LoginCrypto loginCrypto = JSONUtils.toEntity(loginCryptoStr, LoginCrypto.class);
         if (loginCrypto == null) return Response.systemErr("登录失败,系统异常");
@@ -86,10 +86,9 @@ public class UserServiceImpl implements UserService {
         String VOPassword = new String(VOPasswordBytes);
         String VOPhone = new String(VOPhoneBytes);
         String VOFP = new String(VOFPBytes);
-        if (!Validator.isValidPhone(VOPhone) || !Validator.isValidPassword(VOPassword) || VOFP.length() != 32)
-            return Response.authErr("账号或密码错误");//正则判断
+        if (!Validator.isValidPhone(VOPhone) || !Validator.isValidPassword(VOPassword) || VOFP.length() != 32) return Response.authErr("账号或密码错误");//正则判断
         String MD5Password = MD5.MD5Password(VOPhone + VOPassword);
-        String userStr = RedisUtils.get(VOPhone);//获取缓存的用户信息
+        String userStr = RedisUtils.get("U:User:" + VOPhone);//获取缓存的用户信息
         String userPassword = null;
         User user;
         if (userStr != null) {//用户缓存不为空,进行str到实体类转换,并从实体类获取加密后的密码
@@ -106,7 +105,7 @@ public class UserServiceImpl implements UserService {
             HashMap<String, Object> data = new HashMap<>();
             data.put("token", token);
             LoginUser loginUser = new LoginUser(VOPhone, MD5Password, VOFP, token, ip);
-            String res = RedisUtils.set("M:LoginUser:" + VOPhone, JSONUtils.toJSONStr(loginUser), 3600);//缓存指纹对应的token,及密码MD5(改密后需重新登录)
+            String res = RedisUtils.set("U:LoginUser:" + VOPhone, JSONUtils.toJSONStr(loginUser), 3600);//缓存指纹对应的token,及密码MD5(改密后需重新登录)
             //String res2 = RedisUtils.set(ip + "_user", VOPhone, 3600);//缓存ip登录的用户(一个ip只能登录一个用户);
             //|| !Objects.equals(res2, "OK") 考虑到一个公网ip可能对应多个内网用户,记录ip弃用
             if (!Objects.equals(res, "OK")) return Response.systemErr("登录失败,系统异常");
@@ -120,8 +119,8 @@ public class UserServiceImpl implements UserService {
         String token = JWTAuth.releaseToken(userVO.getPhone());
         data.put("token", token);
         LoginUser loginUser = new LoginUser(VOPhone, MD5Password, VOFP, token, ip);
-        String res = RedisUtils.set("M:LoginUser:" + VOPhone, JSONUtils.toJSONStr(loginUser), 3600);
-        String res2 = RedisUtils.set("M:ManagerUser:" + VOPhone, JSONUtils.toJSONStr(user), 25200);//缓存用户信息
+        String res = RedisUtils.set("U:LoginUser:" + VOPhone, JSONUtils.toJSONStr(loginUser), 3600);
+        String res2 = RedisUtils.set("U:User:" + VOPhone, JSONUtils.toJSONStr(user), 25200);//缓存用户信息
         //String res3 = RedisUtils.set(ip + "_user", VOPhone, 3600);
         if (!Objects.equals(res, "OK") || !Objects.equals(res2, "OK")) return Response.systemErr("登录失败,系统异常");
         return Response.success(data, "登录成功");

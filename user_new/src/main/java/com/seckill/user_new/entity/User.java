@@ -1,30 +1,77 @@
 package com.seckill.user_new.entity;
 
-import lombok.*;
-
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
-import com.baomidou.mybatisplus.annotation.*;
-
+/**
+ * <p>
+ * 
+ * </p>
+ *
+ * @author wky1742095859
+ * @since 2022-04-05
+ */
 @Data
-@Builder(toBuilder = true)
-@TableName("user")
-public class User {
+@ApiModel(value = "User对象", description = "")
+public class User implements Serializable {
 
-    @TableId(type = IdType.AUTO)
+    private static final long serialVersionUID = 1L;
+
+    @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
-    @TableField(insertStrategy = FieldStrategy.NOT_NULL, updateStrategy = FieldStrategy.NOT_NULL)
-    private Date created_at, updated_at, deleted_at, age;
+    private LocalDateTime createdAt;
 
-    @TableField(insertStrategy = FieldStrategy.NOT_NULL, updateStrategy = FieldStrategy.NOT_NULL)
-    private String user_name, name, password, phone, id_card;
+    private LocalDateTime updatedAt;
 
-    @TableField(insertStrategy = FieldStrategy.NOT_NULL, updateStrategy = FieldStrategy.NOT_NULL)
-    private int employment_status, credit_status;
+    private LocalDateTime deletedAt;
+
+    private String userName;
+
+    private String name;
+
+    private String password;
 
     private String email;
 
+    private String phone;
+
+    private String idCard;
+
+    @ApiModelProperty("钱包余额")
     private BigDecimal balance;
+
+    private LocalDateTime age;
+
+    @ApiModelProperty("就业状态")
+    private Integer employmentStatus;
+
+    @ApiModelProperty("失信状态")
+    private Integer creditStatus;
+
+    @Override
+    public String toString() {
+        return "User{" +
+            "id=" + id +
+            ", createdAt=" + createdAt +
+            ", updatedAt=" + updatedAt +
+            ", deletedAt=" + deletedAt +
+            ", userName=" + userName +
+            ", name=" + name +
+            ", password=" + password +
+            ", email=" + email +
+            ", phone=" + phone +
+            ", idCard=" + idCard +
+            ", balance=" + balance +
+            ", age=" + age +
+            ", employmentStatus=" + employmentStatus +
+            ", creditStatus=" + creditStatus +
+        "}";
+    }
 }

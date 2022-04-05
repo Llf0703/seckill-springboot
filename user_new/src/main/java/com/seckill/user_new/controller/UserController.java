@@ -5,15 +5,15 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.seckill.user_new.common.Response;
 import com.seckill.user_new.controller.vo.UserVO;
-import com.seckill.user_new.service.UserService;
 
+import com.seckill.user_new.service.impl.UserServiceImpl;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
 public class UserController {
     @Resource
-    UserService userService;
+    private UserServiceImpl userService;
 
     @PostMapping("/auth/login_check")
     public Response loginCheck(HttpServletRequest request) {
@@ -21,7 +21,7 @@ public class UserController {
         return userService.LoginCheck(ip);
     }
 
-    @PostMapping("auth/login")
+    @PostMapping("/auth/login")
     public Response login(HttpServletRequest request, @RequestBody UserVO userVO) {
         String ip = request.getHeader("X-real-ip");
         return userService.loginService(userVO, ip);

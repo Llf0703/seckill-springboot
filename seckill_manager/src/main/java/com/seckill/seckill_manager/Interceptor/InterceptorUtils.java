@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.seckill.seckill_manager.entity.ManagerUsers;
 import com.seckill.seckill_manager.entity.RedisService.LoginAdmin;
 import com.seckill.seckill_manager.mapper.ManagerUsersMapper;
-import com.seckill.seckill_manager.mapper.OperateRecordMapper;
 import com.seckill.seckill_manager.utils.JSONUtils;
 import com.seckill.seckill_manager.utils.JWTAuth;
 import com.seckill.seckill_manager.utils.RedisUtils;
@@ -28,13 +27,9 @@ public class InterceptorUtils {
     @Resource
     private ManagerUsersMapper managerUsersMapper0;
 
-    private static OperateRecordMapper operateRecordMapper;
-    @Resource
-    private OperateRecordMapper operateRecordMapper0;
     @PostConstruct
     private void init() {
         managerUsersMapper = this.managerUsersMapper0;
-        operateRecordMapper = this.operateRecordMapper0;
     }
 
     public static boolean riskControlPermission(ManagerUsers user, int level) {
@@ -104,33 +99,31 @@ public class InterceptorUtils {
             managerUser = JSONUtils.toEntity(managerUserStr, ManagerUsers.class);
         if (managerUser == null) {//缓存中无账号信息,查询数据库
             QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
-            queryWrapper.isNull("deleted_at").eq("account", account);
-            ManagerUsers managerUsers = managerUsersMapper.selectOne(queryWrapper);
-            if (managerUsers == null) {
+            queryWrapper.isNull("deleted_at").eq("binary account", account);
+            managerUser = managerUsersMapper.selectOne(queryWrapper);
+            if (managerUser == null) {
                 res.put("status", false);
                 return res;
             }
-            String info = JSONUtils.toJSONStr(managerUsers);
+            String info = JSONUtils.toJSONStr(managerUser);
             if (info != null) {
                 RedisUtils.set("M:ManagerUser:" + account, info);
             }
-            //检查密码是否更改及ip所登录的token与传回的token是否一致
-            if (!Objects.equals(managerUsers.getPassword(), loginUser.getMD5Password()) || !Objects.equals(token, loginUser.getToken())) {
+            //检查密码是否更改
+            if (!Objects.equals(managerUser.getPassword(), loginUser.getMD5Password())) {
                 res.put("status", false);
                 return res;
             }
             res.put("status", true);
-            res.put("user", managerUsers);
+            res.put("user", managerUser);
             return res;
-            //return Objects.equals(managerUsers.getPassword(), userInfoStr[1]) && Objects.equals(token, userInfoStr[0]);
         }
-        if (!Objects.equals(loginUser.getToken(), token) || !Objects.equals(managerUser.getPassword(), loginUser.getMD5Password())) {
+        if (!Objects.equals(managerUser.getPassword(), loginUser.getMD5Password())) {
             res.put("status", false);
             return res;
         }
         res.put("status", true);
         res.put("user", managerUser);
         return res;
-        //return Objects.equals(userInfoStr[0], token) && Objects.equals(userInfoStr[1], userInfoStr);
     }
 }

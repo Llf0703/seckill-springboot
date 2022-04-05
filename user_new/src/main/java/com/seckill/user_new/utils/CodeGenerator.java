@@ -1,4 +1,4 @@
-package com.seckill.seckill_manager.utils;
+package com.seckill.user_new.utils;
 
 import com.baomidou.mybatisplus.generator.FastAutoGenerator;
 import com.baomidou.mybatisplus.generator.config.OutputFile;
