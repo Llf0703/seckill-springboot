@@ -77,17 +77,17 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         if (id == null) {
             seckillItem.setCreatedAt(localDateTime);//初始化创建时间
             boolean res = save(seckillItem);
-            if (res) return Response.success("添加成功",seckillItem.getId());
+            if (res) return Response.success("添加成功", seckillItem.getId());
             return Response.systemErr("database error");
         }
         if (id <= 0) return Response.dataErr("invalid id");
-        SeckillItems query=getSeckillItemById(id);
+        SeckillItems query = getSeckillItemById(id);
         if (query == null)
             return Response.dataErr("invalid id");
         if (!query.getStartTime().isAfter(LocalDateTime.now().plusHours(2)))
             return Response.paramsErr("活动已开始或距开始小于两小时,无法修改");
         if (!updateById(seckillItem)) return Response.systemErr("database error");
-        return Response.success("修改成功",seckillItem.getId());
+        return Response.success("修改成功", seckillItem.getId());
     }
 
     @Override
@@ -100,17 +100,25 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
 
     @Override
     public Response getSeckillItemPage(PageVO pageVO) {
+        if (!Validator.isValidZeroOrOne(pageVO.getOrder())) return Response.paramsErr("排序异常");
         if (!Validator.isValidPageCurrent(pageVO.getCurrent())) return Response.paramsErr("页数异常");
         if (!Validator.isValidPageSize(pageVO.getSize())) return Response.paramsErr("请求数量超出范围");
+        if (pageVO.getKeyWord() != null && !Validator.isValidProductName(pageVO.getKeyWord()))
+            return Response.paramsErr("关键词异常");
         Page<SeckillItems> page = new Page<>(pageVO.getCurrent(), pageVO.getSize());
         QueryWrapper<SeckillItems> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at").orderByDesc("id");;
+        if (pageVO.getKeyWord() != null)
+            queryWrapper.like("title", pageVO.getKeyWord());
+        queryWrapper.isNull("deleted_at");
+        if (pageVO.getOrder() == 1) {
+            queryWrapper.orderByDesc("id");
+        }
         seckillItemsMapper.selectPage(page, queryWrapper);
         List<SeckillItems> itemsList = page.getRecords();
-        HashMap<String,Object> data=new HashMap<>();
-        data.put("items",SeckillItemDTO.toSeckillItemTableDTO(itemsList));
-        data.put("total",page.getTotal());
-        return Response.success(data, "获取成功",0);
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("items", SeckillItemDTO.toSeckillItemTableDTO(itemsList));
+        data.put("total", page.getTotal());
+        return Response.success(data, "获取成功", 0);
     }
 
     @Override
@@ -118,35 +126,35 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         if (queryByIdVO.getId() == null || queryByIdVO.getId() <= 0) return Response.paramsErr("参数异常");
         SeckillItems seckillItems = getSeckillItemById(queryByIdVO.getId());
         if (seckillItems == null) return Response.dataNotFoundErr("未查询到相关数据");
-        LocalDateTime nowTime=LocalDateTime.now();
+        LocalDateTime nowTime = LocalDateTime.now();
         seckillItems.setDeletedAt(nowTime);
         boolean res = updateById(seckillItems);
-        if (!res)return Response.dataErr("删除失败,数据库异常");
-        return Response.success("删除成功",seckillItems.getId());
+        if (!res) return Response.dataErr("删除失败,数据库异常");
+        return Response.success("删除成功", seckillItems.getId());
     }
 
     @Override
     public Response searchFinancialItemOptions(QueryVO queryByNameVO) {
         if (queryByNameVO.getKeyWord() == null) return null;
-        if (!Validator.isValidProductName(queryByNameVO.getKeyWord())) return Response.success("OK",0);
+        if (!Validator.isValidProductName(queryByNameVO.getKeyWord())) return Response.success("OK", 0);
         Page<FinancialItems> page = new Page<>(1, 25);
         QueryWrapper<FinancialItems> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("deleted_at").like("product_name", queryByNameVO.getKeyWord());
         financialItemsMapper.selectPage(page, queryWrapper);
         List<FinancialItems> itemsList = page.getRecords();
-        return Response.success(FinancialItemDTO.toFinancialItemOptionsDTO(itemsList), "OK",0);
+        return Response.success(FinancialItemDTO.toFinancialItemOptionsDTO(itemsList), "OK", 0);
     }
 
     @Override
     public Response searchRiskControlOptions(QueryVO queryByNameVO) {
         if (queryByNameVO.getKeyWord() == null) return null;
-        if (!Validator.isValidProductName(queryByNameVO.getKeyWord())) return Response.success("OK",0);
+        if (!Validator.isValidProductName(queryByNameVO.getKeyWord())) return Response.success("OK", 0);
         Page<RiskControl> page = new Page<>(1, 25);
         QueryWrapper<RiskControl> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNull("deleted_at").like("policy_name", queryByNameVO.getKeyWord());
         riskControlMapper.selectPage(page, queryWrapper);
         List<RiskControl> itemsList = page.getRecords();
-        return Response.success(RiskControlDTO.toRiskControlOptionsDTO(itemsList), "OK",0);
+        return Response.success(RiskControlDTO.toRiskControlOptionsDTO(itemsList), "OK", 0);
     }
 
     private SeckillItems getSeckillItemById(Integer id) {

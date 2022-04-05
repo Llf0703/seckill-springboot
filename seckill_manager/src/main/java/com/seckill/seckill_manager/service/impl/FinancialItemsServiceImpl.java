@@ -39,8 +39,7 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
     public Response editFinancialItem(FinancialItemVO financialItemVO) {
         if (!Validator.isValidAmountCanNotBeZERO(financialItemVO.getDailyCumulativeLimit()))
             return Response.paramsErr("日累计限额超出范围");
-        if (!Validator.isValidProductName(financialItemVO.getProductName()))
-            return Response.paramsErr("产品名称不合规");
+        if (!Validator.isValidProductName(financialItemVO.getProductName())) return Response.paramsErr("产品名称不合规");
         if (!Validator.isValidZeroOrOne(financialItemVO.getAutomaticRedemptionAtMaturity()))
             return Response.paramsErr("错误的到期自动赎回选项");
         if (!Validator.isValidAmountCanBeZERO(financialItemVO.getIncrementAmount()))
@@ -49,27 +48,22 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
             return Response.paramsErr("单笔最大金额超出范围");
         if (!Validator.isValidAmountCanNotBeZERO(financialItemVO.getMinimumDepositAmount()))
             return Response.paramsErr("起存金额超出范围");
-        if (!Validator.isValidZeroOrOne(financialItemVO.getEarlyWithdrawal()))
-            return Response.paramsErr("错误的允许提前支取选项");
-        if (!Validator.isValidRate(financialItemVO.getInterestRate()))
-            return Response.paramsErr("利率超出范围");
-        if (!Validator.isValidDays(financialItemVO.getShelfLife()))
-            return Response.paramsErr("存期超出范围");
+        if (!Validator.isValidZeroOrOne(financialItemVO.getEarlyWithdrawal())) return Response.paramsErr("错误的允许提前支取选项");
+        if (!Validator.isValidRate(financialItemVO.getInterestRate())) return Response.paramsErr("利率超出范围");
+        if (!Validator.isValidDays(financialItemVO.getShelfLife())) return Response.paramsErr("存期超出范围");
         if (financialItemVO.getMinimumDepositAmount().compareTo(financialItemVO.getMaximumSinglePurchaseAmount()) > 0)
             return Response.paramsErr("起存金额不能大于单笔最大金额");
         if (financialItemVO.getMinimumDepositAmount().compareTo(financialItemVO.getDailyCumulativeLimit()) > 0)
             return Response.paramsErr("起存金额不能大于日累计限额");
         if (financialItemVO.getMaximumSinglePurchaseAmount().compareTo(financialItemVO.getDailyCumulativeLimit()) > 0)
             return Response.paramsErr("单笔最大金额不能大于日累计限额");
-        if (financialItemVO.getProductExpirationDate() == null)
-            return Response.paramsErr("产品失效日期不能为空");
-        if (financialItemVO.getProductEffectiveDate() == null)
-            return Response.paramsErr("产品生效日期不能为空");
+        if (financialItemVO.getProductExpirationDate() == null) return Response.paramsErr("产品失效日期不能为空");
+        if (financialItemVO.getProductEffectiveDate() == null) return Response.paramsErr("产品生效日期不能为空");
         if (!financialItemVO.getProductEffectiveDate().isBefore(financialItemVO.getProductExpirationDate()))
             return Response.paramsErr("产品失效日期应大于产品生效日期");
         FinancialItems financialItem = new FinancialItems();
         FinancialItems query = getFinancialItemByName(financialItemVO.getProductName());
-        if (query != null) return Response.dataErr("存在相同名称的产品");
+        if (financialItemVO.getId() ==null && query != null) return Response.dataErr("存在相同名称的产品");
         if (financialItemVO.getId() == null) {//id不存在,新增数据
             BeanUtil.copyProperties(financialItemVO, financialItem, true);
             LocalDateTime localDateTime = LocalDateTime.now();
@@ -104,16 +98,23 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
 
     @Override
     public Response getFinancialItemPage(PageVO pageVO) {
+        if (!Validator.isValidZeroOrOne(pageVO.getOrder())) return Response.paramsErr("排序异常");
         if (!Validator.isValidPageCurrent(pageVO.getCurrent())) return Response.paramsErr("页数异常");
         if (!Validator.isValidPageSize(pageVO.getSize())) return Response.paramsErr("请求数量超出范围");
+        if (pageVO.getKeyWord() != null && !Validator.isValidProductName(pageVO.getKeyWord()))
+            return Response.paramsErr("关键词异常");
         Page<FinancialItems> page = new Page<>(pageVO.getCurrent(), pageVO.getSize());
         QueryWrapper<FinancialItems> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at").orderByDesc("id");;
+        if (pageVO.getKeyWord() != null) queryWrapper.like("product_name", pageVO.getKeyWord());
+        queryWrapper.isNull("deleted_at");
+        if (pageVO.getOrder() == 1) {
+            queryWrapper.orderByDesc("id");
+        }
         financialItemsMapper.selectPage(page, queryWrapper);
         List<FinancialItems> itemsList = page.getRecords();
-        HashMap<String,Object> data=new HashMap<>();
+        HashMap<String, Object> data = new HashMap<>();
         data.put("items", FinancialItemDTO.toFinancialItemTableDTO(itemsList));
-        data.put("total",page.getTotal());
+        data.put("total", page.getTotal());
         return Response.success(data, "获取成功", 0);
     }
 

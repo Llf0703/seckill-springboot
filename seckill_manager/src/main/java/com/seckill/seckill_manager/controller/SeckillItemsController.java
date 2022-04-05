@@ -94,7 +94,7 @@ public class SeckillItemsController {
     @Permission(level = LevelCode.EDIT, permission = PermissionType.SeckillItemPermission)
     @OperateRecord(operateName = "删除秒杀活动",level = LevelCode.OPERATE_DELETE)
     @PostMapping("/delete_item")
-    public Response deleteItem(HttpServletRequest request, QueryVO queryByIdVO) {
+    public Response deleteItem(HttpServletRequest request,@RequestBody QueryVO queryByIdVO) {
         Response res= seckillItemsService.deleteSeckillItemPage(queryByIdVO);
         if (res.getStatus()) {
             request.setAttribute("operateId", res.getId());

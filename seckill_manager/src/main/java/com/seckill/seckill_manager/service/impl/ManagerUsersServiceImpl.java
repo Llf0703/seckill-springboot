@@ -322,12 +322,18 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
 
     @Override
     public Response getAdminPage(PageVO pageVO) {
+        if (!Validator.isValidZeroOrOne(pageVO.getOrder())) return Response.paramsErr("排序异常");
         if (!Validator.isValidPageCurrent(pageVO.getCurrent())) return Response.paramsErr("页数异常");
         if (!Validator.isValidPageSize(pageVO.getSize())) return Response.paramsErr("请求数量超出范围");
+        if (pageVO.getKeyWord() != null && !Validator.isValidProductName(pageVO.getKeyWord()))
+            return Response.paramsErr("关键词异常");
         Page<ManagerUsers> page = new Page<>(pageVO.getCurrent(), pageVO.getSize());
         QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at").orderByDesc("id");
-        ;
+        if (pageVO.getKeyWord() != null) queryWrapper.like("account", pageVO.getKeyWord());
+        queryWrapper.isNull("deleted_at");
+        if (pageVO.getOrder() == 1) {
+            queryWrapper.orderByDesc("id");
+        }
         managerUsersMapper.selectPage(page, queryWrapper);
         List<ManagerUsers> itemsList = page.getRecords();
         HashMap<String, Object> data = new HashMap<>();
