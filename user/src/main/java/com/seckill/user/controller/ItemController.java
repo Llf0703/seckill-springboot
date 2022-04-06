@@ -1,5 +1,6 @@
 package com.seckill.user.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.seckill.user.entity.Item;
 import com.seckill.user.entity.Items;
@@ -59,7 +60,19 @@ public class ItemController {
     public JSONObject findOne_controller(@RequestParam int id){
        Item item = itemService.findById(id);
        JSONObject jsonObject = new JSONObject();
-       jsonObject.put("data",item);
-       return jsonObject;
+       if(item != null) {
+           jsonObject.put("data", item);
+           return jsonObject;
+       }
+       else
+       {
+           jsonObject.put("date",
+                   "ManagerUser{"
+                           + "id=" + id
+                           + ", title="
+                           + "错误，该商品信息不存在"
+                           + "}");
+           return jsonObject;
+       }
     }
 }
