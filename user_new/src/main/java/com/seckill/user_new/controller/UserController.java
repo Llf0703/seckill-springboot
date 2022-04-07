@@ -34,7 +34,7 @@ public class UserController {
     }
 
 
-    @GetMapping("/api/check_version")
+    @GetMapping("/auth/check_version")
     public Response checkVersion(HttpServletRequest request) {
         String token = request.getHeader("token");
         String ip = request.getHeader("X-real-ip");

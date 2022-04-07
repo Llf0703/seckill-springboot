@@ -21,6 +21,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>
@@ -107,7 +108,7 @@ public class FinancialItemsServiceImpl extends ServiceImpl<FinancialItemsMapper,
         QueryWrapper<FinancialItems> queryWrapper = new QueryWrapper<>();
         if (pageVO.getKeyWord() != null) queryWrapper.like("product_name", pageVO.getKeyWord());
         queryWrapper.isNull("deleted_at");
-        if (pageVO.getOrder() == 1) {
+        if (Objects.equals(pageVO.getOrder(),1)) {
             queryWrapper.orderByDesc("id");
         }
         financialItemsMapper.selectPage(page, queryWrapper);

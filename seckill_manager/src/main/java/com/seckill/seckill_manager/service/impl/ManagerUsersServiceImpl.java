@@ -332,7 +332,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
         if (pageVO.getKeyWord() != null) queryWrapper.like("account", pageVO.getKeyWord());
         queryWrapper.isNull("deleted_at");
-        if (pageVO.getOrder() == 1) {
+        if (Objects.equals(pageVO.getOrder(),1)) {
             queryWrapper.orderByDesc("id");
         }
         managerUsersMapper.selectPage(page, queryWrapper);

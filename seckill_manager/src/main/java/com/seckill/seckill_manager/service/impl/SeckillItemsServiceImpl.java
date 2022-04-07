@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -110,7 +111,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         if (pageVO.getKeyWord() != null)
             queryWrapper.like("title", pageVO.getKeyWord());
         queryWrapper.isNull("deleted_at");
-        if (pageVO.getOrder() == 1) {
+        if (Objects.equals(pageVO.getOrder(),1)) {
             queryWrapper.orderByDesc("id");
         }
         seckillItemsMapper.selectPage(page, queryWrapper);

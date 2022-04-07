@@ -17,6 +17,7 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>
@@ -50,18 +51,18 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         if (pageVO.getKeyWord() != null)
             queryWrapper.like("title", pageVO.getKeyWord());
         LocalDateTime nowTime = LocalDateTime.now();
-        if (pageVO.getOrder2() == 2) {
+        if (Objects.equals(pageVO.getOrder2(),2)) {
             queryWrapper.gt("start_time", nowTime);
         }
-        if (pageVO.getOrder2() == 3) {
+        if (Objects.equals(pageVO.getOrder2(),3)) {
             queryWrapper.le("start_time", nowTime);
             queryWrapper.ge("end_time", nowTime);
         }
-        if (pageVO.getOrder2() == 4) {
+        if (Objects.equals(pageVO.getOrder2(),4)) {
             queryWrapper.lt("end_time", nowTime);
         }
         queryWrapper.isNull("deleted_at");
-        if (pageVO.getOrder() == 1) {
+        if (Objects.equals(pageVO.getOrder(),1)) {
             queryWrapper.orderByDesc("id");
         }
         seckillItemsMapper.selectPage(page, queryWrapper);

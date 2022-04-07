@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>
@@ -45,7 +46,7 @@ public class OperateRecordServiceImpl extends ServiceImpl<OperateRecordMapper, O
         if (pageVO.getKeyWord2() != null)
             queryWrapper.like("operate", pageVO.getKeyWord2());
         queryWrapper.isNull("deleted_at");
-        if (pageVO.getOrder() == 1) {
+        if (Objects.equals(pageVO.getOrder(),1)) {
             queryWrapper.orderByDesc("id");
         }
         operateRecordMapper.selectPage(page, queryWrapper);

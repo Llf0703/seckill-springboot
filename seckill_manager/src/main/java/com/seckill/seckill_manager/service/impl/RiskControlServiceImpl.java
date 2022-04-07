@@ -92,7 +92,7 @@ public class RiskControlServiceImpl extends ServiceImpl<RiskControlMapper, RiskC
         if (pageVO.getKeyWord() != null)
             queryWrapper.like("policy_name", pageVO.getKeyWord());
         queryWrapper.isNull("deleted_at");
-        if (pageVO.getOrder() == 1) {
+        if (Objects.equals(pageVO.getOrder(),1)) {
             queryWrapper.orderByDesc("id");
         }
         riskControlMapper.selectPage(page, queryWrapper);
