@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 /**
  * <p>
@@ -17,6 +18,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @author wky1742095859
  * @since 2022-04-07
  */
+@Data
 @TableName("seckill_items")
 @ApiModel(value = "SeckillItems对象", description = "")
 public class SeckillItems implements Serializable {
@@ -49,98 +51,6 @@ public class SeckillItems implements Serializable {
     private Integer financialItemId;
 
     private Integer riskControlId;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
-    }
-
-    public void setDeletedAt(LocalDateTime deletedAt) {
-        this.deletedAt = deletedAt;
-    }
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-    public Long getStock() {
-        return stock;
-    }
-
-    public void setStock(Long stock) {
-        this.stock = stock;
-    }
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
-    public Long getRemainingStock() {
-        return remainingStock;
-    }
-
-    public void setRemainingStock(Long remainingStock) {
-        this.remainingStock = remainingStock;
-    }
-    public Integer getFinancialItemId() {
-        return financialItemId;
-    }
-
-    public void setFinancialItemId(Integer financialItemId) {
-        this.financialItemId = financialItemId;
-    }
-    public Integer getRiskControlId() {
-        return riskControlId;
-    }
-
-    public void setRiskControlId(Integer riskControlId) {
-        this.riskControlId = riskControlId;
-    }
 
     @Override
     public String toString() {

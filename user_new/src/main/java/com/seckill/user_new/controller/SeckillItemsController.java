@@ -4,6 +4,7 @@ package com.seckill.user_new.controller;
 import com.seckill.user_new.Interceptor.Type.LoginRequired;
 import com.seckill.user_new.common.Response;
 import com.seckill.user_new.controller.vo.PageVO;
+import com.seckill.user_new.controller.vo.QueryVO;
 import com.seckill.user_new.service.impl.SeckillItemsServiceImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,5 +31,11 @@ public class SeckillItemsController {
     @PostMapping("/get_overview")
     public Response getOverview(@RequestBody PageVO pageVO) {
         return seckillItemsService.getOverview(pageVO);
+    }
+
+    @LoginRequired
+    @PostMapping("/get_detail")
+    public Response getDetail(@RequestBody QueryVO queryVO){
+        return seckillItemsService.getDetail(queryVO);
     }
 }
