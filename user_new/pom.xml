@@ -131,6 +131,13 @@
             <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
             <version>2021.1</version>
         </dependency>
+
+        <!--二维码工具-->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.4.1</version>
+        </dependency>
     </dependencies>
 
     <build>
