@@ -4,6 +4,7 @@ import cn.hutool.core.codec.Base64;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seckill.user_new.common.Response;
+import com.seckill.user_new.controller.vo.RegisterVO;
 import com.seckill.user_new.controller.vo.UserVO;
 import com.seckill.user_new.entity.RedisService.LoginCrypto;
 import com.seckill.user_new.entity.RedisService.LoginUser;
@@ -124,6 +125,51 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         //String res3 = RedisUtils.set(ip + "_user", VOPhone, 3600);
         if (!Objects.equals(res, "OK") || !Objects.equals(res2, "OK")) return Response.systemErr("登录失败,系统异常");
         return Response.success(data, "登录成功");
+    }
+
+    @Override
+    public Response checkVersion(String token, String ip) {
+        HashMap<String, Object> result = JWTAuth.parseToken(token);
+        if (!result.get("status").equals(true)) return Response.authErr("登录失效");//token解析失败
+        if (ip == null) return Response.authErr("登录失效");//无ip
+        String account = result.get("account").toString();
+        String loginUserStr = RedisUtils.get("U:LoginUser:" + account);
+        //检查ip对应的登录账号及token账号是否一致
+        if (loginUserStr == null) return Response.authErr("登录失效");
+        LoginUser loginUser = JSONUtils.toEntity(loginUserStr, LoginUser.class);
+        if (loginUser == null) return Response.systemErr("系统异常");
+        if (!Objects.equals(loginUser.getIp(), ip) || !Objects.equals(token, loginUser.getToken()))
+            return Response.authErr("登录失效");//当前ip无登录信息或token无效
+        String managerUserStr = RedisUtils.get("U:User:" + account);//获取用户信息
+        User managerUser = null;
+        if (managerUserStr != null) managerUser = JSONUtils.toEntity(managerUserStr, User.class);
+        if (managerUser == null) {//未查到用户信息,查询数据库
+            managerUser = getUserByPhone(account);
+            if (managerUser == null) return Response.authErr("登录失效");//账号不存在
+            RedisUtils.set("U:User:" + account, JSONUtils.toJSONStr(managerUser), 25200);//缓存用户信息
+            //检查密码是否更改及ip所登录的token与传回的token是否一致
+            if (!Objects.equals(managerUser.getPassword(), loginUser.getMD5Password()))
+                return Response.authErr("登录失效");//检查密码是否有更改,token是否一致
+            return Response.success("查询成功");
+        }
+        if (!Objects.equals(managerUser.getPassword(), loginUser.getMD5Password()))
+            return Response.authErr("登录失效");
+        return Response.success("查询成功");
+    }
+
+    @Override
+    public Response loginOut(String token, String ip) {
+        HashMap<String, Object> result = JWTAuth.parseToken(token);
+        if (!result.get("status").equals(true)) return Response.success("退出成功");//token过期,直接返回退出成功
+        String account = result.get("account").toString();
+        //if (ip != null && RedisUtils.exist(account + "," + ip)) RedisUtils.del(account + "," + ip);
+        if (ip != null && RedisUtils.exist("U:LoginUser:" + account)) RedisUtils.del("U:LoginUser:" + account);
+        return Response.success("退出成功");
+    }
+
+    @Override
+    public Response register(RegisterVO registerVO, String ip) {
+        return null;
     }
 
     private User getUserByPhone(String phone) {

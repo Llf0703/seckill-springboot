@@ -24,15 +24,15 @@ public class CodeGenerator {
                     builder.author("wky1742095859") // 设置作者
                             .enableSwagger() // 开启 swagger 模式
                             .fileOverride() // 覆盖已生成文件
-                            .outputDir("E:\\大创and服创\\codegenerator"); // 指定输出目录
+                            .outputDir("E:\\大创and服创\\llf\\user_new\\src\\main\\java"); // 指定输出目录
                 })
                 .packageConfig(builder -> {
                     builder.parent("com.seckill.user_new") // 设置父包名
                             .moduleName("") // 设置父包模块名
-                            .pathInfo(Collections.singletonMap(OutputFile.mapperXml, "E:\\大创and服创\\codegenerator"));//OutputFile.mapperXml, "D://")); // 设置mapperXml生成路径
+                            .pathInfo(Collections.singletonMap(OutputFile.mapperXml, "E:\\大创and服创\\llf\\user_new\\src\\main\\resources\\mapper"));//OutputFile.mapperXml, "D://")); // 设置mapperXml生成路径
                 })
                 .strategyConfig(builder -> {
-                    builder.addInclude("user") // 设置需要生成的表名
+                    builder.addInclude("financial_items") // 设置需要生成的表名
                             .addTablePrefix("t_", "c_"); // 设置过滤表前缀
                 })
                 .templateEngine(new FreemarkerTemplateEngine()) // 使用Freemarker引擎模板，默认的是Velocity引擎模板
