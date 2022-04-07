@@ -91,7 +91,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         String VOFP = new String(VOFPBytes);
         if (!Validator.isValidPhone(VOPhone) || !Validator.isValidPassword(VOPassword) || VOFP.length() != 32) return Response.authErr("账号或密码错误");//正则判断
         String MD5Password = MD5.MD5Password(VOPhone + VOPassword);
-        System.out.println(VOPhone);
         String userStr = RedisUtils.get("U:User:" + VOPhone);//获取缓存的用户信息
         String userPassword = null;
         User user;
@@ -137,27 +136,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (ip == null) return Response.authErr("登录失效");//无ip
         String account = result.get("account").toString();
         String loginUserStr = RedisUtils.get("U:LoginUser:" + account);
-        System.out.println(account);
         //检查ip对应的登录账号及token账号是否一致
-        if (loginUserStr == null) return Response.authErr("登录失效1");
+        if (loginUserStr == null) return Response.authErr("登录失效");
         LoginUser loginUser = JSONUtils.toEntity(loginUserStr, LoginUser.class);
         if (loginUser == null) return Response.systemErr("系统异常");
         if (!Objects.equals(loginUser.getIp(), ip) || !Objects.equals(token, loginUser.getToken()))
-            return Response.authErr("登录失效2");//当前ip无登录信息或token无效
+            return Response.authErr("登录失效");//当前ip无登录信息或token无效
         String userStr = RedisUtils.get("U:User:" + account);//获取用户信息
         User user = null;
         if (userStr != null) user = JSONUtils.toEntity(userStr, User.class);
         if (user == null) {//未查到用户信息,查询数据库
             user = getUserByPhone(account);
-            if (user == null) return Response.authErr("登录失效3");//账号不存在
+            if (user == null) return Response.authErr("登录失效");//账号不存在
             RedisUtils.set("U:User:" + account, JSONUtils.toJSONStr(user), 25200);//缓存用户信息
             //检查密码是否更改及ip所登录的token与传回的token是否一致
             if (!Objects.equals(user.getPassword(), loginUser.getMD5Password()))
-                return Response.authErr("登录失效4");//检查密码是否有更改,token是否一致
+                return Response.authErr("登录失效");//检查密码是否有更改,token是否一致
             return Response.success("查询成功");
         }
         if (!Objects.equals(user.getPassword(), loginUser.getMD5Password()))
-            return Response.authErr("登录失效5");
+            return Response.authErr("登录失效");
         return Response.success("查询成功");
     }
 
