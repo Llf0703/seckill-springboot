@@ -20,7 +20,7 @@ public class ItemServicelmpl implements ItemService {
     }
 
     @Override
-    public Item findById(int id){
+    public Item findById(int id) {
         return itemMapper.find_by_id(id);
     }
 }
