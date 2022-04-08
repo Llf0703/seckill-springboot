@@ -17,7 +17,11 @@ import com.seckill.user_new.utils.crypto.RSAUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -171,7 +175,65 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public Response register(RegisterVO registerVO, String ip) {
-        return null;
+        if (registerVO.getPhone() == null || registerVO.getPassword() == null
+            || registerVO.getName() == null || registerVO.getId_card() == null) return Response.authErr("有信息为空");
+        if (ip == null) return Response.systemErr("注册失败,系统异常");
+        String loginCryptoStr = RedisUtils.get("U:LoginCrypto:" + registerVO.getUid());
+        if (loginCryptoStr == null) return Response.systemErr("注册失败,系统异常");
+        LoginCrypto loginCrypto = JSONUtils.toEntity(loginCryptoStr, LoginCrypto.class);
+        if (loginCrypto == null) return Response.systemErr("注册失败,系统异常");
+        byte[] VOPasswordBytes;
+        byte[] VOPhoneBytes;
+        byte[] VONameBytes;
+        byte[] VOIdCardBytes;
+        byte[] VOFPBytes;
+        try {
+            VOPhoneBytes = RSAUtil.decryptByPrivateKey(Base64.decode(registerVO.getPhone()), loginCrypto.getRsaPrvKey());
+            VOPasswordBytes = RSAUtil.decryptByPrivateKey(Base64.decode(registerVO.getPassword()), loginCrypto.getRsaPrvKey());
+            VONameBytes = RSAUtil.decryptByPrivateKey(Base64.decode(registerVO.getName()), loginCrypto.getRsaPrvKey());
+            VOIdCardBytes = RSAUtil.decryptByPrivateKey(Base64.decode(registerVO.getId_card()), loginCrypto.getRsaPrvKey());
+            VOFPBytes = RSAUtil.decryptByPrivateKey(Base64.decode(registerVO.getToken()), loginCrypto.getRsaPrvKey());
+        } catch (Exception e) {
+            return Response.authErr("信息错误");
+        }
+        String VOPassword = new String(VOPasswordBytes);
+        String VOPhone = new String(VOPhoneBytes);
+        String VOName = new String(VONameBytes);
+        String VOIdCard = new String(VOIdCardBytes);
+        String VOFP = new String(VOFPBytes);
+        if (!Validator.isValidPhone(VOPhone) || !Validator.isValidPassword(VOPassword)
+            || !Validator.isValidName(VOName) || !Validator.isValidIdCard(VOIdCard) || VOFP.length() != 32) return Response.authErr("信息错误");
+        if (getUserByPhone(VOPhone) != null)
+            return Response.authErr("手机号已被注册");
+        String MD5Password = MD5.MD5Password(VOPhone + VOPassword);
+        LocalDateTime time = LocalDateTime.now();
+        User user = new User();
+        user.setCreatedAt(time);
+        user.setUpdatedAt(time);
+        user.setPhone(VOPhone);
+        user.setPassword(MD5Password);
+        user.setName(VOName);
+        user.setIdCard(VOIdCard);
+        user.setUserName(UserUtil.generateUserName());
+        user.setBalance(new BigDecimal(0));
+        user.setEmploymentStatus(0);
+        user.setCreditStatus(0);
+        try {
+            LocalDateTime brithday = UserUtil.getAge(VOIdCard);
+            user.setAge(brithday);
+        } catch (ParseException e) {
+            return Response.systemErr("注册失败,系统异常");
+        }
+        userMapper.insert(user);
+        HashMap<String, Object> data = new HashMap<>();
+        String token = JWTAuth.releaseToken(registerVO.getPhone());
+        data.put("token", token);
+        LoginUser loginUser = new LoginUser(VOPhone, MD5Password, VOFP, token, ip);
+        String res = RedisUtils.set("U:LoginUser:" + VOPhone, JSONUtils.toJSONStr(loginUser), 3600);
+        String res2 = RedisUtils.set("U:User:" + VOPhone, JSONUtils.toJSONStr(user), 25200);//缓存用户信息
+        //String res3 = RedisUtils.set(ip + "_user", VOPhone, 3600);
+        if (!Objects.equals(res, "OK") || !Objects.equals(res2, "OK")) return Response.systemErr("注册失败,系统异常");
+        return Response.success(data, "注册成功");
     }
 
     private User getUserByPhone(String phone) {
