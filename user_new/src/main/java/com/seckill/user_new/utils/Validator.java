@@ -38,6 +38,12 @@ public class Validator {
         if (name == null) return false;
         return Pattern.matches(RegexStr.REGEX_NAME, name);
     }
+
+    public static boolean isValidIdCard(String idCard) {
+        if (idCard == null) return false;
+        return IdCardUtil.idCardValidate(idCard);
+    }
+    
     public static boolean isValidSeckillTime(LocalDateTime startTime, LocalDateTime endTime) {
         if (startTime == null || endTime == null) return false;
         LocalDateTime nowTime = LocalDateTime.now();
