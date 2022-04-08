@@ -119,7 +119,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (user == null || !Objects.equals(user.getPassword(), MD5Password))//未查到或密码不相等
             return Response.authErr("账号或密码错误");
         HashMap<String, Object> data = new HashMap<>();
-        String token = JWTAuth.releaseToken(userVO.getPhone());
+        String token = JWTAuth.releaseToken(VOPhone);
         data.put("token", token);
         LoginUser loginUser = new LoginUser(VOPhone, MD5Password, VOFP, token, ip);
         String res = RedisUtils.set("U:LoginUser:" + VOPhone, JSONUtils.toJSONStr(loginUser), 3600);
