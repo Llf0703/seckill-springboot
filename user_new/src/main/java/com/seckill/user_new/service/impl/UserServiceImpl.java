@@ -224,9 +224,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         } catch (ParseException e) {
             return Response.systemErr("注册失败,系统异常");
         }
-        userMapper.insert(user);
+        if (!save(user))return Response.systemErr("注册失败,系统异常");
         HashMap<String, Object> data = new HashMap<>();
-        String token = JWTAuth.releaseToken(registerVO.getPhone());
+        String token = JWTAuth.releaseToken(VOPhone);
         data.put("token", token);
         LoginUser loginUser = new LoginUser(VOPhone, MD5Password, VOFP, token, ip);
         String res = RedisUtils.set("U:LoginUser:" + VOPhone, JSONUtils.toJSONStr(loginUser), 3600);
