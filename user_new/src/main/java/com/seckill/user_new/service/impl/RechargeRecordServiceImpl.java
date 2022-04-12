@@ -16,6 +16,7 @@ import com.seckill.user_new.utils.UUIDUtil;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -51,15 +52,24 @@ public class RechargeRecordServiceImpl extends ServiceImpl<RechargeRecordMapper,
         DoRecharge doRecharge=new DoRecharge(userId,rechargeVO.getAmount(), rechargeVO.getRechargeMethod(), null);
         String res= RedisUtils.set("U:DoRecharge:"+uuid, JSONUtils.toJSONStr(doRecharge),300);//有效期五分钟
         if (!Objects.equals(res,"OK"))
-            return Response.systemErr("获取验证码失败,系统异常");
+            return Response.systemErr("获取二维码失败,系统异常");
         String img= QRCodeUtil.generatorQR(baseUrl+uuid);
         Dict data=Dict.create().set("img",img);
-        return Response.success(data,"OK");
+        return Response.success(data, "获取二维码成功,有效期五分钟");
     }
 
     @Override
     public Response doRecharge(String rechargeId) {
-        return null;
+        if (rechargeId == null) return Response.paramsErr("充值失败,无效的连接");
+        String doRechargeStr = RedisUtils.get("U:DoRecharge:" + rechargeId);
+        if (doRechargeStr == null) return Response.paramsErr("充值失败,无效的连接");
+        DoRecharge doRecharge = JSONUtils.toEntity(doRechargeStr, DoRecharge.class);
+        if (doRecharge == null) return Response.paramsErr("充值失败,系统异常");
+        Dict res = Dict.create()
+                .set("amount", doRecharge.getAmount())
+                .set("rechargeMethod", doRecharge.getRechargeMethod())
+                .set("rechargeTime", LocalDateTime.now());
+        return Response.success(res, "充值成功");
     }
 
     @Override

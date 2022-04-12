@@ -37,7 +37,7 @@ public class RechargeRecordController {
     @PostMapping("/recharge/get_recharge_link")
     public Response getRechargeLink(HttpServletRequest request, @RequestBody RechargeVO rechargeVO) {
         User user = (User) request.getAttribute("user");
-        String baseUrl = "http://124.223.199.137:8888/recharge/do_recharge/";
+        String baseUrl = "http://124.223.199.137:7777/api/recharge/do_recharge/";
         return rechargeRecordService.getRechargeLink(user, rechargeVO, baseUrl);
     }
 
@@ -49,7 +49,7 @@ public class RechargeRecordController {
      * @Param [rechargeId]
      * @Return com.seckill.user_new.common.Response
      **/
-    @PostMapping("/recharge/do_recharge/{rechargeId}")
+    @GetMapping("/recharge/do_recharge/{rechargeId}")
     public Response doRecharge(@PathVariable("rechargeId") String rechargeId) {
         return rechargeRecordService.doRecharge(rechargeId);
     }

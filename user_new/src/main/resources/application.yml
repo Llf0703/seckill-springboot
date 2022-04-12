@@ -18,8 +18,8 @@ spring:
     timeout: 30000
     jedis:
       pool:
-        max-active: 500
-        max-idle: 10
+        max-active: 100
+        max-idle: 100
         min-idle: 0
         max-wait: -1
   cloud:

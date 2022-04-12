@@ -44,8 +44,11 @@
           <version>1.18.22</version>
         </dependency>
 
-
-
+        <!--定时任务-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-quartz</artifactId>
+        </dependency>
 
         <!--mybatis-plus-->
         <dependency>
