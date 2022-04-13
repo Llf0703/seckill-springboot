@@ -125,9 +125,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         data.put("token", token);
         LoginUser loginUser = new LoginUser(VOPhone, MD5Password, VOFP, token, ip);
         String res = RedisUtils.set("U:LoginUser:" + VOPhone, JSONUtils.toJSONStr(loginUser), 3600);
-        String res2 = RedisUtils.set("U:User:" + VOPhone, JSONUtils.toJSONStr(user), 25200);//缓存用户信息
-        //String res3 = RedisUtils.set(ip + "_user", VOPhone, 3600);
-        if (!Objects.equals(res, "OK") || !Objects.equals(res2, "OK")) return Response.systemErr("登录失败,系统异常");
+        //String res2 = RedisUtils.set("U:User:" + VOPhone, JSONUtils.toJSONStr(user), 25200);//缓存用户信息
+        //String res3 = RedisUtils.set(ip + "_user", VOPhone, 3600);|| !Objects.equals(res2, "OK")
+        if (!Objects.equals(res, "OK") ) return Response.systemErr("登录失败,系统异常");
         return Response.success(data, "登录成功");
     }
 
@@ -144,19 +144,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (loginUser == null) return Response.systemErr("系统异常");
         if (!Objects.equals(loginUser.getIp(), ip) || !Objects.equals(token, loginUser.getToken()))
             return Response.authErr("登录失效");//当前ip无登录信息或token无效
-        String userStr = RedisUtils.get("U:User:" + account);//获取用户信息
-        User user = null;
-        if (userStr != null) user = JSONUtils.toEntity(userStr, User.class);
-        if (user == null) {//未查到用户信息,查询数据库
+        String userPassword = RedisUtils.hget("U:User:" + account,"password");//获取用户信息
+        if (userPassword == null) {//未查到用户信息,查询数据库
+            User user = null;
             user = getUserByPhone(account);
             if (user == null) return Response.authErr("登录失效");//账号不存在
-            RedisUtils.set("U:User:" + account, JSONUtils.toJSONStr(user), 25200);//缓存用户信息
+            Map<String,String> map=JSONUtils.toRedisHash(user);
+            RedisUtils.hset("U:User:" + account,map);
+            //RedisUtils.set("U:User:" + account, JSONUtils.toJSONStr(user), 25200);//缓存用户信息
             //检查密码是否更改及ip所登录的token与传回的token是否一致
             if (!Objects.equals(user.getPassword(), loginUser.getMD5Password()))
                 return Response.authErr("登录失效");//检查密码是否有更改,token是否一致
             return Response.success("查询成功");
         }
-        if (!Objects.equals(user.getPassword(), loginUser.getMD5Password()))
+        if (!Objects.equals(userPassword, loginUser.getMD5Password()))
             return Response.authErr("登录失效");
         return Response.success("查询成功");
     }
@@ -228,6 +229,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         data.put("token", token);
         LoginUser loginUser = new LoginUser(VOPhone, MD5Password, VOFP, token, ip);
         String res = RedisUtils.set("U:LoginUser:" + VOPhone, JSONUtils.toJSONStr(loginUser), 3600);
+
         String res2 = RedisUtils.set("U:User:" + VOPhone, JSONUtils.toJSONStr(user), 25200);//缓存用户信息
         //String res3 = RedisUtils.set(ip + "_user", VOPhone, 3600);
         if (!Objects.equals(res, "OK") || !Objects.equals(res2, "OK")) return Response.systemErr("注册失败,系统异常");

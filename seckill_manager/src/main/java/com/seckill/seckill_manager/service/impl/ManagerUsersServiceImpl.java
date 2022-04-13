@@ -182,7 +182,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
             managerUser = getManagerUserByAccount(account);
             if (managerUser == null) return Response.authErr("登录失效");//账号不存在
             Map<String, String> map = JSONUtils.toRedisHash(managerUser);
-            RedisUtils.hset("M:ManagerUser:" + account, map);//缓存用户信息
+            if (map != null) RedisUtils.hset("M:ManagerUser:" + account, map);//缓存用户信息
             //检查密码是否更改及ip所登录的token与传回的token是否一致
             if (!Objects.equals(managerUser.getPassword(), loginUser.getMD5Password()))
                 return Response.authErr("登录失效");//检查密码是否有更改,token是否一致
@@ -287,8 +287,8 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
             boolean res = save(managerUsers);
             if (!res) return Response.dataErr("保存失败,数据库异常");
             Map<String, String> map = JSONUtils.toRedisHash(managerUsers);
-            long res1 = RedisUtils.hset("M:ManagerUser:" + managerUsers.getAccount(), map);
-            if (res1 >= 0) return Response.success("新增成功", managerUsers.getId());
+            if (map != null) RedisUtils.hset("M:ManagerUser:" + managerUsers.getAccount(), map);
+            //if (res1 >= 0) return Response.success("新增成功", managerUsers.getId());
             return Response.success("新增成功", managerUsers.getId());
         }
         //id不为空修改
@@ -305,6 +305,10 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
             managerUsers.setPassword(MD5.MD5Password(managerUsers.getAccount() + VOPassword));
         if (!updateById(managerUsers)) return Response.dataErr("保存失败,数据库异常");
         Map<String, String> map = JSONUtils.toRedisHash(managerUsers);
+        if (map==null){
+            RedisUtils.del("M:ManagerUser:" + managerUsers.getAccount());
+            return Response.success("保存成功,但可能需要等待一段时间才能应用变更", managerUsers.getId());
+        }
         long res1 = RedisUtils.hset("M:ManagerUser:" + managerUsers.getAccount(), map);
         if (res1 < 0) {
             RedisUtils.del("M:ManagerUser:" + managerUsers.getAccount());
