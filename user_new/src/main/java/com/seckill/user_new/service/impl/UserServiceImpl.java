@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -95,15 +96,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         String VOFP = new String(VOFPBytes);
         if (!Validator.isValidPhone(VOPhone) || !Validator.isValidPassword(VOPassword) || VOFP.length() != 32) return Response.authErr("账号或密码错误");//正则判断
         String MD5Password = MD5.MD5Password(VOPhone + VOPassword);
-        String userStr = RedisUtils.get("U:User:" + VOPhone);//获取缓存的用户信息
-        String userPassword = null;
-        User user;
-        if (userStr != null) {//用户缓存不为空,进行str到实体类转换,并从实体类获取加密后的密码
-            user = JSONUtils.toEntity(userStr, User.class);
-            if (user != null) {
-                userPassword = user.getPassword();
-            }
-        }
+        String userPassword = RedisUtils.hget("U:User:" + VOPhone,"password");//获取缓存的用户信息
         if (userPassword != null && !Objects.equals(userPassword, MD5Password)) {//缓存不为空且密码不相等
             return Response.authErr("账号或密码错误");
         }
@@ -119,7 +112,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             return Response.success(data, "登录成功");
         }
         //缓存未空,查询mysql
+        User user;
         user = getUserByPhone(VOPhone);
+        if (user!=null){
+            Map<String,String> map=JSONUtils.toRedisHash(user);
+            if (map!=null)RedisUtils.hset("U:User:"+user.getPhone(),map);
+        }
         if (user == null || !Objects.equals(user.getPassword(), MD5Password))//未查到或密码不相等
             return Response.authErr("账号或密码错误");
         HashMap<String, Object> data = new HashMap<>();

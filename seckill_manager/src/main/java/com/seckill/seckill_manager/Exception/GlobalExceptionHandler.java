@@ -20,6 +20,13 @@ import javax.servlet.http.HttpServletRequest;
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(Exception.class)
+    public @ResponseBody
+    Response ExceptionHandler(Exception e) {
+        e.printStackTrace();
+        return Response.systemErr("系统异常");
+    }
+
     /*
      * @MethodName ExceptionHandler404
      * @author Wky1742095859

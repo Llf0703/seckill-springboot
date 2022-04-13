@@ -142,8 +142,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
             //request.setAttribute("user", managerUser);
             return Response.success(data, "登录成功", Integer.parseInt(managerUserID));
         }
-        //缓存未空,查询mysql
-        System.out.println("查询sql");
+        //缓存空,查询mysql
         ManagerUsers managerUsers = getManagerUserByAccount(VOAccount);
         Map<String, String> map = null;
         if (managerUsers != null) {

@@ -40,10 +40,14 @@ public class OperateRecordInterceptor implements HandlerInterceptor {
                     record.setUpdatedAt(nowTime);
                     record.setOperate(operateRecord.operateName());
                     record.setCreatedAt(nowTime);
-                    record.setManagerUserId(user.getId());
                     record.setLevel(operateRecord.level());
                     record.setOperateId(operateId);
-                    record.setManagerUserAccount(user.getAccount());
+                    if (user==null){
+                        record.setManagerUserAccount(request.getHeader("X-real-ip"));
+                    }else {
+                        record.setManagerUserId(user.getId());
+                        record.setManagerUserAccount(user.getAccount());
+                    }
                     try {
                         int res = operateRecordMapper.insert(record);
                     } catch (Exception ignored) {
