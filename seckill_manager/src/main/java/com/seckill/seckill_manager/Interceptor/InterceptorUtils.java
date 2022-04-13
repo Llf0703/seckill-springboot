@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -93,11 +94,9 @@ public class InterceptorUtils {
             res.put("status", false);
             return res;
         }
-        String managerUserStr = RedisUtils.get("M:ManagerUser:" + account);
+        Map<String, String> managerUserMap = RedisUtils.hgetall("M:ManagerUser:" + account);
         ManagerUsers managerUser = null;
-        if (managerUserStr != null)
-            managerUser = JSONUtils.toEntity(managerUserStr, ManagerUsers.class);
-        if (managerUser == null) {//缓存中无账号信息,查询数据库
+        if (managerUserMap == null) {//缓存中无账号信息,查询数据库
             QueryWrapper<ManagerUsers> queryWrapper = new QueryWrapper<>();
             queryWrapper.isNull("deleted_at").eq("binary account", account);
             managerUser = managerUsersMapper.selectOne(queryWrapper);
@@ -105,9 +104,9 @@ public class InterceptorUtils {
                 res.put("status", false);
                 return res;
             }
-            String info = JSONUtils.toJSONStr(managerUser);
-            if (info != null) {
-                RedisUtils.set("M:ManagerUser:" + account, info);
+            Map<String, String> map = JSONUtils.toRedisHash(managerUser);
+            if (map != null) {
+                RedisUtils.hset("M:ManagerUser:" + account, map);
             }
             //检查密码是否更改
             if (!Objects.equals(managerUser.getPassword(), loginUser.getMD5Password())) {
@@ -118,7 +117,8 @@ public class InterceptorUtils {
             res.put("user", managerUser);
             return res;
         }
-        if (!Objects.equals(managerUser.getPassword(), loginUser.getMD5Password())) {
+        managerUser = JSONUtils.toEntity(managerUserMap, ManagerUsers.class);
+        if (managerUser == null || !Objects.equals(managerUser.getPassword(), loginUser.getMD5Password())) {
             res.put("status", false);
             return res;
         }

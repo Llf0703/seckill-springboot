@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -124,15 +125,7 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (!Validator.isValidAccount(VOAccount) || !Validator.isValidPassword(VOPassword) || VOFP.length() != 32)
             return Response.authErr("账号或密码错误");//正则判断
         String MD5Password = MD5.MD5Password(VOAccount + VOPassword);
-        String ManagerUserStr = RedisUtils.get("M:ManagerUser:" + VOAccount);//获取缓存的用户信息
-        String managerUserPassword = null;
-        ManagerUsers managerUser = new ManagerUsers();
-        if (ManagerUserStr != null) {//用户缓存不为空,进行str到实体类转换,并从实体类获取加密后的密码
-            managerUser = JSONUtils.toEntity(ManagerUserStr, ManagerUsers.class);
-            if (managerUser != null) {
-                managerUserPassword = managerUser.getPassword();
-            }
-        }
+        String managerUserPassword = RedisUtils.hget("M:ManagerUser:" + VOAccount, "password");//获取缓存的用户MD5密码
         if (managerUserPassword != null && !Objects.equals(managerUserPassword, MD5Password)) {//缓存不为空且密码不相等
             return Response.authErr("账号或密码错误");
         }
@@ -142,15 +135,21 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
             data.put("token", token);
             LoginAdmin loginAdmin = new LoginAdmin(VOAccount, MD5Password, VOFP, token, ip);
             String res = RedisUtils.set("M:LoginUser:" + VOAccount, JSONUtils.toJSONStr(loginAdmin), 3600);//缓存指纹对应的token,及密码MD5(改密后需重新登录)
+            String managerUserID = RedisUtils.hget("M:ManagerUser:" + VOAccount, "id");
             //String res2 = RedisUtils.set(ip + "_user", VOAccount, 3600);//缓存ip登录的用户(一个ip只能登录一个用户);
             //|| !Objects.equals(res2, "OK") 考虑到一个公网ip可能对应多个内网用户,记录ip弃用
-            if (!Objects.equals(res, "OK")) return Response.systemErr("登录失败,系统异常");
-            request.setAttribute("user", managerUser);
-            return Response.success(data, "登录成功", managerUser.getId());
+            if (!Objects.equals(res, "OK") || managerUserID == null) return Response.systemErr("登录失败,系统异常");
+            //request.setAttribute("user", managerUser);
+            return Response.success(data, "登录成功", Integer.parseInt(managerUserID));
         }
         //缓存未空,查询mysql
         System.out.println("查询sql");
         ManagerUsers managerUsers = getManagerUserByAccount(VOAccount);
+        Map<String, String> map = null;
+        if (managerUsers != null) {
+            map = JSONUtils.toRedisHash(managerUsers);
+            if (map != null) RedisUtils.hset("M:ManagerUser:" + VOAccount, map);
+        }
         if (managerUsers == null || !Objects.equals(managerUsers.getPassword(), MD5Password))//未查到或密码不相等
             return Response.authErr("账号或密码错误");
         HashMap<String, Object> data = new HashMap<>();
@@ -158,10 +157,10 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         data.put("token", token);
         LoginAdmin loginAdmin = new LoginAdmin(VOAccount, MD5Password, VOFP, token, ip);
         String res = RedisUtils.set("M:LoginUser:" + VOAccount, JSONUtils.toJSONStr(loginAdmin), 3600);
-        String res2 = RedisUtils.set("M:ManagerUser:" + VOAccount, JSONUtils.toJSONStr(managerUsers), 25200);//缓存用户信息
-        //String res3 = RedisUtils.set(ip + "_user", VOAccount, 3600);
-        if (!Objects.equals(res, "OK") || !Objects.equals(res2, "OK")) return Response.systemErr("登录失败,系统异常");
-        request.setAttribute("user", managerUser);
+        //String res2 = RedisUtils.set("M:ManagerUser:" + VOAccount, JSONUtils.toJSONStr(managerUsers), 25200);//缓存用户信息
+        //String res3 = RedisUtils.set(ip + "_user", VOAccount, 3600);|| !Objects.equals(res2, "OK")
+        if (!Objects.equals(res, "OK")) return Response.systemErr("登录失败,系统异常");
+        //request.setAttribute("user", managerUser);
         return Response.success(data, "登录成功", managerUsers.getId());
     }
 
@@ -178,19 +177,19 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (loginUser == null) return Response.systemErr("系统异常");
         if (!Objects.equals(loginUser.getIp(), ip) || !Objects.equals(token, loginUser.getToken()))
             return Response.authErr("登录失效");//当前ip无登录信息或token无效
-        String managerUserStr = RedisUtils.get("M:ManagerUser:" + account);//获取用户信息
+        String managerUserPassword = RedisUtils.hget("M:ManagerUser:" + account, "password");//获取用户信息密码
         ManagerUsers managerUser = null;
-        if (managerUserStr != null) managerUser = JSONUtils.toEntity(managerUserStr, ManagerUsers.class);
-        if (managerUser == null) {//未查到用户信息,查询数据库
+        if (managerUserPassword == null) {//未查到用户信息,查询数据库
             managerUser = getManagerUserByAccount(account);
             if (managerUser == null) return Response.authErr("登录失效");//账号不存在
-            RedisUtils.set("M:ManagerUser:" + account, JSONUtils.toJSONStr(managerUser), 25200);//缓存用户信息
+            Map<String, String> map = JSONUtils.toRedisHash(managerUser);
+            RedisUtils.hset("M:ManagerUser:" + account, map);//缓存用户信息
             //检查密码是否更改及ip所登录的token与传回的token是否一致
             if (!Objects.equals(managerUser.getPassword(), loginUser.getMD5Password()))
                 return Response.authErr("登录失效");//检查密码是否有更改,token是否一致
             return Response.success("查询成功", 0);
         }
-        if (!Objects.equals(managerUser.getPassword(), loginUser.getMD5Password()))
+        if (!Objects.equals(managerUserPassword, loginUser.getMD5Password()))
             return Response.authErr("登录失效");
         return Response.success("查询成功", 0);
     }
@@ -288,8 +287,9 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
             managerUsers.setPassword(MD5.MD5Password(VOAccount + VOPassword));
             boolean res = save(managerUsers);
             if (!res) return Response.dataErr("保存失败,数据库异常");
-            String res1 = RedisUtils.set("M:ManagerUser:" + managerUsers.getAccount(), JSONUtils.toJSONStr(managerUsers), 25200);
-            if (!Objects.equals(res1, "OK")) return Response.success("新增成功", managerUsers.getId());
+            Map<String, String> map = JSONUtils.toRedisHash(managerUsers);
+            long res1 = RedisUtils.hset("M:ManagerUser:" + managerUsers.getAccount(), map);
+            if (res1 >= 0) return Response.success("新增成功", managerUsers.getId());
             return Response.success("新增成功", managerUsers.getId());
         }
         //id不为空修改
@@ -305,8 +305,9 @@ public class ManagerUsersServiceImpl extends ServiceImpl<ManagerUsersMapper, Man
         if (managerUsersVO.getPassword() != null)
             managerUsers.setPassword(MD5.MD5Password(managerUsers.getAccount() + VOPassword));
         if (!updateById(managerUsers)) return Response.dataErr("保存失败,数据库异常");
-        String res1 = RedisUtils.set("M:ManagerUser:" + managerUsers.getAccount(), JSONUtils.toJSONStr(managerUsers), 25200);
-        if (!Objects.equals(res1, "OK")) {
+        Map<String, String> map = JSONUtils.toRedisHash(managerUsers);
+        long res1 = RedisUtils.hset("M:ManagerUser:" + managerUsers.getAccount(), map);
+        if (res1 < 0) {
             RedisUtils.del("M:ManagerUser:" + managerUsers.getAccount());
             return Response.success("保存成功,但可能需要等待一段时间才能应用变更", managerUsers.getId());
         }
