@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -57,11 +58,9 @@ public class InterceptorUtils {
             res.put("status", false);
             return res;
         }
-        String userStr = RedisUtils.get("U:User:" + account);
+        Map<String, String> userMap = RedisUtils.hgetall("U:User:" + account);
         User user = null;
-        if (userStr != null)
-            user = JSONUtils.toEntity(userStr, User.class);
-        if (user == null) {//缓存中无账号信息,查询数据库
+        if (userMap == null) {//缓存中无账号信息,查询数据库
             QueryWrapper<User> queryWrapper = new QueryWrapper<>();
             queryWrapper.isNull("deleted_at").eq("binary phone", account);
             user = userMapper.selectOne(queryWrapper);
@@ -69,10 +68,8 @@ public class InterceptorUtils {
                 res.put("status", false);
                 return res;
             }
-            String info = JSONUtils.toJSONStr(user);
-            if (info != null) {
-                RedisUtils.set("U:User:" + account, info);
-            }
+            Map<String, String> map = JSONUtils.toRedisHash(user);
+            if (map != null) RedisUtils.hset("U:User:" + account, map);
             //检查密码是否更改
             if (!Objects.equals(user.getPassword(), loginUser.getMD5Password())) {
                 res.put("status", false);
@@ -82,7 +79,8 @@ public class InterceptorUtils {
             res.put("user", user);
             return res;
         }
-        if (!Objects.equals(user.getPassword(), loginUser.getMD5Password())) {
+        user = JSONUtils.toEntity(userMap, User.class);
+        if (user == null || !Objects.equals(user.getPassword(), loginUser.getMD5Password())) {
             res.put("status", false);
             return res;
         }

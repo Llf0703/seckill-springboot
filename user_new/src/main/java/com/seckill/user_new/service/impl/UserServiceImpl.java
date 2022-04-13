@@ -17,7 +17,6 @@ import com.seckill.user_new.utils.crypto.RSAUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -150,7 +149,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             user = getUserByPhone(account);
             if (user == null) return Response.authErr("登录失效");//账号不存在
             Map<String,String> map=JSONUtils.toRedisHash(user);
-            RedisUtils.hset("U:User:" + account,map);
+            if (map!=null)RedisUtils.hset("U:User:" + account,map);
             //RedisUtils.set("U:User:" + account, JSONUtils.toJSONStr(user), 25200);//缓存用户信息
             //检查密码是否更改及ip所登录的token与传回的token是否一致
             if (!Objects.equals(user.getPassword(), loginUser.getMD5Password()))
@@ -214,7 +213,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         user.setName(VOName);
         user.setIdCard(VOIdCard);
         user.setUserName(UserUtil.generateUserName());
-        user.setBalance(new BigDecimal(0));
+        user.setBalance(BigDecimal.ZERO);
         user.setEmploymentStatus(0);
         user.setCreditStatus(0);
         try {
@@ -223,16 +222,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         } catch (ParseException e) {
             return Response.systemErr("注册失败,系统异常");
         }
-        if (!save(user))return Response.systemErr("注册失败,系统异常");
+        if (!save(user)) return Response.systemErr("注册失败,系统异常");
         HashMap<String, Object> data = new HashMap<>();
         String token = JWTAuth.releaseToken(VOPhone);
         data.put("token", token);
         LoginUser loginUser = new LoginUser(VOPhone, MD5Password, VOFP, token, ip);
         String res = RedisUtils.set("U:LoginUser:" + VOPhone, JSONUtils.toJSONStr(loginUser), 3600);
-
-        String res2 = RedisUtils.set("U:User:" + VOPhone, JSONUtils.toJSONStr(user), 25200);//缓存用户信息
-        //String res3 = RedisUtils.set(ip + "_user", VOPhone, 3600);
-        if (!Objects.equals(res, "OK") || !Objects.equals(res2, "OK")) return Response.systemErr("注册失败,系统异常");
+        Map<String, String> map = JSONUtils.toRedisHash(user);
+        if (map != null) RedisUtils.hset("U:User:" + VOPhone, map);//缓存用户信息
+        //String res3 = RedisUtils.set(ip + "_user", VOPhone, 3600);|| !Objects.equals(res2, "OK")
+        if (!Objects.equals(res, "OK")) return Response.systemErr("注册失败,系统异常");
         return Response.success(data, "注册成功");
     }
 
