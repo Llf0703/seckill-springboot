@@ -15,4 +15,5 @@ public class DoRecharge {
     private BigDecimal amount;//充值金额
     private Integer rechargeMethod;//充值方式
     private LocalDateTime rechargeTime;//充值时间
+    private Long serialNumber;//流水号
 }

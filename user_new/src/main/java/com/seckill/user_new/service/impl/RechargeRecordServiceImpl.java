@@ -9,14 +9,15 @@ import com.seckill.user_new.entity.RedisService.DoRecharge;
 import com.seckill.user_new.entity.User;
 import com.seckill.user_new.mapper.RechargeRecordMapper;
 import com.seckill.user_new.service.IRechargeRecordService;
-import com.seckill.user_new.utils.JSONUtils;
-import com.seckill.user_new.utils.QRCodeUtil;
-import com.seckill.user_new.utils.RedisUtils;
-import com.seckill.user_new.utils.UUIDUtil;
+import com.seckill.user_new.utils.*;
 import org.springframework.stereotype.Service;
+import redis.clients.jedis.StreamEntry;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -49,31 +50,46 @@ public class RechargeRecordServiceImpl extends ServiceImpl<RechargeRecordMapper,
             return Response.paramsErr("充值方式异常");
         Integer userId = user.getId();
         String uuid = UUIDUtil.getUUID();
-        DoRecharge doRecharge=new DoRecharge(userId,rechargeVO.getAmount(), rechargeVO.getRechargeMethod(), null);
-        String res= RedisUtils.set("U:DoRecharge:"+uuid, JSONUtils.toJSONStr(doRecharge),300);//有效期五分钟
-        if (!Objects.equals(res,"OK"))
+        DoRecharge doRecharge = new DoRecharge(userId, rechargeVO.getAmount(), rechargeVO.getRechargeMethod(), null, Snowflake.nextLongID());
+        String res = RedisUtils.set("U:DoRecharge:" + uuid, JSONUtils.toJSONStr(doRecharge), 300);//有效期五分钟
+        if (!Objects.equals(res, "OK"))
             return Response.systemErr("获取二维码失败,系统异常");
-        String img= QRCodeUtil.generatorQR(baseUrl+uuid);
-        Dict data=Dict.create().set("img",img);
+        String img = QRCodeUtil.generatorQR(baseUrl + uuid);
+        Dict data = Dict.create()
+                .set("img", img)
+                .set("url", baseUrl + uuid);
         return Response.success(data, "获取二维码成功,有效期五分钟");
     }
 
     @Override
     public Response doRecharge(String rechargeId) {
-        if (rechargeId == null) return Response.paramsErr("充值失败,无效的连接");
-        String doRechargeStr = RedisUtils.get("U:DoRecharge:" + rechargeId);
-        if (doRechargeStr == null) return Response.paramsErr("充值失败,无效的连接");
+        if (rechargeId == null) return Response.paramsErr("充值失败,链接无效");
+        String doRechargeStr = (String) RedisUtils.evalSHA(RedisUtils.doRechargeLuaSHA, Collections.singletonList("U:DoRecharge:" + rechargeId), Collections.emptyList());
+        if (doRechargeStr == null) return Response.paramsErr("充值失败,链接无效");
         DoRecharge doRecharge = JSONUtils.toEntity(doRechargeStr, DoRecharge.class);
         if (doRecharge == null) return Response.paramsErr("充值失败,系统异常");
-        Dict res = Dict.create()
-                .set("amount", doRecharge.getAmount())
-                .set("rechargeMethod", doRecharge.getRechargeMethod())
-                .set("rechargeTime", LocalDateTime.now());
-        return Response.success(res, "充值成功");
+        doRecharge.setRechargeTime(LocalDateTime.now());
+        Map<String, String> map = JSONUtils.toRedisHash(doRecharge);
+        String id = RedisUtils.xadd("U:RechargeMessageQueue:", map, 100000, false);
+        if (id == null) return Response.systemErr("充值失败,系统异常");
+        /**
+         byte[] idBytes;
+         try {
+         idBytes = RSAUtil.encryptByPublicKey(id.getBytes(StandardCharsets.UTF_8), RSAUtil.getPublicKey());
+         } catch (Exception e) {
+         return Response.success("扫码成功,正在处理中");
+         }**/
+        Dict data = Dict.create()
+                .set("uid", id);
+        return Response.success(data, "扫码成功,正在处理中");
     }
 
     @Override
     public Response getRechargeResult(String rechargeId) {
-        return null;
+        List<StreamEntry> res = RedisUtils.xrange("U:RechargeMessageQueue:", rechargeId, rechargeId, 1);
+        if (res == null || res.isEmpty()) {
+            return Response.success("1");
+        }
+        return Response.success("0");
     }
 }

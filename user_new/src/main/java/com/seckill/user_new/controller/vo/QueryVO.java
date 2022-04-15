@@ -6,4 +6,5 @@ import lombok.Data;
 public class QueryVO {
     private Integer id;//id
     private String keyWord;//关键字
+    private String uid;
 }

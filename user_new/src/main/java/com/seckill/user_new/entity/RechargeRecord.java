@@ -3,11 +3,13 @@ package com.seckill.user_new.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * <p>
@@ -17,6 +19,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @author wky1742095859
  * @since 2022-04-08
  */
+@Data
 @TableName("recharge_record")
 @ApiModel(value = "RechargeRecord对象", description = "")
 public class RechargeRecord implements Serializable {
@@ -43,74 +46,19 @@ public class RechargeRecord implements Serializable {
     @ApiModelProperty("流水号")
     private Long serialNumber;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
-    }
-
-    public void setDeletedAt(LocalDateTime deletedAt) {
-        this.deletedAt = deletedAt;
-    }
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-    public Integer getRechargeMethod() {
-        return rechargeMethod;
-    }
-
-    public void setRechargeMethod(Integer rechargeMethod) {
-        this.rechargeMethod = rechargeMethod;
-    }
-    public Long getSerialNumber() {
-        return serialNumber;
-    }
-
-    public void setSerialNumber(Long serialNumber) {
-        this.serialNumber = serialNumber;
-    }
-
+    private LocalDateTime rechargeTime;//充值时间
     @Override
     public String toString() {
         return "RechargeRecord{" +
-            "id=" + id +
-            ", createdAt=" + createdAt +
-            ", updatedAt=" + updatedAt +
-            ", deletedAt=" + deletedAt +
-            ", userId=" + userId +
-            ", amount=" + amount +
-            ", rechargeMethod=" + rechargeMethod +
-            ", serialNumber=" + serialNumber +
-        "}";
+                "id=" + id +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", deletedAt=" + deletedAt +
+                ", userId=" + userId +
+                ", amount=" + amount +
+                ", rechargeMethod=" + rechargeMethod +
+                ", serialNumber=" + serialNumber +
+                ", rechargeTime=" + rechargeTime +
+                "}";
     }
 }

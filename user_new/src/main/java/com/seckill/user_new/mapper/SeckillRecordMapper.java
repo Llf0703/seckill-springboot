@@ -1,6 +1,6 @@
 package com.seckill.user_new.mapper;
 
-import com.seckill.user_new.entity.ExpensesRecord;
+import com.seckill.user_new.entity.SeckillRecord;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -9,8 +9,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * </p>
  *
  * @author wky1742095859
- * @since 2022-04-08
+ * @since 2022-04-14
  */
-public interface ExpensesRecordMapper extends BaseMapper<ExpensesRecord> {
+public interface SeckillRecordMapper extends BaseMapper<SeckillRecord> {
 
 }

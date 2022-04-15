@@ -6,4 +6,7 @@ public class Snowflake {
     public static String nextID(){
         return snowFlakeWorker.nextIdStr();
     }
+    public static Long nextLongID(){
+        return snowFlakeWorker.nextId();
+    }
 }

@@ -1,6 +1,6 @@
 package com.seckill.user_new.service;
 
-import com.seckill.user_new.entity.ExpensesRecord;
+import com.seckill.user_new.entity.SeckillRecord;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -9,8 +9,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * </p>
  *
  * @author wky1742095859
- * @since 2022-04-08
+ * @since 2022-04-14
  */
-public interface IExpensesRecordService extends IService<ExpensesRecord> {
+public interface ISeckillRecordService extends IService<SeckillRecord> {
 
 }

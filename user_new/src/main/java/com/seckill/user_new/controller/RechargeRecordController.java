@@ -3,6 +3,7 @@ package com.seckill.user_new.controller;
 
 import com.seckill.user_new.Interceptor.Type.LoginRequired;
 import com.seckill.user_new.common.Response;
+import com.seckill.user_new.controller.vo.QueryVO;
 import com.seckill.user_new.controller.vo.RechargeVO;
 import com.seckill.user_new.entity.User;
 import com.seckill.user_new.service.impl.RechargeRecordServiceImpl;
@@ -37,6 +38,7 @@ public class RechargeRecordController {
     @PostMapping("/recharge/get_recharge_link")
     public Response getRechargeLink(HttpServletRequest request, @RequestBody RechargeVO rechargeVO) {
         User user = (User) request.getAttribute("user");
+        //String baseUrl = "http://localhost:8089/api/recharge/do_recharge/";
         String baseUrl = "http://124.223.199.137:7777/api/recharge/do_recharge/";
         return rechargeRecordService.getRechargeLink(user, rechargeVO, baseUrl);
     }
@@ -49,7 +51,7 @@ public class RechargeRecordController {
      * @Param [rechargeId]
      * @Return com.seckill.user_new.common.Response
      **/
-    @GetMapping("/recharge/do_recharge/{rechargeId}")
+    @PostMapping("/recharge/do_recharge/{rechargeId}")
     public Response doRecharge(@PathVariable("rechargeId") String rechargeId) {
         return rechargeRecordService.doRecharge(rechargeId);
     }
@@ -62,9 +64,8 @@ public class RechargeRecordController {
      * @Param [rechargeId]
      * @Return com.seckill.user_new.common.Response
      **/
-    @LoginRequired
-    @PostMapping("/recharge/get_recharge_result/{rechargeId}")
-    public Response getRechargeResult(@PathVariable("rechargeId") String rechargeId) {
-        return rechargeRecordService.getRechargeResult(rechargeId);
+    @PostMapping("/recharge/get_recharge_result")
+    public Response getRechargeResult(@RequestBody QueryVO queryVO) {
+        return rechargeRecordService.getRechargeResult(queryVO.getUid());
     }
 }

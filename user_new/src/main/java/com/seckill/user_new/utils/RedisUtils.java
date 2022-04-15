@@ -11,19 +11,53 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @ClassName RedisUtils
- * @description:  redis工具类
  * @author Wky1742095859
- * @date 2022/3/20 2:30
  * @version 1.0
+ * @ClassName RedisUtils
+ * @description: redis工具类
+ * @date 2022/3/20 2:30
  */
 @Component
 public class RedisUtils {
+    public static final String doRechargeLua =
+            "local doRecharge=redis.call('get',KEYS[1])" +
+                    " if doRecharge==false then" +//查询为空
+                    " return false" +//直接返回false(java:null)
+                    " end" +
+                    " redis.call('del',KEYS[1])" +//作废链接
+                    " return doRecharge";
+    public static String doRechargeLuaSHA;
     private static JedisPool jedisPool;
 
     @Autowired
     public void init(JedisPool jedisPool) {
         RedisUtils.jedisPool = jedisPool;
+        loadScript();
+    }
+
+    private static void loadScript() {
+        try (Jedis jedis = jedisPool.getResource()) {
+            doRechargeLuaSHA = jedis.scriptLoad(doRechargeLua);
+        } catch (Exception ignored) {
+        }
+    }
+
+    public static Object eval(String script, List<String> KEYS, List<String> ARGV) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis.eval(script, KEYS, ARGV);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Object evalSHA(String scriptSHA, List<String> KEYS, List<String> ARGV) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis.evalsha(scriptSHA, KEYS, ARGV);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static String set(String key, String val) {
@@ -149,6 +183,19 @@ public class RedisUtils {
         }
     }
 
+    public static String xadd(String streamName, Map<String, String> msg, long maxLen, boolean approximateLength) {
+        try (Jedis jd = jedisPool.getResource()) {
+            StreamEntryID id = jd.xadd(streamName, StreamEntryID.NEW_ENTRY, msg, maxLen, approximateLength);
+//			StreamEntryID id = jd.xadd("k", new StreamEntryID("1-1"), hash);
+            return id.toString();
+            //StreamEntryID id2 = jd.xadd("k", StreamEntryID.NEW_ENTRY, hash2, 5, approximateLength);
+            //System.out.println("xadd2 id:" + id2.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static long xlen(String streamName) {
         try (Jedis jd = jedisPool.getResource()) {
             long len = jd.xlen(streamName);
@@ -169,14 +216,38 @@ public class RedisUtils {
         }
     }
 
-    public static void xrange() {
+    public static List<Map.Entry<String, List<StreamEntry>>> xread(Integer count, String streamName) {
+        try (Jedis jd = jedisPool.getResource()) {
+            //count, block, key-id...
+            return jd.xread(count, 0, new MyJedisEntry(streamName, "0"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static List<Map.Entry<String, List<StreamEntry>>> xread(Integer count, String streamName, String start) {
+        try (Jedis jd = jedisPool.getResource()) {
+            //count, block, key-id...
+            return jd.xread(count, 0, new MyJedisEntry(streamName, start));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static List<StreamEntry> xrange(String key, String start, String end, Integer count) {
         try (Jedis jd = jedisPool.getResource()) {
             //key, start, end, count
             //null表示无穷小或者无穷大
-            List<StreamEntry> list = jd.xrange("k", null, null, 100);
-            System.out.println("xrange:" + list);
+            StreamEntryID s = null;
+            StreamEntryID e = null;
+            if (start != null) s = new StreamEntryID(start);
+            if (end != null) e = new StreamEntryID(end);
+            return jd.xrange(key, s, e, count);
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
     }
 

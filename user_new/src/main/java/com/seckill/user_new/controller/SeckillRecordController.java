@@ -4,7 +4,6 @@ package com.seckill.user_new.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>
@@ -12,10 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
  * </p>
  *
  * @author wky1742095859
- * @since 2022-04-08
+ * @since 2022-04-14
  */
-@RestController
-@RequestMapping("/api/expenses_record")
-public class ExpensesRecordController {
+@Controller
+@RequestMapping("/seckill-record")
+public class SeckillRecordController {
 
 }
