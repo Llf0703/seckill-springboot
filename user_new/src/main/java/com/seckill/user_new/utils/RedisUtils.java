@@ -41,7 +41,22 @@ public class RedisUtils {
         } catch (Exception ignored) {
         }
     }
-
+    public static Long zadd(String key,Double score,String f){
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis.zadd(key,score,f);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public static Long zadd(String key,Map<String,Double> fv){
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis.zadd(key,fv);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     public static Object eval(String script, List<String> KEYS, List<String> ARGV) {
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.eval(script, KEYS, ARGV);
@@ -109,35 +124,35 @@ public class RedisUtils {
     }
 
 
-    public static long ttl(String key) {
+    public static Long ttl(String key) {
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.ttl(key);
         } catch (Exception e) {
-            return -1;
+            return null;
         }
     }
 
-    public static long del(String key) {
+    public static Long del(String key) {
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.del(key);
         } catch (Exception e) {
-            return 0;
+            return null;
         }
     }
 
-    public static long del(String... key) {
+    public static Long del(String... key) {
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.del(key);
         } catch (Exception e) {
-            return 0;
+            return null;
         }
     }
 
-    public static long hset(String key, Map<String, String> fv) {
+    public static Long hset(String key, Map<String, String> fv) {
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.hset(key, fv);
         } catch (Exception e) {
-            return -1;
+            return null;
         }
     }
 
@@ -165,12 +180,11 @@ public class RedisUtils {
         }
     }
 
-    public static long hset(String key, String f, String v) {
+    public static Long hset(String key, String f, String v) {
         try (Jedis jedis = jedisPool.getResource()) {
-
             return jedis.hset(key, f, v);
         } catch (Exception e) {
-            return -1;
+            return null;
         }
     }
 
@@ -207,8 +221,7 @@ public class RedisUtils {
 
     public static long xlen(String streamName) {
         try (Jedis jd = jedisPool.getResource()) {
-            long len = jd.xlen(streamName);
-            return len;
+            return jd.xlen(streamName);
         } catch (Exception e) {
             e.printStackTrace();
             return 0;

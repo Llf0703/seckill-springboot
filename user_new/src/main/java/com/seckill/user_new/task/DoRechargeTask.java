@@ -42,7 +42,7 @@ public class DoRechargeTask extends ServiceImpl<RechargeRecordMapper, RechargeRe
      * @Param []
      * @Return void
      **/
-    @Scheduled(fixedDelay = 1000)
+    //@Scheduled(fixedDelay = 1000)
     public void doRecharge() throws Exception {
         String id = RedisUtils.get("U:RechargeMessageQueue:lastID");
         String startID;
@@ -97,7 +97,7 @@ public class DoRechargeTask extends ServiceImpl<RechargeRecordMapper, RechargeRe
      * @Param []
      * @Return void
      **/
-    @Scheduled(fixedDelay = 1000)
+    //@Scheduled(fixedDelay = 1000)
     public void HandleRedisError() throws Exception {
         String id = RedisUtils.get("U:RechargeMessageQueue:lastRedisErrorID");
         String startID;
