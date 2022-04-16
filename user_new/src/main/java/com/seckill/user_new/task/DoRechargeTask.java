@@ -6,7 +6,6 @@ import com.seckill.user_new.entity.RedisService.DoRecharge;
 import com.seckill.user_new.mapper.RechargeRecordMapper;
 import com.seckill.user_new.utils.JSONUtils;
 import com.seckill.user_new.utils.RedisUtils;
-import com.seckill.user_new.utils.Snowflake;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import redis.clients.jedis.StreamEntry;
 import redis.clients.jedis.StreamEntryID;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,6 +32,8 @@ import java.util.Map;
 @Transactional
 public class DoRechargeTask extends ServiceImpl<RechargeRecordMapper, RechargeRecord> {
     private String lastStrID = null;
+    private String lastRedisErrorID = null;
+
     /*
      * @MethodName doRecharge
      * @author Wky1742095859
@@ -44,7 +44,19 @@ public class DoRechargeTask extends ServiceImpl<RechargeRecordMapper, RechargeRe
      **/
     @Scheduled(fixedDelay = 1000)
     public void doRecharge() throws Exception {
-        List<StreamEntry> streamEntryList = RedisUtils.xrange("U:RechargeMessageQueue:", lastStrID, null, 1000);
+        String id = RedisUtils.get("U:RechargeMessageQueue:lastID");
+        String startID;
+        if (id == null) {
+            startID = lastStrID;
+        } else {
+            StreamEntryID redisID = new StreamEntryID(id);
+            if (lastStrID == null || redisID.compareTo(new StreamEntryID(lastStrID)) > 0) {
+                startID = redisID.toString();
+            } else {
+                startID = lastStrID;
+            }
+        }
+        List<StreamEntry> streamEntryList = RedisUtils.xrange("U:RechargeMessageQueue:queue", startID, null, 1000);
         if (streamEntryList != null && !streamEntryList.isEmpty()) {
             List<RechargeRecord> rechargeRecordList = new LinkedList<>();
             for (StreamEntry msg :
@@ -56,63 +68,68 @@ public class DoRechargeTask extends ServiceImpl<RechargeRecordMapper, RechargeRe
                     msgEntity.setCreatedAt(nowTime);
                     msgEntity.setUpdatedAt(nowTime);
                     rechargeRecordList.add(msgEntity);
+                } else {
+                    RedisUtils.xadd("U:RechargeMessageQueue:DBErrorQueue", msgText, 100000, false);//加入mysql更新错误处理队列
                 }
             }
             if (saveBatch(rechargeRecordList)) {
+                for (StreamEntry msg :
+                        streamEntryList) {
+                    Map<String, String> msgText = msg.getFields();
+                    DoRecharge msgEntity = JSONUtils.toEntity(msgText, DoRecharge.class);
+                    assert msgEntity != null;
+                    Double res = RedisUtils.hincrbyfloat("U:User:" + msgEntity.getPhone(), "balance", msgEntity.getAmount().floatValue());
+                    if (res == null) {
+                        RedisUtils.xadd("U:RechargeMessageQueue:RedisErrorQueue", msgText, 100000, false);//加入redis更新错误队列
+                    }
+                }
                 StreamEntryID lastID = streamEntryList.get(streamEntryList.size() - 1).getID();
                 lastStrID = lastID.getTime() + "-" + (lastID.getSequence() + 1);
+                RedisUtils.set("U:RechargeMessageQueue:lastID", lastStrID);
             }
         }
     }
     /*
      * @MethodName doSeckill
      * @author Wky1742095859
-     * @Description 秒杀队列消费
+     * @Description 处理redis异常
      * @Date 2022/4/12 23:21
      * @Param []
      * @Return void
      **/
-
-    @Scheduled(fixedDelay = 3000)
-    public void doSeckill() throws Exception {
-        /*
-        User test=new User();
-        test.setBalance(new BigDecimal("4546522"));
-        test.setAge(LocalDateTime.now());
-        test.setCreditStatus(1);
-        Map<String,String> map= JSON.parseObject(JSON.toJSONString(test),new TypeReference<Map<String,String>>(){});
-        System.out.println(map);
-        System.out.println(RedisUtils.hset("testhash",map));
-        System.out.println(RedisUtils.hmget("testhash","balance","age"));
-        System.out.println(RedisUtils.hget("tqweqw","eqwewe"));*/
-        /*
-        System.out.println("c" + new Date());
-        List<Map.Entry<String, List<StreamEntry>>> streamList = RedisUtils.xread(2, "test");
-        System.out.println(streamList);
-        if (streamList != null && !streamList.isEmpty()) {
-            Map.Entry<String, List<StreamEntry>> stream = streamList.get(0);
-            //System.out.println(msg);
-            //System.out.println(msg.getKey()); //队列名
-            List<StreamEntry> msglist = stream.getValue();
-            System.out.println(msglist);
-            System.out.println(msglist.size());
-            String id = msglist.get(0).getID().toString();
-            Map<String,String> test= msglist.get(0).getFields();
+    @Scheduled(fixedDelay = 1000)
+    public void HandleRedisError() throws Exception {
+        String id = RedisUtils.get("U:RechargeMessageQueue:lastRedisErrorID");
+        String startID;
+        if (id == null) {
+            startID = lastRedisErrorID;
+        } else {
+            StreamEntryID redisID = new StreamEntryID(id);
+            if (lastRedisErrorID == null || redisID.compareTo(new StreamEntryID(lastRedisErrorID)) > 0) {
+                startID = redisID.toString();
+            } else {
+                startID = lastRedisErrorID;
+            }
         }
-        System.out.println("------------------------------------------");*/
-
+        List<StreamEntry> streamEntryList = RedisUtils.xrange("U:RechargeMessageQueue:RedisErrorQueue", startID, null, 1000);
+        if (streamEntryList != null && !streamEntryList.isEmpty()) {
+            for (StreamEntry msg :
+                    streamEntryList) {
+                Map<String, String> msgText = msg.getFields();
+                DoRecharge msgEntity = JSONUtils.toEntity(msgText, DoRecharge.class);
+                if (msgEntity != null) {
+                    Double res = RedisUtils.hincrbyfloat("U:User:" + msgEntity.getPhone(), "balance", msgEntity.getAmount().floatValue());
+                    if (res == null) {
+                        RedisUtils.xadd("U:RechargeMessageQueue:RedisErrorQueue", msgText, 100000, false);//加入redis更新错误队列
+                    }
+                } else {
+                    RedisUtils.xadd("U:RechargeMessageQueue:RedisErrorQueue", msgText, 100000, false);//加入重新排入redis更新错误处理队列
+                }
+            }
+            StreamEntryID lastID = streamEntryList.get(streamEntryList.size() - 1).getID();
+            lastRedisErrorID = lastID.getTime() + "-" + (lastID.getSequence() + 1);
+            RedisUtils.set("U:RechargeMessageQueue:lastRedisErrorID", lastRedisErrorID);
+        }
     }
 
-    /*
-     * @MethodName loadCache
-     * @author Wky1742095859
-     * @Description 商品预热
-     * @Date 2022/4/12 23:21
-     * @Param []
-     * @Return void
-     **/
-    @Scheduled(fixedDelay = 3600000)
-    public void loadCache() throws Exception {
-
-    }
 }

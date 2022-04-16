@@ -11,12 +11,11 @@ import com.seckill.user_new.mapper.RechargeRecordMapper;
 import com.seckill.user_new.service.IRechargeRecordService;
 import com.seckill.user_new.utils.*;
 import org.springframework.stereotype.Service;
-import redis.clients.jedis.StreamEntry;
+import redis.clients.jedis.StreamEntryID;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -50,7 +49,7 @@ public class RechargeRecordServiceImpl extends ServiceImpl<RechargeRecordMapper,
             return Response.paramsErr("充值方式异常");
         Integer userId = user.getId();
         String uuid = UUIDUtil.getUUID();
-        DoRecharge doRecharge = new DoRecharge(userId, rechargeVO.getAmount(), rechargeVO.getRechargeMethod(), null, Snowflake.nextLongID());
+        DoRecharge doRecharge = new DoRecharge(userId, user.getPhone(), rechargeVO.getAmount(), rechargeVO.getRechargeMethod(), null, Snowflake.nextLongID());
         String res = RedisUtils.set("U:DoRecharge:" + uuid, JSONUtils.toJSONStr(doRecharge), 300);//有效期五分钟
         if (!Objects.equals(res, "OK"))
             return Response.systemErr("获取二维码失败,系统异常");
@@ -70,7 +69,7 @@ public class RechargeRecordServiceImpl extends ServiceImpl<RechargeRecordMapper,
         if (doRecharge == null) return Response.paramsErr("充值失败,系统异常");
         doRecharge.setRechargeTime(LocalDateTime.now());
         Map<String, String> map = JSONUtils.toRedisHash(doRecharge);
-        String id = RedisUtils.xadd("U:RechargeMessageQueue:", map, 100000, false);
+        String id = RedisUtils.xadd("U:RechargeMessageQueue:queue", map, 100000, false);
         if (id == null) return Response.systemErr("充值失败,系统异常");
         /**
          byte[] idBytes;
@@ -86,8 +85,14 @@ public class RechargeRecordServiceImpl extends ServiceImpl<RechargeRecordMapper,
 
     @Override
     public Response getRechargeResult(String rechargeId) {
-        List<StreamEntry> res = RedisUtils.xrange("U:RechargeMessageQueue:", rechargeId, rechargeId, 1);
-        if (res == null || res.isEmpty()) {
+        StreamEntryID id;
+        try {
+            id = new StreamEntryID(rechargeId);
+        } catch (Exception e) {
+            return Response.paramsErr("id无效");
+        }
+        String res = RedisUtils.get("U:RechargeMessageQueue:lastID");
+        if (res != null && new StreamEntryID(res).compareTo(id) > 0) {
             return Response.success("1");
         }
         return Response.success("0");

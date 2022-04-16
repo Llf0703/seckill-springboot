@@ -60,6 +60,22 @@ public class RedisUtils {
         }
     }
 
+    public static Double hincrbyfloat(String key, String f, float v) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis.hincrByFloat(key, f, v);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static Boolean exists(String key) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis.exists(key);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public static String set(String key, String val) {
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.set(key, val);
@@ -92,13 +108,6 @@ public class RedisUtils {
         }
     }
 
-    public static Boolean exist(String key) {
-        try (Jedis jedis = jedisPool.getResource()) {
-            return jedis.exists(key);
-        } catch (Exception e) {
-            return false;
-        }
-    }
 
     public static long ttl(String key) {
         try (Jedis jedis = jedisPool.getResource()) {

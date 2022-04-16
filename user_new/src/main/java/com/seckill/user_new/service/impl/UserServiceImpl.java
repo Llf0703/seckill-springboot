@@ -166,7 +166,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (!result.get("status").equals(true)) return Response.success("退出成功");//token过期,直接返回退出成功
         String account = result.get("account").toString();
         //if (ip != null && RedisUtils.exist(account + "," + ip)) RedisUtils.del(account + "," + ip);
-        if (ip != null && RedisUtils.exist("U:LoginUser:" + account)) RedisUtils.del("U:LoginUser:" + account);
+        if (ip != null && Boolean.TRUE.equals(RedisUtils.exists("U:LoginUser:" + account))) RedisUtils.del("U:LoginUser:" + account);
         return Response.success("退出成功");
     }
 
