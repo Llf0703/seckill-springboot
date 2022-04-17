@@ -7,8 +7,6 @@ import com.seckill.user_new.entity.*;
 import com.seckill.user_new.mapper.*;
 import com.seckill.user_new.utils.JSONUtils;
 import com.seckill.user_new.utils.RedisUtils;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,8 +19,6 @@ import java.util.Map;
 
 
 @Component
-@EnableScheduling
-@Async
 @Transactional
 public class LoadCacheTask {
     @Resource

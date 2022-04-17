@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 /**
  * <p>
@@ -17,6 +18,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @author wky1742095859
  * @since 2022-04-07
  */
+@Data
 @TableName("risk_control")
 @ApiModel(value = "RiskControl对象", description = "")
 public class RiskControl implements Serializable {
@@ -56,90 +58,6 @@ public class RiskControl implements Serializable {
     @ApiModelProperty("金额小于exception_amount,exception_days内还清的除外")
     private Integer exceptionDays;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
-    }
-
-    public void setDeletedAt(LocalDateTime deletedAt) {
-        this.deletedAt = deletedAt;
-    }
-    public String getPolicyName() {
-        return policyName;
-    }
-
-    public void setPolicyName(String policyName) {
-        this.policyName = policyName;
-    }
-    public Integer getWorkingStatusLimit() {
-        return workingStatusLimit;
-    }
-
-    public void setWorkingStatusLimit(Integer workingStatusLimit) {
-        this.workingStatusLimit = workingStatusLimit;
-    }
-    public Integer getUntrustworthyPersonLimit() {
-        return untrustworthyPersonLimit;
-    }
-
-    public void setUntrustworthyPersonLimit(Integer untrustworthyPersonLimit) {
-        this.untrustworthyPersonLimit = untrustworthyPersonLimit;
-    }
-    public Integer getAgeLimit() {
-        return ageLimit;
-    }
-
-    public void setAgeLimit(Integer ageLimit) {
-        this.ageLimit = ageLimit;
-    }
-    public Integer getOverdueYearLimit() {
-        return overdueYearLimit;
-    }
-
-    public void setOverdueYearLimit(Integer overdueYearLimit) {
-        this.overdueYearLimit = overdueYearLimit;
-    }
-    public Integer getOverdueNumberLimit() {
-        return overdueNumberLimit;
-    }
-
-    public void setOverdueNumberLimit(Integer overdueNumberLimit) {
-        this.overdueNumberLimit = overdueNumberLimit;
-    }
-    public BigDecimal getExceptionAmount() {
-        return exceptionAmount;
-    }
-
-    public void setExceptionAmount(BigDecimal exceptionAmount) {
-        this.exceptionAmount = exceptionAmount;
-    }
-    public Integer getExceptionDays() {
-        return exceptionDays;
-    }
-
-    public void setExceptionDays(Integer exceptionDays) {
-        this.exceptionDays = exceptionDays;
-    }
 
     @Override
     public String toString() {

@@ -6,6 +6,7 @@ import com.seckill.user_new.entity.RedisService.DoRecharge;
 import com.seckill.user_new.mapper.RechargeRecordMapper;
 import com.seckill.user_new.utils.JSONUtils;
 import com.seckill.user_new.utils.RedisUtils;
+import com.seckill.user_new.utils.Snowflake;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import redis.clients.jedis.StreamEntry;
 import redis.clients.jedis.StreamEntryID;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,8 +29,6 @@ import java.util.Map;
  * @date 2022/4/12 23:20
  */
 @Component
-@EnableScheduling
-@Async
 @Transactional
 public class DoRechargeTask extends ServiceImpl<RechargeRecordMapper, RechargeRecord> {
     private String lastStrID = null;
@@ -42,7 +42,7 @@ public class DoRechargeTask extends ServiceImpl<RechargeRecordMapper, RechargeRe
      * @Param []
      * @Return void
      **/
-    @Scheduled(fixedDelay = 3000)
+    @Scheduled(fixedDelay = 1000)
     public void doRecharge() throws Exception {
         while (true) {
             String id = RedisUtils.get("U:RechargeMessageQueue:lastID");
@@ -57,7 +57,7 @@ public class DoRechargeTask extends ServiceImpl<RechargeRecordMapper, RechargeRe
                     startID = lastStrID;
                 }
             }
-            List<StreamEntry> streamEntryList = RedisUtils.xrange("U:RechargeMessageQueue:", startID, null, 1000);
+            List<StreamEntry> streamEntryList = RedisUtils.xrange("U:RechargeMessageQueue:queue", startID, null, 1000);
             if (streamEntryList == null || streamEntryList.isEmpty()) {
                 break;
             }
@@ -102,7 +102,7 @@ public class DoRechargeTask extends ServiceImpl<RechargeRecordMapper, RechargeRe
      * @Param []
      * @Return void
      **/
-    @Scheduled(fixedDelay = 3000)
+    @Scheduled(fixedDelay = 1000)
     public void HandleRedisError() throws Exception {
         String id = RedisUtils.get("U:RechargeMessageQueue:lastRedisErrorID");
         String startID;

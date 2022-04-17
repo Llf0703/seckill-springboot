@@ -1,5 +1,6 @@
 package com.seckill.user_new.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -7,9 +8,17 @@ import com.seckill.user_new.common.Response;
 import com.seckill.user_new.controller.dto.SeckillItemsDTO;
 import com.seckill.user_new.controller.vo.PageVO;
 import com.seckill.user_new.controller.vo.QueryVO;
+import com.seckill.user_new.controller.vo.SeckillRawDetailVO;
+import com.seckill.user_new.entity.FinancialItems;
+import com.seckill.user_new.entity.RiskControl;
 import com.seckill.user_new.entity.SeckillItems;
+import com.seckill.user_new.mapper.FinancialItemsMapper;
+import com.seckill.user_new.mapper.RiskControlMapper;
 import com.seckill.user_new.mapper.SeckillItemsMapper;
 import com.seckill.user_new.service.ISeckillItemsService;
+import com.seckill.user_new.utils.JSONUtils;
+import com.seckill.user_new.utils.RbloomFilterUtil;
+import com.seckill.user_new.utils.RedisUtils;
 import com.seckill.user_new.utils.Validator;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +26,7 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -31,6 +41,16 @@ import java.util.Objects;
 public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, SeckillItems> implements ISeckillItemsService {
     @Resource
     private SeckillItemsMapper seckillItemsMapper;
+    @Resource
+    private RiskControlMapper riskControlMapper;
+    @Resource
+    private FinancialItemsMapper financialItemsMapper;
+
+    private SeckillItems getSeckillItemByID(Integer id) {
+        QueryWrapper<SeckillItems> queryWrapper = new QueryWrapper<>();
+        queryWrapper.isNull("deleted_at").eq("id", id);
+        return seckillItemsMapper.selectOne(queryWrapper);
+    }
 
     /*
      * @MethodName getOverview
@@ -75,6 +95,53 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
 
     @Override
     public Response getDetail(QueryVO queryVO) {
-        return null;
+        if (queryVO.getId() == null) return Response.paramsErr("秒杀活动不存在");
+        //布隆过滤器查询
+        boolean res1 = RbloomFilterUtil.bloomFilterContains(RbloomFilterUtil.seckillBloomFilterName, queryVO.getId().toString());
+        //黑名单查询
+        Boolean res2 = RedisUtils.sismember("U:SeckillItem:blacklist", queryVO.getId().toString());
+        if (res1 && Boolean.FALSE.equals(res2)) {
+            SeckillRawDetailVO seckillRawDetailVO = new SeckillRawDetailVO();
+            Map<String, String> map = RedisUtils.hgetall("U:SeckillItem:" + queryVO.getId());
+            SeckillItems seckillItems;
+            if (map == null || map.isEmpty()) {//查询mysql
+                seckillItems = getSeckillItemByID(queryVO.getId());
+                if (seckillItems == null) {
+                    RedisUtils.sadd("U:SeckillItem:blacklist", queryVO.getId().toString());//加入黑名单
+                    return Response.dataNotFoundErr("未查询到该商品");
+                }
+            } else {
+                seckillItems = JSONUtils.toEntity(map, SeckillItems.class);
+            }
+            if (seckillItems == null)
+                return Response.systemErr("获取秒杀信息失败,系统异常");
+            map = RedisUtils.hgetall("U:FinancialItem:" + seckillItems.getFinancialItemId());
+            FinancialItems financialItems;
+            if (map == null || map.isEmpty()) {//理财产品缓存不存在,查询mysql
+                QueryWrapper<FinancialItems> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("id", seckillItems.getFinancialItemId());
+                financialItems = financialItemsMapper.selectOne(queryWrapper);
+            } else {
+                financialItems = JSONUtils.toEntity(map, FinancialItems.class);
+            }
+            if (financialItems != null) {
+                BeanUtil.copyProperties(financialItems, seckillRawDetailVO, true);
+            }
+            map = RedisUtils.hgetall("U:RiskControl:" + seckillItems.getRiskControlId());
+            RiskControl riskControl;
+            if (map == null || map.isEmpty()) {
+                QueryWrapper<RiskControl> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("id", seckillItems.getFinancialItemId());
+                riskControl = riskControlMapper.selectOne(queryWrapper);
+            } else {
+                riskControl = JSONUtils.toEntity(map, RiskControl.class);
+            }
+            if (riskControl != null) {
+                BeanUtil.copyProperties(riskControl, seckillRawDetailVO, true);
+            }
+            BeanUtil.copyProperties(seckillItems, seckillRawDetailVO, true);
+            return Response.success(seckillRawDetailVO, "OK");
+        }
+        return Response.paramsErr("秒杀活动不存在");
     }
 }

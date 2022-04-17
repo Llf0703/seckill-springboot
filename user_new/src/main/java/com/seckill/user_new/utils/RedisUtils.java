@@ -41,15 +41,35 @@ public class RedisUtils {
         } catch (Exception ignored) {
         }
     }
-    public static Long zadd(String key,Double score,String f){
+
+    public static Long sadd(String key, String f) {
         try (Jedis jedis = jedisPool.getResource()) {
-            return jedis.zadd(key,score,f);
+            return jedis.sadd(key, f);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
-    public static Long zadd(String key,Map<String,Double> fv){
+
+    public static Boolean sismember(String key, String f) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis.sismember(key, f);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Long zadd(String key, Double score, String f) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis.zadd(key, score, f);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Long zadd(String key, Map<String, Double> fv) {
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.zadd(key,fv);
         } catch (Exception e) {

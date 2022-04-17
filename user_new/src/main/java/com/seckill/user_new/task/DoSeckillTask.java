@@ -8,6 +8,7 @@ import com.seckill.user_new.mapper.SeckillRecordMapper;
 import com.seckill.user_new.mapper.UserMapper;
 import com.seckill.user_new.service.impl.UserServiceImpl;
 import com.seckill.user_new.utils.JSONUtils;
+import com.seckill.user_new.utils.RbloomFilterUtil;
 import com.seckill.user_new.utils.RedisUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -25,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-@EnableScheduling
-@Async
 @Transactional
 public class DoSeckillTask extends ServiceImpl<SeckillRecordMapper, SeckillRecord> {
     @Resource
@@ -42,15 +41,10 @@ public class DoSeckillTask extends ServiceImpl<SeckillRecordMapper, SeckillRecor
         queryWrapper.eq("id", id);
         return userMapper.selectOne(queryWrapper);
     }
-    //@Scheduled(fixedDelay = 100)
+    @Scheduled(fixedDelay = 2000)
     public void test() throws Exception{
-        SeckillRecord seckillRecord=new SeckillRecord();
-        seckillRecord.setSeckillItemsId(1);
-        seckillRecord.setAmount(new BigDecimal("10000"));
-        seckillRecord.setStatus(1);
-        seckillRecord.setUserId(2);
-        Map<String,String> map=JSONUtils.toRedisHash(seckillRecord);
-        RedisUtils.xadd("U:SeckillMessageQueue:queue",map,600,false);
+        Map<String,String> map=RedisUtils.hgetall("U:SeckillItem:999");
+        System.out.println(map.isEmpty());
     }
     /*
      * @MethodName doRecharge
@@ -60,7 +54,7 @@ public class DoSeckillTask extends ServiceImpl<SeckillRecordMapper, SeckillRecor
      * @Param []
      * @Return void
      **/
-    @Scheduled(fixedDelay = 3000)
+    @Scheduled(fixedDelay = 1000)
     public void doSeckill() throws Exception {
         while (true) {
             String id = RedisUtils.get("U:SeckillMessageQueue:lastID");
@@ -127,7 +121,7 @@ public class DoSeckillTask extends ServiceImpl<SeckillRecordMapper, SeckillRecor
      * @Param []
      * @Return void
      **/
-    @Scheduled(fixedDelay = 3000)
+    @Scheduled(fixedDelay = 1000)
     public void HandleRedisError() throws Exception {
         //第二轮重试, 再次失败则抛弃本次秒杀
         String id = RedisUtils.get("U:SeckillMessageQueue:lastDBErrorID");
