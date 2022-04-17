@@ -110,6 +110,8 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
                     RedisUtils.sadd("U:SeckillItem:blacklist", queryVO.getId().toString());//加入黑名单
                     return Response.dataNotFoundErr("未查询到该商品");
                 }
+                map = JSONUtils.toRedisHash(seckillItems);
+                RedisUtils.hset("U:SeckillItem:" + seckillItems.getId(), map);
             } else {
                 seckillItems = JSONUtils.toEntity(map, SeckillItems.class);
             }
@@ -121,6 +123,10 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
                 QueryWrapper<FinancialItems> queryWrapper = new QueryWrapper<>();
                 queryWrapper.eq("id", seckillItems.getFinancialItemId());
                 financialItems = financialItemsMapper.selectOne(queryWrapper);
+                if (financialItems != null) {
+                    map = JSONUtils.toRedisHash(financialItems);
+                    RedisUtils.hset("U:FinancialItem:" + financialItems.getId(), map);
+                }
             } else {
                 financialItems = JSONUtils.toEntity(map, FinancialItems.class);
             }
@@ -129,10 +135,14 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
             }
             map = RedisUtils.hgetall("U:RiskControl:" + seckillItems.getRiskControlId());
             RiskControl riskControl;
-            if (map == null || map.isEmpty()) {
+            if (map == null || map.isEmpty()) {//风控配置不存在,查询mysql
                 QueryWrapper<RiskControl> queryWrapper = new QueryWrapper<>();
                 queryWrapper.eq("id", seckillItems.getFinancialItemId());
                 riskControl = riskControlMapper.selectOne(queryWrapper);
+                if (riskControl != null) {
+                    map = JSONUtils.toRedisHash(riskControl);
+                    RedisUtils.hset("U:RiskControl:" + riskControl.getId(), map);
+                }
             } else {
                 riskControl = JSONUtils.toEntity(map, RiskControl.class);
             }
