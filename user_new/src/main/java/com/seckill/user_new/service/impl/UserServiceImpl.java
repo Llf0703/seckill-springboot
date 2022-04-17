@@ -1,5 +1,6 @@
 package com.seckill.user_new.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.codec.Base64;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -238,7 +239,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public Response getUserInfo(HttpServletRequest request) {
         User user= (User) request.getAttribute("user");
-        return Response.success(user,"OK");
+        UserVO userVO=new UserVO();
+        BeanUtil.copyProperties(user,userVO,true);
+        return Response.success(userVO,"OK");
     }
 
     @Override

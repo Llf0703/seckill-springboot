@@ -157,6 +157,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
 
     @Override
     public Response getSeckillLink(String seckillID) {
+
         return null;
     }
 

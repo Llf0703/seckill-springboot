@@ -26,6 +26,46 @@ public class RedisUtils {
                     " end" +
                     " redis.call('del',KEYS[1])" +//作废链接
                     " return doRecharge";
+    public static final String doSeckillLua=
+            "local rS=redis.call('hget',KEYS[1],KEYS[2])"+//查询剩余库存
+            " if rS==false then" +//剩余库存不存在
+            " return 0" +
+            " end" +
+            " local intRS=tonumber(rS)" +
+            " if intRS<1 then" +//无库存
+            " return -1" +
+            " end" +
+            " local balance=redis.call('hget',KEYS[3],KEYS[4])"+
+            " if balance==false then"+
+            " return -2"+//余额不存在
+            " end"+
+            " local amount=redis.call('hget',KEYS[5],KEYS[6])"+
+            " if amount==false then"+
+            " return -3"+//单价不存在
+            " end"+
+            " local intBalance=tonumber(balance)"+
+            " local intAmount=tonumber(amount)"+
+            " if intBalance<intAmount then"+
+            " return -4"+//余额不足
+            " end" +
+            " local b=redis.call('zscore',KEYS[7],KEYS[8])"+
+            " if b~=false then"+
+            " local intB=tonumber(b)" +
+            " if intB>=tonumber(ARGV[1]) then"+//已购买大于等于ARGV[1]份
+            " return -5"+//触发限购
+            " end"+
+            " local risk=redis.call('zscore',KEYS[9],KEYS[10])"+
+            " if risk==false then"+
+            " return -6"+//未发现风控结果,需返回查询mysql
+            " end" +
+            " if tonumber(risk)==0 then"+
+            " return -7"+//初筛未通过
+            " end"+
+            " redis.call('hincrby',KEYS[1],KEYS[2],-1)"+//扣库存
+            " redis.call('hincrbyfloat',KEYS[3],KEYS[4],-intAmount)"+//扣余额
+            " redis.call('zincrby',KEYS[7],KEYS[8],1)";//加一次购买
+
+    public static String doSeckillLuaSHA;
     public static String doRechargeLuaSHA;
     private static JedisPool jedisPool;
 
@@ -38,6 +78,7 @@ public class RedisUtils {
     private static void loadScript() {
         try (Jedis jedis = jedisPool.getResource()) {
             doRechargeLuaSHA = jedis.scriptLoad(doRechargeLua);
+            doSeckillLuaSHA=jedis.scriptLoad(doSeckillLua);
         } catch (Exception ignored) {
         }
     }
