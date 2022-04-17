@@ -8,10 +8,7 @@ import com.seckill.user_new.mapper.SeckillRecordMapper;
 import com.seckill.user_new.mapper.UserMapper;
 import com.seckill.user_new.service.impl.UserServiceImpl;
 import com.seckill.user_new.utils.JSONUtils;
-import com.seckill.user_new.utils.RbloomFilterUtil;
 import com.seckill.user_new.utils.RedisUtils;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,11 +37,6 @@ public class DoSeckillTask extends ServiceImpl<SeckillRecordMapper, SeckillRecor
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id", id);
         return userMapper.selectOne(queryWrapper);
-    }
-    @Scheduled(fixedDelay = 2000)
-    public void test() throws Exception{
-        Map<String,String> map=RedisUtils.hgetall("U:SeckillItem:999");
-        System.out.println(map.isEmpty());
     }
     /*
      * @MethodName doRecharge

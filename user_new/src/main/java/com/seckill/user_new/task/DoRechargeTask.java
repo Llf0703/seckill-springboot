@@ -1,20 +1,22 @@
 package com.seckill.user_new.task;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seckill.user_new.entity.RechargeRecord;
 import com.seckill.user_new.entity.RedisService.DoRecharge;
+import com.seckill.user_new.entity.User;
 import com.seckill.user_new.mapper.RechargeRecordMapper;
+import com.seckill.user_new.mapper.UserMapper;
+import com.seckill.user_new.service.impl.UserServiceImpl;
 import com.seckill.user_new.utils.JSONUtils;
 import com.seckill.user_new.utils.RedisUtils;
-import com.seckill.user_new.utils.Snowflake;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import redis.clients.jedis.StreamEntry;
 import redis.clients.jedis.StreamEntryID;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
@@ -33,7 +35,15 @@ import java.util.Map;
 public class DoRechargeTask extends ServiceImpl<RechargeRecordMapper, RechargeRecord> {
     private String lastStrID = null;
     private String lastRedisErrorID = null;
-
+    @Resource
+    private UserMapper userMapper;
+    @Resource
+    private UserServiceImpl userService;
+    private User getUserByID(Integer id) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", id);
+        return userMapper.selectOne(queryWrapper);
+    }
     /*
      * @MethodName doRecharge
      * @author Wky1742095859
@@ -76,6 +86,9 @@ public class DoRechargeTask extends ServiceImpl<RechargeRecordMapper, RechargeRe
                 }
             }
             if (saveBatch(rechargeRecordList)) {
+                //刷新用户数据 加余额
+                List<User> userList = new LinkedList<>();
+                User user;
                 for (StreamEntry msg :
                         streamEntryList) {
                     Map<String, String> msgText = msg.getFields();
@@ -85,7 +98,17 @@ public class DoRechargeTask extends ServiceImpl<RechargeRecordMapper, RechargeRe
                     if (res == null) {
                         RedisUtils.xadd("U:RechargeMessageQueue:RedisErrorQueue", msgText, 100000, false);//加入redis更新错误队列
                     }
+                    user = getUserByID(msgEntity.getUserId());
+                    if (user == null)
+                        continue;
+                    BigDecimal balance = user.getBalance();
+                    user.setBalance(balance.add(msgEntity.getAmount()));
+                    user.setUpdatedAt(LocalDateTime.now());
+                    userList.add(user);
                 }
+                boolean res=userService.updateBatchById(userList);
+                if (!res)
+                    throw new RuntimeException();//进行回滚
                 StreamEntryID lastID = streamEntryList.get(streamEntryList.size() - 1).getID();
                 lastStrID = lastID.getTime() + "-" + (lastID.getSequence() + 1);
                 RedisUtils.set("U:RechargeMessageQueue:lastID", lastStrID);
