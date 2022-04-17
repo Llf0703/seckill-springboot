@@ -6,6 +6,8 @@ import com.seckill.user_new.controller.vo.RegisterVO;
 import com.seckill.user_new.controller.vo.UserVO;
 import com.seckill.user_new.entity.User;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * <p>
  * 服务类
@@ -20,4 +22,6 @@ public interface IUserService extends IService<User> {
     Response checkVersion(String token, String ip);
     Response loginOut(String token,String ip);
     Response register(RegisterVO registerVO,String ip);
+    Response getUserInfo(HttpServletRequest request);
+    Response getBalance(HttpServletRequest request);
 }

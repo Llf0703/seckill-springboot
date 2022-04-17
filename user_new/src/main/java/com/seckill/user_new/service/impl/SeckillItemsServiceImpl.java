@@ -154,4 +154,14 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         }
         return Response.paramsErr("秒杀活动不存在");
     }
+
+    @Override
+    public Response getSeckillLink(String seckillID) {
+        return null;
+    }
+
+    @Override
+    public Response doSeckill(String seckillID) {
+        return null;
+    }
 }

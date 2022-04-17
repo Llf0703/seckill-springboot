@@ -17,6 +17,7 @@ import com.seckill.user_new.utils.crypto.RSAUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -232,6 +233,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         //String res3 = RedisUtils.set(ip + "_user", VOPhone, 3600);|| !Objects.equals(res2, "OK")
         if (!Objects.equals(res, "OK")) return Response.systemErr("注册失败,系统异常");
         return Response.success(data, "注册成功");
+    }
+
+    @Override
+    public Response getUserInfo(HttpServletRequest request) {
+        User user= (User) request.getAttribute("user");
+        return Response.success(user,"OK");
+    }
+
+    @Override
+    public Response getBalance(HttpServletRequest request) {
+        User user= (User) request.getAttribute("user");
+        return Response.success(user.getBalance(),"OK");
     }
 
     private User getUserByPhone(String phone) {

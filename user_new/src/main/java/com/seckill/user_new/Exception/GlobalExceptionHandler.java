@@ -3,6 +3,7 @@ package com.seckill.user_new.Exception;
 import com.seckill.user_new.common.Response;
 import org.springframework.boot.json.JsonParseException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,7 +32,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoHandlerFoundException.class)
     public @ResponseBody
     Response ExceptionHandler404(NoHandlerFoundException e) {
-        return Response.dataNotFoundErr("无效的接口");
+        return Response.dataNotFoundErr("接口不存在");
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public @ResponseBody
+    Response ExceptionHandlerNotSupported(HttpRequestMethodNotSupportedException e) {
+        return Response.dataNotFoundErr("接口不存在");
     }
 
     /*

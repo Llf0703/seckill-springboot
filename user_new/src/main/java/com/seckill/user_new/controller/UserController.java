@@ -1,5 +1,6 @@
 package com.seckill.user_new.controller;
 
+import com.seckill.user_new.Interceptor.Type.LoginRequired;
 import com.seckill.user_new.common.Response;
 import com.seckill.user_new.controller.vo.RegisterVO;
 import com.seckill.user_new.controller.vo.UserVO;
@@ -46,5 +47,17 @@ public class UserController {
         String token = request.getHeader("token");
         String ip = request.getHeader("X-real-ip");
         return userService.loginOut(token, ip);
+    }
+
+    @LoginRequired
+    @PostMapping("/user/get_user_info")
+    public Response getUserInfo(HttpServletRequest request) {
+        return userService.getUserInfo(request);
+    }
+
+    @LoginRequired
+    @PostMapping("/user/get_user_balance")
+    public Response getUserBalance(HttpServletRequest request) {
+        return userService.getBalance(request);
     }
 }

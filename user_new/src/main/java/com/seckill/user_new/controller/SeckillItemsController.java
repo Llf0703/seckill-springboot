@@ -6,11 +6,7 @@ import com.seckill.user_new.common.Response;
 import com.seckill.user_new.controller.vo.PageVO;
 import com.seckill.user_new.controller.vo.QueryVO;
 import com.seckill.user_new.service.impl.SeckillItemsServiceImpl;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -36,7 +32,19 @@ public class SeckillItemsController {
 
     @LoginRequired
     @PostMapping("/get_detail")
-    public Response getDetail(@RequestBody QueryVO queryVO){
+    public Response getDetail(@RequestBody QueryVO queryVO) {
         return seckillItemsService.getDetail(queryVO);
+    }
+
+    @LoginRequired
+    @PostMapping("/get_seckill_link/{id}")
+    public Response getSeckillLink(@PathVariable("id") String id) {
+        return seckillItemsService.getSeckillLink(id);
+    }
+
+    @LoginRequired
+    @PostMapping("/do_seckill_link/{uid}")
+    public Response doSeckill(@PathVariable("uid") String uid) {
+        return seckillItemsService.doSeckill(uid);
     }
 }
