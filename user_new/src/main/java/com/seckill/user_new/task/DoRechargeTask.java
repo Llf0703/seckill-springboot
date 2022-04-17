@@ -42,22 +42,25 @@ public class DoRechargeTask extends ServiceImpl<RechargeRecordMapper, RechargeRe
      * @Param []
      * @Return void
      **/
-    //@Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 3000)
     public void doRecharge() throws Exception {
-        String id = RedisUtils.get("U:RechargeMessageQueue:lastID");
-        String startID;
-        if (id == null) {
-            startID = lastStrID;
-        } else {
-            StreamEntryID redisID = new StreamEntryID(id);
-            if (lastStrID == null || redisID.compareTo(new StreamEntryID(lastStrID)) > 0) {
-                startID = redisID.toString();
-            } else {
+        while (true) {
+            String id = RedisUtils.get("U:RechargeMessageQueue:lastID");
+            String startID;
+            if (id == null) {
                 startID = lastStrID;
+            } else {
+                StreamEntryID redisID = new StreamEntryID(id);
+                if (lastStrID == null || redisID.compareTo(new StreamEntryID(lastStrID)) > 0) {
+                    startID = redisID.toString();
+                } else {
+                    startID = lastStrID;
+                }
             }
-        }
-        List<StreamEntry> streamEntryList = RedisUtils.xrange("U:RechargeMessageQueue:queue", startID, null, 1000);
-        if (streamEntryList != null && !streamEntryList.isEmpty()) {
+            List<StreamEntry> streamEntryList = RedisUtils.xrange("U:RechargeMessageQueue:", startID, null, 1000);
+            if (streamEntryList == null || streamEntryList.isEmpty()) {
+                break;
+            }
             List<RechargeRecord> rechargeRecordList = new LinkedList<>();
             for (StreamEntry msg :
                     streamEntryList) {
@@ -87,7 +90,9 @@ public class DoRechargeTask extends ServiceImpl<RechargeRecordMapper, RechargeRe
                 lastStrID = lastID.getTime() + "-" + (lastID.getSequence() + 1);
                 RedisUtils.set("U:RechargeMessageQueue:lastID", lastStrID);
             }
+
         }
+
     }
     /*
      * @MethodName doSeckill
@@ -97,7 +102,7 @@ public class DoRechargeTask extends ServiceImpl<RechargeRecordMapper, RechargeRe
      * @Param []
      * @Return void
      **/
-    //@Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 3000)
     public void HandleRedisError() throws Exception {
         String id = RedisUtils.get("U:RechargeMessageQueue:lastRedisErrorID");
         String startID;
@@ -131,5 +136,4 @@ public class DoRechargeTask extends ServiceImpl<RechargeRecordMapper, RechargeRe
             RedisUtils.set("U:RechargeMessageQueue:lastRedisErrorID", lastRedisErrorID);
         }
     }
-
 }

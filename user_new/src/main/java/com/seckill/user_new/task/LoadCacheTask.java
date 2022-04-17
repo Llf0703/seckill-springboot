@@ -5,10 +5,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.seckill.user_new.entity.*;
 import com.seckill.user_new.mapper.*;
-import com.seckill.user_new.utils.IdCardUtil;
 import com.seckill.user_new.utils.JSONUtils;
 import com.seckill.user_new.utils.RedisUtils;
-import nonapi.io.github.classgraph.json.Id;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -72,25 +69,6 @@ public class LoadCacheTask {
         overdueRecordMapper.selectPage(page, queryWrapper);
         return page.getRecords();
     }
-
-    //@Scheduled(fixedDelay = 2000)
-    public void loadItem1() throws Exception {
-        int current = 1;
-        Page<User> page = new Page<>(current, 1000);
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.isNull("deleted_at");
-        userMapper.selectPage(page, queryWrapper);
-        List<User> itemsList = page.getRecords();
-        Map<String,Double> map=new HashMap<>();
-        for (User user:
-             itemsList) {
-            int age=IdcardUtil.getAgeByIdCard(user.getIdCard());
-            map.put(user.getId().toString(), 1.);
-        }
-        Long res=RedisUtils.zadd("testzadd",map);
-        System.out.println(res);
-    }
-
     /*
      * @MethodName loadCache
      * @author Wky1742095859
@@ -113,11 +91,10 @@ public class LoadCacheTask {
                     seckillItemsList) {
                 Map<String, String> seckillItemMap = JSONUtils.toRedisHash(item);
                 RedisUtils.hset("U:SeckillItem:" + item.getId(), seckillItemMap);
-                /*
                 Boolean res = RedisUtils.exists("U:SeckillItem:" + item.getId());//原先内容不存在
                 if (res != null && !res) {
                     RedisUtils.hset("U:SeckillItem:" + item.getId(), seckillItemMap);
-                }*/
+                }
                 loadFinancial(item);//预热理财产品
                 RiskControl riskControl = getRiskControlByID(item.getRiskControlId());//获取风控配置
                 if (riskControl != null) {
@@ -172,7 +149,7 @@ public class LoadCacheTask {
                 }
                 map.put(user.getPhone(),0.);
             }
-            RedisUtils.zadd("U:RiskControlRes:ResSet",map);
+            RedisUtils.zadd("U:RiskControlRes:" + item.getId(), map);
         }
 
     }

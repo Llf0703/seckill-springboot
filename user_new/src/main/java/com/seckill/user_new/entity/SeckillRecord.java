@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 /**
  * <p>
@@ -17,6 +18,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @author wky1742095859
  * @since 2022-04-14
  */
+@Data
 @TableName("seckill_record")
 @ApiModel(value = "SeckillRecord对象", description = "")
 public class SeckillRecord implements Serializable {
@@ -36,75 +38,11 @@ public class SeckillRecord implements Serializable {
 
     private BigDecimal amount;
 
-    private String reason;
 
     private Integer status;
 
     private Integer seckillItemsId;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
-    }
-
-    public void setDeletedAt(LocalDateTime deletedAt) {
-        this.deletedAt = deletedAt;
-    }
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-    public String getReason() {
-        return reason;
-    }
-
-    public void setReason(String reason) {
-        this.reason = reason;
-    }
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-    public Integer getSeckillItemsId() {
-        return seckillItemsId;
-    }
-
-    public void setSeckillItemsId(Integer seckillItemsId) {
-        this.seckillItemsId = seckillItemsId;
-    }
 
     @Override
     public String toString() {
@@ -115,7 +53,6 @@ public class SeckillRecord implements Serializable {
             ", deletedAt=" + deletedAt +
             ", userId=" + userId +
             ", amount=" + amount +
-            ", reason=" + reason +
             ", status=" + status +
             ", seckillItemsId=" + seckillItemsId +
         "}";
