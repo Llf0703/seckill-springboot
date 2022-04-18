@@ -40,12 +40,30 @@ public class SeckillItemsController {
     @LoginRequired
     @PostMapping("/get_seckill_link/{id}")
     public Response getSeckillLink(HttpServletRequest request, @PathVariable("id") String id) {
-        return seckillItemsService.getSeckillLink(request,id);
+        return seckillItemsService.getSeckillLink(request, id);
     }
 
     @LoginRequired
     @PostMapping("/do_seckill_link/{uid}")
-    public Response doSeckill(HttpServletRequest request,@PathVariable("uid") String uid) {
-        return seckillItemsService.doSeckill(request,uid);
+    public Response doSeckill(@PathVariable("uid") String uid) {
+        return seckillItemsService.doSeckill(uid);
+    }
+
+    @LoginRequired
+    @PostMapping("/load_test")
+    public Response loadTest() {
+        return seckillItemsService.loadTest();
+    }
+
+    @LoginRequired
+    @PostMapping("/get_seckill_link_test/{id}")
+    public Response getSeckillLinkTest(HttpServletRequest request, @PathVariable("id") String id) {
+        return seckillItemsService.getSeckillLink(request, id);
+    }
+
+    @LoginRequired
+    @PostMapping("/do_seckill_link_test/{uid}")
+    public Response doSeckillTest(@PathVariable("uid") String uid) {
+        return seckillItemsService.doSeckillTest(uid);
     }
 }

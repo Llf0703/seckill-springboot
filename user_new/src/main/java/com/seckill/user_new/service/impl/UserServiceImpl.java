@@ -66,6 +66,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         loginCrypto.setRsaPrvKey(RSAPrvKey);//保存RSA私钥
         loginCrypto.setRsaPubKey(RSAPubKey);//保存RSA公钥
         loginCrypto.setTimeStamp(res.getTimeStamp());//保存生成时间
+        loginCrypto.setCaptcha((String) cat.get("code"));//保存验证码
         //loginCrypto.setFp(managerUsersVO.getToken());//保存浏览器指纹
         loginCrypto.setIp(ip);//保存ip
         String result = RedisUtils.set("U:LoginCrypto:" + MD5ID, JSONUtils.toJSONStr(loginCrypto), 30);
@@ -75,12 +76,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public Response loginService(UserVO userVO, String ip) {
+        if (userVO.getCaptcha() == null || Objects.equals(userVO.getCaptcha(), "")) return Response.paramsErr("请输入验证码");
         if (userVO.getPhone() == null || userVO.getPassword() == null) return Response.authErr("账号或密码错误");
         if (ip == null) return Response.systemErr("登录失败,系统异常");
         String loginCryptoStr = RedisUtils.get("U:LoginCrypto:" + userVO.getUid());
-        if (loginCryptoStr == null) return Response.systemErr("登录失败,系统异常");
+        if (loginCryptoStr == null) return Response.systemErr("请重新输入验证码");
         LoginCrypto loginCrypto = JSONUtils.toEntity(loginCryptoStr, LoginCrypto.class);
         if (loginCrypto == null) return Response.systemErr("登录失败,系统异常");
+        if (!Objects.equals(loginCrypto.getCaptcha(), userVO.getCaptcha().toLowerCase()))
+            return Response.authErr("验证码错误");
         byte[] VOPasswordBytes;
         byte[] VOPhoneBytes;
         byte[] VOFPBytes;
@@ -174,25 +178,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public Response register(RegisterVO registerVO, String ip) {
+        if (registerVO.getCaptcha() == null || Objects.equals(registerVO.getCaptcha(), ""))
+            return Response.paramsErr("请输入验证码");
         if (registerVO.getPhone() == null || registerVO.getPassword() == null
-            || registerVO.getName() == null || registerVO.getId_card() == null) return Response.authErr("有信息为空");
-        if (ip == null) return Response.systemErr("注册失败,系统异常");
+                || registerVO.getName() == null || registerVO.getIdCard() == null) return Response.authErr("有信息为空");
+        if (ip == null) return Response.systemErr("注册失败,系统异常1");
         String loginCryptoStr = RedisUtils.get("U:LoginCrypto:" + registerVO.getUid());
-        if (loginCryptoStr == null) return Response.systemErr("注册失败,系统异常");
+        if (loginCryptoStr == null) return Response.systemErr("注册失败,请重新输入验证码");
         LoginCrypto loginCrypto = JSONUtils.toEntity(loginCryptoStr, LoginCrypto.class);
-        if (loginCrypto == null) return Response.systemErr("注册失败,系统异常");
+        if (loginCrypto == null) return Response.systemErr("注册失败,系统异常3");
+        if (!Objects.equals(loginCrypto.getCaptcha(), registerVO.getCaptcha().toLowerCase()))
+            return Response.authErr("验证码错误");
         byte[] VOPasswordBytes;
         byte[] VOPhoneBytes;
         byte[] VONameBytes;
         byte[] VOIdCardBytes;
         byte[] VOFPBytes;
+        System.out.println(registerVO);
         try {
             VOPhoneBytes = RSAUtil.decryptByPrivateKey(Base64.decode(registerVO.getPhone()), loginCrypto.getRsaPrvKey());
             VOPasswordBytes = RSAUtil.decryptByPrivateKey(Base64.decode(registerVO.getPassword()), loginCrypto.getRsaPrvKey());
-            VONameBytes = RSAUtil.decryptByPrivateKey(Base64.decode(registerVO.getName()), loginCrypto.getRsaPrvKey());
-            VOIdCardBytes = RSAUtil.decryptByPrivateKey(Base64.decode(registerVO.getId_card()), loginCrypto.getRsaPrvKey());
             VOFPBytes = RSAUtil.decryptByPrivateKey(Base64.decode(registerVO.getToken()), loginCrypto.getRsaPrvKey());
+            VONameBytes = RSAUtil.decryptByPrivateKey(Base64.decode(registerVO.getName()), loginCrypto.getRsaPrvKey());
+            VOIdCardBytes = RSAUtil.decryptByPrivateKey(Base64.decode(registerVO.getIdCard()), loginCrypto.getRsaPrvKey());
         } catch (Exception e) {
+            e.printStackTrace();
             return Response.authErr("信息错误");
         }
         String VOPassword = new String(VOPasswordBytes);
@@ -201,7 +211,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         String VOIdCard = new String(VOIdCardBytes);
         String VOFP = new String(VOFPBytes);
         if (!Validator.isValidPhone(VOPhone) || !Validator.isValidPassword(VOPassword)
-            || !Validator.isValidName(VOName) || !Validator.isValidIdCard(VOIdCard) || VOFP.length() != 32) return Response.authErr("信息错误");
+                || !Validator.isValidName(VOName) || !Validator.isValidIdCard(VOIdCard) || VOFP.length() != 32)
+            return Response.authErr("信息不合法");
         if (getUserByPhone(VOPhone) != null)
             return Response.authErr("手机号已被注册");
         String MD5Password = MD5.MD5Password(VOPhone + VOPassword);
@@ -221,9 +232,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             LocalDateTime brithday = UserUtil.getAge(VOIdCard);
             user.setAge(brithday);
         } catch (ParseException e) {
-            return Response.systemErr("注册失败,系统异常");
+            return Response.systemErr("注册失败,系统异常4");
         }
-        if (!save(user)) return Response.systemErr("注册失败,系统异常");
+        if (!save(user)) return Response.systemErr("注册失败,系统异常5");
         HashMap<String, Object> data = new HashMap<>();
         String token = JWTAuth.releaseToken(VOPhone);
         data.put("token", token);
@@ -232,7 +243,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         Map<String, String> map = JSONUtils.toRedisHash(user);
         if (map != null) RedisUtils.hset("U:User:" + VOPhone, map);//缓存用户信息
         //String res3 = RedisUtils.set(ip + "_user", VOPhone, 3600);|| !Objects.equals(res2, "OK")
-        if (!Objects.equals(res, "OK")) return Response.systemErr("注册失败,系统异常");
+        if (!Objects.equals(res, "OK")) return Response.systemErr("注册失败,系统异常6");
         return Response.success(data, "注册成功");
     }
 

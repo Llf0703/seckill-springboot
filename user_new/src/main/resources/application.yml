@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 7777
 spring:
   application:
     name: user_new
@@ -7,14 +7,14 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/seckill?serverTimezone=GMT%2b8&rewriteBatchedStatements=true
     username: root
-    password: Wky15878295798
+    password: seckill
 #  mvc:
 #    pathmatch:
 #      #matching-strategy: ant_path_matcher
   redis:
     host: 127.0.0.1
     port: 6379
-    password: Wky15878295798
+    password: seckill
     timeout: 30000
     jedis:
       pool:

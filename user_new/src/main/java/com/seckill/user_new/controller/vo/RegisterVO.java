@@ -18,7 +18,7 @@ public class RegisterVO {
 
     private String phone;
 
-    private String id_card;
+    private String idCard;
 
     private String uid;
 

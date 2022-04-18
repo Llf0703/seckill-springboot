@@ -17,6 +17,7 @@ import com.seckill.user_new.entity.User;
 import com.seckill.user_new.mapper.FinancialItemsMapper;
 import com.seckill.user_new.mapper.RiskControlMapper;
 import com.seckill.user_new.mapper.SeckillItemsMapper;
+import com.seckill.user_new.mapper.UserMapper;
 import com.seckill.user_new.service.ISeckillItemsService;
 import com.seckill.user_new.utils.*;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,16 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
     private RiskControlMapper riskControlMapper;
     @Resource
     private FinancialItemsMapper financialItemsMapper;
+    @Resource
+    private UserMapper userMapper;
+    @Resource
+    private UserServiceImpl userService;
+
+    private User getTestUserByID(Integer id) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", id);
+        return userMapper.selectOne(queryWrapper);
+    }
 
     private SeckillItems getSeckillItemByID(Integer id) {
         QueryWrapper<SeckillItems> queryWrapper = new QueryWrapper<>();
@@ -158,9 +169,9 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
     public Response getSeckillLink(HttpServletRequest request, String seckillID) {
         if (seckillID == null) return Response.paramsErr("秒杀活动不存在");
         Boolean res = RedisUtils.exists("U:SeckillItem:" + seckillID);
-        if (Boolean.FALSE.equals(res)) {
+        if (!Boolean.FALSE.equals(res)) {
             User user = (User) request.getAttribute("user");
-            List<String> timeStr = RedisUtils.hmget("U:SeckillItem:" + seckillID, "startTime", "nowTime", "amount");
+            List<String> timeStr = RedisUtils.hmget("U:SeckillItem:" + seckillID, "startTime", "endTime", "amount");
             if (timeStr == null || timeStr.size() != 3)
                 return Response.systemErr("系统异常");
             LocalDateTime startTime = LocalDateTime.parse(timeStr.get(0), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
@@ -184,7 +195,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
     }
 
     @Override
-    public Response doSeckill(HttpServletRequest request, String seckillID) {
+    public Response doSeckill(String seckillID) {
         String res = (String) RedisUtils.evalSHA(RedisUtils.doRechargeLuaSHA, Collections.singletonList("U:DoSeckill:" + seckillID), Collections.emptyList());
         if (res == null) {
             return Response.paramsErr("链接无效");
@@ -199,12 +210,100 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         Integer res1 = (Integer) RedisUtils.evalSHA(RedisUtils.doSeckillLuaSHA,
                 Arrays.asList("U:SeckillItem:" + seckillRecordRedis.getSeckillItemsId(), "remainingStock",
                         "U:User:" + seckillRecordRedis.getPhone(), "balance",
-                        "U:UserBuy:sortedSet", seckillRecordRedis.getPhone(),
+                        "U:UserBuy:" + seckillRecordRedis.getSeckillItemsId(), seckillRecordRedis.getPhone(),
                         "U:RiskControlRes:" + riskId),
                 Arrays.asList("1", seckillRecordRedis.getAmount().toString()));
         Response response;
         if (res1 != null) {
             switch (res1) {
+                case 0:
+                    response = Response.systemErr("系统异常,库存不存在");
+                    break;
+                case -1:
+                    response = Response.systemErr("商品已售完");
+                    break;
+                case -2:
+                    response = Response.systemErr("系统异常,用户余额不存在");
+                    break;
+                case -3:
+                    response = Response.systemErr("系统异常,单价不存在");
+                    break;
+                case -4:
+                    response = Response.systemErr("余额不足");
+                    break;
+                case -5:
+                    response = Response.systemErr("已超过最大购买次数");
+                    break;
+                case -6:
+                    response = Response.systemErr("初筛判断失败");
+                    /*应查询mysql判断初筛结果,这里为了性能舍弃这一步骤,直接返回失败*/
+                    break;
+                case -7:
+                    response = Response.systemErr("您没有购买资格");
+                    break;
+                case 1:
+                    response = Response.success("已成功下单,正在处理中");
+                    seckillRecordRedis.setStatus(1);
+                    break;
+                default:
+                    response = Response.systemErr("系统异常");
+
+            }
+        } else {
+            response = Response.systemErr("系统异常1");
+        }
+        Map<String, String> map = JSONUtils.toRedisHash(seckillRecordRedis);
+        String task = RedisUtils.xadd("U:SeckillMessageQueue:queue", map, 100000, false);
+        return response;
+    }
+
+    @Override
+    public Response loadTest() {
+        SeckillItems seckillItems = getSeckillItemByID(1);
+        if (seckillItems == null) return Response.systemErr("初始化失败,未查询到测试活动");
+        LocalDateTime nowTime = LocalDateTime.now();
+        seckillItems.setUpdatedAt(nowTime);
+        seckillItems.setStock(100000L);
+        seckillItems.setRemainingStock(100000L);
+        seckillItems.setAmount(new BigDecimal("10000"));
+        if (!save(seckillItems)) return Response.systemErr("初始化活动保存mysql失败");
+        Map<String, String> map = JSONUtils.toRedisHash(seckillItems);
+        RedisUtils.hset("U:SeckillItem:" + seckillItems.getId(), map);//重新设置缓存
+        RedisUtils.del("U:RiskControlRes:1");//删除原初筛结果
+        RedisUtils.del("U:UserBuy:1");//删除购买次数记录
+        User user = getTestUserByID(1);
+        if (user == null) return Response.systemErr("初始化失败,未找到用户");
+        user.setUpdatedAt(nowTime);
+        user.setBalance(new BigDecimal("1000000"));
+        if (!userService.save(user)) return Response.systemErr("初始化保存user失败");
+        RedisUtils.zadd("U:RiskControlRes:1", 1.0, user.getPhone());//初筛通过
+        RedisUtils.hset("U:User:" + user.getPhone(), "balance", "1000000");
+        return Response.success("初始化完成");
+    }
+
+
+    @Override
+    public Response doSeckillTest(String seckillID) {
+        String res = (String) RedisUtils.evalSHA(RedisUtils.doRechargeLuaSHA, Collections.singletonList("U:DoSeckill:" + seckillID), Collections.emptyList());
+        if (res == null) {
+            return Response.paramsErr("链接无效");
+        }
+        SeckillRecordRedis seckillRecordRedis = JSONUtils.toEntity(res, SeckillRecordRedis.class);
+        if (seckillRecordRedis == null) {
+            return Response.paramsErr("链接无效");
+        }
+        String riskId = RedisUtils.hget("U:SeckillItem:" + seckillRecordRedis.getSeckillItemsId(), "riskControlId");
+        if (riskId == null)
+            return Response.systemErr("系统异常");
+        Long res1 = (Long) RedisUtils.evalSHA(RedisUtils.doSeckillLuaSHA,
+                Arrays.asList("U:SeckillItem:" + seckillRecordRedis.getSeckillItemsId(), "remainingStock",
+                        "U:User:" + seckillRecordRedis.getPhone(), "balance",
+                        "U:UserBuy:" + seckillRecordRedis.getSeckillItemsId(), seckillRecordRedis.getPhone(),
+                        "U:RiskControlRes:" + riskId),
+                Arrays.asList("100000", seckillRecordRedis.getAmount().toString()));
+        Response response;
+        if (res1 != null) {
+            switch (res1.intValue()) {
                 case 0:
                     response = Response.systemErr("系统异常,库存不存在");
                     break;
