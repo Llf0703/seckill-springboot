@@ -266,7 +266,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         seckillItems.setStock(100000L);
         seckillItems.setRemainingStock(100000L);
         seckillItems.setAmount(new BigDecimal("10000"));
-        if (!save(seckillItems)) return Response.systemErr("初始化活动保存mysql失败");
+        if (!updateById(seckillItems)) return Response.systemErr("初始化活动保存mysql失败");
         Map<String, String> map = JSONUtils.toRedisHash(seckillItems);
         RedisUtils.hset("U:SeckillItem:" + seckillItems.getId(), map);//重新设置缓存
         RedisUtils.del("U:RiskControlRes:1");//删除原初筛结果
@@ -275,15 +275,44 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         if (user == null) return Response.systemErr("初始化失败,未找到用户");
         user.setUpdatedAt(nowTime);
         user.setBalance(new BigDecimal("1000000"));
-        if (!userService.save(user)) return Response.systemErr("初始化保存user失败");
+        if (!userService.updateById(user)) return Response.systemErr("初始化保存user失败");
         RedisUtils.zadd("U:RiskControlRes:1", 1.0, user.getPhone());//初筛通过
         RedisUtils.hset("U:User:" + user.getPhone(), "balance", "1000000");
         return Response.success("初始化完成");
     }
 
-
+    @Override
+    public Response getSeckillLinkTest(HttpServletRequest request, String seckillID){
+        //测试版uid设为一小时
+        if (seckillID == null) return Response.paramsErr("秒杀活动不存在");
+        Boolean res = RedisUtils.exists("U:SeckillItem:" + seckillID);
+        if (!Boolean.FALSE.equals(res)) {
+            User user = (User) request.getAttribute("user");
+            List<String> timeStr = RedisUtils.hmget("U:SeckillItem:" + seckillID, "startTime", "endTime", "amount");
+            if (timeStr == null || timeStr.size() != 3)
+                return Response.systemErr("系统异常");
+            LocalDateTime startTime = LocalDateTime.parse(timeStr.get(0), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+            LocalDateTime endTime = LocalDateTime.parse(timeStr.get(1), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+            LocalDateTime nowTime = LocalDateTime.now();
+            if (startTime.isAfter(nowTime))
+                return Response.systemErr("活动未开始");
+            if (endTime.isBefore(nowTime))
+                return Response.systemErr("活动已结束");
+            SeckillRecordRedis seckillRecordRedis = new SeckillRecordRedis(user.getId(),
+                    user.getPhone(), LocalDateTime.now(), new BigDecimal(timeStr.get(2)), 0,
+                    Integer.parseInt(seckillID), Snowflake.nextLongID());
+            String recordStr = JSONUtils.toJSONStr(seckillRecordRedis);
+            String uid = UUIDUtil.getUUID();
+            String res1 = RedisUtils.set("U:DoSeckill:" + uid, recordStr, 3600);
+            if (!Objects.equals(res1, "OK"))
+                return Response.systemErr("秒杀失败,系统异常");
+            return Response.success(uid, "OK");
+        }
+        return Response.dataNotFoundErr("秒杀活动不存在");
+    }
     @Override
     public Response doSeckillTest(String seckillID) {
+        //测试版一个用户最高允许购买十万份
         String res = (String) RedisUtils.evalSHA(RedisUtils.doRechargeLuaSHA, Collections.singletonList("U:DoSeckill:" + seckillID), Collections.emptyList());
         if (res == null) {
             return Response.paramsErr("链接无效");

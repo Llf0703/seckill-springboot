@@ -56,14 +56,14 @@ public class SeckillItemsController {
     }
 
     @LoginRequired
-    @PostMapping("/get_seckill_link_test/{id}")
-    public Response getSeckillLinkTest(HttpServletRequest request, @PathVariable("id") String id) {
-        return seckillItemsService.getSeckillLink(request, id);
+    @PostMapping("/get_seckill_link_test")
+    public Response getSeckillLinkTest(HttpServletRequest request, @RequestBody QueryVO queryVO) {
+        return seckillItemsService.getSeckillLinkTest(request, queryVO.getId().toString());
     }
 
     @LoginRequired
-    @PostMapping("/do_seckill_link_test/{uid}")
-    public Response doSeckillTest(@PathVariable("uid") String uid) {
-        return seckillItemsService.doSeckillTest(uid);
+    @PostMapping("/do_seckill_link_test")
+    public Response doSeckillTest(@RequestBody QueryVO queryVO) {
+        return seckillItemsService.doSeckillTest(queryVO.getUid());
     }
 }

@@ -23,5 +23,6 @@ public interface ISeckillItemsService extends IService<SeckillItems> {
     Response getSeckillLink(HttpServletRequest request, String seckillID);
     Response doSeckill(String seckillID);
     Response loadTest();
+    Response getSeckillLinkTest(HttpServletRequest request, String seckillID);
     Response doSeckillTest(String seckillID);
 }
