@@ -9,6 +9,7 @@ import com.seckill.user_new.service.impl.SeckillItemsServiceImpl;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * <p>
@@ -38,13 +39,13 @@ public class SeckillItemsController {
 
     @LoginRequired
     @PostMapping("/get_seckill_link/{id}")
-    public Response getSeckillLink(@PathVariable("id") String id) {
-        return seckillItemsService.getSeckillLink(id);
+    public Response getSeckillLink(HttpServletRequest request, @PathVariable("id") String id) {
+        return seckillItemsService.getSeckillLink(request,id);
     }
 
     @LoginRequired
     @PostMapping("/do_seckill_link/{uid}")
-    public Response doSeckill(@PathVariable("uid") String uid) {
-        return seckillItemsService.doSeckill(uid);
+    public Response doSeckill(HttpServletRequest request,@PathVariable("uid") String uid) {
+        return seckillItemsService.doSeckill(request,uid);
     }
 }

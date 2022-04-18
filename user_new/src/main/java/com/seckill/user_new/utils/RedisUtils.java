@@ -39,32 +39,30 @@ public class RedisUtils {
             " if balance==false then"+
             " return -2"+//余额不存在
             " end"+
-            " local amount=redis.call('hget',KEYS[5],KEYS[6])"+
-            " if amount==false then"+
-            " return -3"+//单价不存在
-            " end"+
             " local intBalance=tonumber(balance)"+
-            " local intAmount=tonumber(amount)"+
+            " local intAmount=tonumber(ARGV[2])"+
             " if intBalance<intAmount then"+
             " return -4"+//余额不足
             " end" +
-            " local b=redis.call('zscore',KEYS[7],KEYS[8])"+
+            " local b=redis.call('zscore',KEYS[5],KEYS[6])"+
             " if b~=false then"+
             " local intB=tonumber(b)" +
             " if intB>=tonumber(ARGV[1]) then"+//已购买大于等于ARGV[1]份
             " return -5"+//触发限购
             " end"+
-            " local risk=redis.call('zscore',KEYS[9],KEYS[10])"+
+            " end"+
+            " local risk=redis.call('zscore',KEYS[7],KEYS[6])"+
             " if risk==false then"+
             " return -6"+//未发现风控结果,需返回查询mysql
             " end" +
-            " if tonumber(risk)==0 then"+
+            " if tonumber(risk)~=1 then"+
             " return -7"+//初筛未通过
             " end"+
             " redis.call('hincrby',KEYS[1],KEYS[2],-1)"+//扣库存
             " redis.call('hincrbyfloat',KEYS[3],KEYS[4],-intAmount)"+//扣余额
-            " redis.call('zincrby',KEYS[7],KEYS[8],1)";//加一次购买
-
+            " redis.call('zincrby',KEYS[5],1,KEYS[6])"+//加一次购买
+            " return 1";//操作完成
+    //public static String doSeckillNoRiskLuaSHA;
     public static String doSeckillLuaSHA;
     public static String doRechargeLuaSHA;
     private static JedisPool jedisPool;
@@ -78,8 +76,11 @@ public class RedisUtils {
     private static void loadScript() {
         try (Jedis jedis = jedisPool.getResource()) {
             doRechargeLuaSHA = jedis.scriptLoad(doRechargeLua);
+            System.out.println(doSeckillLua);
             doSeckillLuaSHA=jedis.scriptLoad(doSeckillLua);
-        } catch (Exception ignored) {
+            //doSeckillNoRiskLuaSHA=jedis.scriptLoad(doSeckillNoRiskLua);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

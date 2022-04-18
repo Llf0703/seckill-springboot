@@ -10,24 +10,23 @@ import com.seckill.user_new.controller.vo.PageVO;
 import com.seckill.user_new.controller.vo.QueryVO;
 import com.seckill.user_new.controller.vo.SeckillRawDetailVO;
 import com.seckill.user_new.entity.FinancialItems;
+import com.seckill.user_new.entity.RedisService.SeckillRecordRedis;
 import com.seckill.user_new.entity.RiskControl;
 import com.seckill.user_new.entity.SeckillItems;
+import com.seckill.user_new.entity.User;
 import com.seckill.user_new.mapper.FinancialItemsMapper;
 import com.seckill.user_new.mapper.RiskControlMapper;
 import com.seckill.user_new.mapper.SeckillItemsMapper;
 import com.seckill.user_new.service.ISeckillItemsService;
-import com.seckill.user_new.utils.JSONUtils;
-import com.seckill.user_new.utils.RbloomFilterUtil;
-import com.seckill.user_new.utils.RedisUtils;
-import com.seckill.user_new.utils.Validator;
+import com.seckill.user_new.utils.*;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 /**
  * <p>
@@ -156,13 +155,94 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
     }
 
     @Override
-    public Response getSeckillLink(String seckillID) {
-
-        return null;
+    public Response getSeckillLink(HttpServletRequest request, String seckillID) {
+        if (seckillID == null) return Response.paramsErr("秒杀活动不存在");
+        Boolean res = RedisUtils.exists("U:SeckillItem:" + seckillID);
+        if (Boolean.FALSE.equals(res)) {
+            User user = (User) request.getAttribute("user");
+            List<String> timeStr = RedisUtils.hmget("U:SeckillItem:" + seckillID, "startTime", "nowTime", "amount");
+            if (timeStr == null || timeStr.size() != 3)
+                return Response.systemErr("系统异常");
+            LocalDateTime startTime = LocalDateTime.parse(timeStr.get(0), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+            LocalDateTime endTime = LocalDateTime.parse(timeStr.get(1), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+            LocalDateTime nowTime = LocalDateTime.now();
+            if (startTime.isAfter(nowTime))
+                return Response.systemErr("活动未开始");
+            if (endTime.isBefore(nowTime))
+                return Response.systemErr("活动已结束");
+            SeckillRecordRedis seckillRecordRedis = new SeckillRecordRedis(user.getId(),
+                    user.getPhone(), LocalDateTime.now(), new BigDecimal(timeStr.get(2)), 0,
+                    Integer.parseInt(seckillID), Snowflake.nextLongID());
+            String recordStr = JSONUtils.toJSONStr(seckillRecordRedis);
+            String uid = UUIDUtil.getUUID();
+            String res1 = RedisUtils.set("U:DoSeckill:" + uid, recordStr, 60);
+            if (!Objects.equals(res1, "OK"))
+                return Response.systemErr("秒杀失败,系统异常");
+            return Response.success(uid, "OK");
+        }
+        return Response.dataNotFoundErr("秒杀活动不存在");
     }
 
     @Override
-    public Response doSeckill(String seckillID) {
-        return null;
+    public Response doSeckill(HttpServletRequest request, String seckillID) {
+        String res = (String) RedisUtils.evalSHA(RedisUtils.doRechargeLuaSHA, Collections.singletonList("U:DoSeckill:" + seckillID), Collections.emptyList());
+        if (res == null) {
+            return Response.paramsErr("链接无效");
+        }
+        SeckillRecordRedis seckillRecordRedis = JSONUtils.toEntity(res, SeckillRecordRedis.class);
+        if (seckillRecordRedis == null) {
+            return Response.paramsErr("链接无效");
+        }
+        String riskId = RedisUtils.hget("U:SeckillItem:" + seckillRecordRedis.getSeckillItemsId(), "riskControlId");
+        if (riskId == null)
+            return Response.systemErr("系统异常");
+        Integer res1 = (Integer) RedisUtils.evalSHA(RedisUtils.doSeckillLuaSHA,
+                Arrays.asList("U:SeckillItem:" + seckillRecordRedis.getSeckillItemsId(), "remainingStock",
+                        "U:User:" + seckillRecordRedis.getPhone(), "balance",
+                        "U:UserBuy:sortedSet", seckillRecordRedis.getPhone(),
+                        "U:RiskControlRes:" + riskId),
+                Arrays.asList("1", seckillRecordRedis.getAmount().toString()));
+        Response response;
+        if (res1 != null) {
+            switch (res1) {
+                case 0:
+                    response = Response.systemErr("系统异常,库存不存在");
+                    break;
+                case -1:
+                    response = Response.systemErr("商品已售完");
+                    break;
+                case -2:
+                    response = Response.systemErr("系统异常,用户余额不存在");
+                    break;
+                case -3:
+                    response = Response.systemErr("系统异常,单价不存在");
+                    break;
+                case -4:
+                    response = Response.systemErr("余额不足");
+                    break;
+                case -5:
+                    response = Response.systemErr("已超过最大购买次数");
+                    break;
+                case -6:
+                    response = Response.systemErr("初筛判断失败");
+                    /*应查询mysql判断初筛结果,这里为了性能舍弃这一步骤,直接返回失败*/
+                    break;
+                case -7:
+                    response = Response.systemErr("您没有购买资格");
+                    break;
+                case 1:
+                    response = Response.success("已成功下单,正在处理中");
+                    seckillRecordRedis.setStatus(1);
+                    break;
+                default:
+                    response = Response.systemErr("系统异常");
+
+            }
+        } else {
+            response = Response.systemErr("系统异常1");
+        }
+        Map<String, String> map = JSONUtils.toRedisHash(seckillRecordRedis);
+        String task = RedisUtils.xadd("U:SeckillMessageQueue:queue", map, 100000, false);
+        return response;
     }
 }

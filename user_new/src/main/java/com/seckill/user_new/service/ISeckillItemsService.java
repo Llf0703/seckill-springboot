@@ -5,6 +5,9 @@ import com.seckill.user_new.controller.vo.PageVO;
 import com.seckill.user_new.controller.vo.QueryVO;
 import com.seckill.user_new.entity.SeckillItems;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.web.method.HandlerMethod;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * <p>
@@ -17,6 +20,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface ISeckillItemsService extends IService<SeckillItems> {
     Response getOverview(PageVO pageVO);
     Response getDetail(QueryVO queryVO);
-    Response getSeckillLink(String seckillID);
-    Response doSeckill(String seckillID);
+    Response getSeckillLink(HttpServletRequest request, String seckillID);
+    Response doSeckill(HttpServletRequest request,String seckillID);
 }
