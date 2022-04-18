@@ -274,10 +274,10 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         User user = getTestUserByID(1);
         if (user == null) return Response.systemErr("初始化失败,未找到用户");
         user.setUpdatedAt(nowTime);
-        user.setBalance(new BigDecimal("1000000"));
+        user.setBalance(new BigDecimal("1100000000"));
         if (!userService.updateById(user)) return Response.systemErr("初始化保存user失败");
         RedisUtils.zadd("U:RiskControlRes:1", 1.0, user.getPhone());//初筛通过
-        RedisUtils.hset("U:User:" + user.getPhone(), "balance", "1000000");
+        RedisUtils.hset("U:User:" + user.getPhone(), "balance", "1100000000");
         return Response.success("初始化完成");
     }
 
