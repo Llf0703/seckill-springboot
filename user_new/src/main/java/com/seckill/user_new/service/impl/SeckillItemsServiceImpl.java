@@ -207,7 +207,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
         String riskId = RedisUtils.hget("U:SeckillItem:" + seckillRecordRedis.getSeckillItemsId(), "riskControlId");
         if (riskId == null)
             return Response.systemErr("系统异常");
-        Integer res1 = (Integer) RedisUtils.evalSHA(RedisUtils.doSeckillLuaSHA,
+        Long res1 = (Long) RedisUtils.evalSHA(RedisUtils.doSeckillLuaSHA,
                 Arrays.asList("U:SeckillItem:" + seckillRecordRedis.getSeckillItemsId(), "remainingStock",
                         "U:User:" + seckillRecordRedis.getPhone(), "balance",
                         "U:UserBuy:" + seckillRecordRedis.getSeckillItemsId(), seckillRecordRedis.getPhone(),
@@ -215,7 +215,7 @@ public class SeckillItemsServiceImpl extends ServiceImpl<SeckillItemsMapper, Sec
                 Arrays.asList("1", seckillRecordRedis.getAmount().toString()));
         Response response;
         if (res1 != null) {
-            switch (res1) {
+            switch (res1.intValue()) {
                 case 0:
                     response = Response.systemErr("系统异常,库存不存在");
                     break;
